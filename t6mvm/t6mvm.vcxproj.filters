@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Components">
+      <UniqueIdentifier>{58524c1b-57a3-462a-8edf-866eb7763242}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Theater">
+      <UniqueIdentifier>{17315cf0-85de-40aa-acb1-e62b8d097d26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\UI">
+      <UniqueIdentifier>{06c0e8ad-1a25-47cf-9ff8-a29c4872b585}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Common">
+      <UniqueIdentifier>{4badef65-2747-4582-b107-2acf32b1c61c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Theater\BoneCamera">
+      <UniqueIdentifier>{db8940a5-979f-4d9e-9469-8433e66017ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Theater\Lights">
+      <UniqueIdentifier>{20fc3d0a-2e1d-4506-8688-c90dbb9b64de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Theater\Misc">
+      <UniqueIdentifier>{53c40cc4-24a9-4714-8a83-d5cf3ba87559}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Theater\Camera">
+      <UniqueIdentifier>{fae21121-a7cb-454b-87f8-5340bbadd4e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Streams">
+      <UniqueIdentifier>{53e47594-d5ad-4685-b981-fe26c1111eca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX11">
+      <UniqueIdentifier>{b506e845-c22c-489b-b4cf-62c062f77b6e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UIBase.h">
+      <Filter>Components\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomDvars.h">
+      <Filter>Components\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="TheaterBase.h">
+      <Filter>Components\Theater</Filter>
+    </ClInclude>
+    <ClInclude Include="BoneCamera.h">
+      <Filter>Components\Theater\BoneCamera</Filter>
+    </ClInclude>
+    <ClInclude Include="BoneCameraMenu.h">
+      <Filter>Components\Theater\BoneCamera</Filter>
+    </ClInclude>
+    <ClInclude Include="UIControls.h">
+      <Filter>Components\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Lights.h">
+      <Filter>Components\Theater\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="LightsMenu.h">
+      <Filter>Components\Theater\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Misc.h">
+      <Filter>Components\Theater\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="MiscMenu.h">
+      <Filter>Components\Theater\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="FreeCamera.h">
+      <Filter>Components\Theater\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="IMVMStream.h">
+      <Filter>Components\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="GreenScreen.h">
+      <Filter>Components\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="Streams.h">
+      <Filter>Components\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="NoPlayers.h">
+      <Filter>Components\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="NoGun.h">
+      <Filter>Components\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="LocalAddresses.h">
+      <Filter>Components\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenGrab.h">
+      <Filter>DX11</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenGrab.cpp">
+      <Filter>DX11</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
