@@ -7,6 +7,8 @@
 #include "GreenScreen.h"
 #include "NoPlayers.h"
 #include "NoGun.h"
+#include "Depth.h"
+#include "FxOnly.h"
 #include "LocalAddresses.h"
 #include "ScreenGrab.h"
 #include <cassert>
@@ -30,6 +32,8 @@ namespace Streams
 	inline static Stream_GreenScreen GreenScreen;
 	inline static Stream_NoPlayers NoPlayers;
 	inline static Stream_NoGun NoGun;
+	inline static Stream_Depth Depth;
+	inline static Stream_FxOnly FxOnly;
 
 #pragma endregion
 #pragma region DX11 defs
@@ -37,12 +41,23 @@ namespace Streams
 	present p_present;
 	present p_present_target;
 	
-	bool init = false;
+	typedef long(__stdcall* resizeBuffers)(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);
+	resizeBuffers p_ResizeBuffers;
+	resizeBuffers p_ResizeBuffers_target;
+
+	typedef long(__stdcall* resizeTarget)(IDXGISwapChain*, const DXGI_MODE_DESC*);
+	resizeTarget p_ResizeTarget;
+	resizeTarget p_ResizeTarget_target;
+
 	HWND window = NULL;
 	ID3D11Device* p_device = NULL;
 	ID3D11DeviceContext* p_context = NULL;
 	ID3D11RenderTargetView* mainRenderTargetView = NULL;
 	DXGI_SWAP_CHAIN_DESC sd;
+
+
+	ID3D11Texture2D* texture_to_save = NULL;
+
 #pragma endregion
 #pragma region DX11 methods
 	bool get_present_pointer()
@@ -80,77 +95,130 @@ namespace Streams
 			device->Release();
 			//context->Release();
 			p_present_target = (present)p_vtable[8];
+			p_ResizeBuffers_target = (resizeBuffers)p_vtable[13];
+			p_ResizeTarget_target = (resizeTarget)p_vtable[14];
 			return true;
 		}
 		return false;
 	}
-	
+	int r_frameCount = 0;
 	long HRES;
 	static long __stdcall detour_present(IDXGISwapChain* p_swap_chain, UINT sync_interval, UINT flags)
 	{
+		static bool init = false;
 		if (!init)
 		{
 			if (SUCCEEDED(p_swap_chain->GetDevice(__uuidof(ID3D11Device), (void**)&p_device)))
 			{
 				p_device->GetImmediateContext(&p_context);
 				p_swap_chain->GetDesc(&sd);
-				p_swap_chain->ResizeBuffers(sd.BufferCount, T6SDK::Addresses::ScreenWidth.Value(), T6SDK::Addresses::ScreenHeight.Value(), sd.BufferDesc.Format, flags);
 				init = true;
 			}
 			else
 				HRES = p_present(p_swap_chain, sync_interval, flags);
 		}
-		//p_context->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
+		p_context->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
 
 		if (ScreenshotRequested)
 		{
-			ID3D11Device* device;
-			HRESULT gd = p_swap_chain->GetDevice(__uuidof(ID3D11Device), (void**)&device);
-			assert(gd == S_OK);
-
-			//Get context
-			ID3D11DeviceContext* context;
-			device->GetImmediateContext(&context);
-
-			//get back buffer
-			ID3D11Texture2D* backbufferTex;
-			HRESULT gb = p_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backbufferTex);
-			assert(gb == S_OK);
-
-			//Capture Frame
+			
 			REFGUID GUID_ContainerFormatJpeg{ 0x19e4a5aa, 0x5662, 0x4fc5, 0xa0, 0xc0, 0x17, 0x58, 0x2, 0x8e, 0x10, 0x57 };
+			
 
-			HRESULT hr = DirectX::SaveWICTextureToFile(context, backbufferTex, GUID_ContainerFormatJpeg, std::wstring(filename.begin(), filename.end()).c_str());
-			assert(hr == S_OK);
+			ID3D11Texture2D* backBuffer;
+			HRESULT hr = p_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&backBuffer));
 
+			if (texture_to_save == NULL)
+			{
+				D3D11_TEXTURE2D_DESC td;
+				backBuffer->GetDesc(&td);
+				p_device->CreateTexture2D(&td, NULL, &texture_to_save);
+			}
+
+			p_context->CopyResource(texture_to_save, backBuffer);
+
+			DirectX::SaveWICTextureToFile(p_context, texture_to_save, GUID_ContainerFormatJpeg, std::wstring(filename.begin(), filename.end()).c_str(), NULL, NULL, true);
 			ScreenshotRequested = false;
+			backBuffer->Release();
+			texture_to_save->Release();
+			texture_to_save = NULL;
 		}
 
-		//if(!IsAnyOtherStream)
-		HRES = p_present(p_swap_chain, sync_interval, flags);
+		if(!IsAnyOtherStream)
+		{
+			HRES = p_present(p_swap_chain, sync_interval, flags);
+			T6SDK::ConsoleLog::LogSameLineFormatted("Frame %i", r_frameCount++);
+		}
+		else
+			T6SDK::ConsoleLog::LogSameLineFormatted("Frozen HRES; Frame %i", r_frameCount++);
 		return HRES;
 	}
-	
+	static long __stdcall detour_ResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
+	{
+		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Resizing buffers to %ix%i", Width, Height);
+		IsAnyOtherStream = false;
+		return p_ResizeBuffers(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
+	}
+
+	static long __stdcall detour_ResizeTarget(IDXGISwapChain* pSwapChain, const DXGI_MODE_DESC* pNewTargetParameters)
+	{
+		IsAnyOtherStream = false;
+		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Resizing target to %ix%i", pNewTargetParameters->Width, pNewTargetParameters->Height);
+		return p_ResizeTarget(pSwapChain, pNewTargetParameters);
+	}
+
 	bool initDX11()
 	{
 		if (!get_present_pointer())
 		{
-			return 1;
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to get present pointer");
+			return false;
 		}
 
 		MH_STATUS status = MH_Initialize();
 		if (status != MH_OK)
 		{
-			return 1;
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to initialize MinHook");
+			return false;
 		}
 		
-		if (MH_CreateHook(reinterpret_cast<void**>(p_present_target), &detour_present, reinterpret_cast<void**>(&p_present)) != MH_OK) {
-			return 1;
+		if (MH_CreateHook(reinterpret_cast<void**>(p_present_target), &detour_present, reinterpret_cast<void**>(&p_present)) != MH_OK) 
+		{
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to hook present");
+			return false;
 		}
 		
-		if (MH_EnableHook(p_present_target) != MH_OK) {
-			return 1;
+		if (MH_EnableHook(p_present_target) != MH_OK) 
+		{
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to enable present");
+			return false;
 		}
+
+		if (MH_CreateHook(reinterpret_cast<void**>(p_ResizeBuffers_target), &detour_ResizeBuffers, reinterpret_cast<void**>(&p_ResizeBuffers)) != MH_OK) 
+		{
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to hook ResizeBuffers");
+			return false;
+		}
+
+		if (MH_EnableHook(p_ResizeBuffers_target) != MH_OK) 
+		{
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to enable ResizeBuffers");
+			return false;
+		}
+
+		if (MH_CreateHook(reinterpret_cast<void**>(p_ResizeTarget_target), &detour_ResizeTarget, reinterpret_cast<void**>(&p_ResizeTarget)) != MH_OK) 
+		{
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to hook ResizeTarget");
+			return false;
+		}
+
+		if (MH_EnableHook(p_ResizeTarget_target) != MH_OK) 
+		{
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to enable ResizeTarget");
+			return false;
+		}
+
+		return true;
 	}
 #pragma endregion
 
@@ -164,23 +232,30 @@ namespace Streams
 		ScreenshotRequested = true;
 		T6SDK::InternalFunctions::SCR_UpdateScreen(2);
 	}
-
+	int StreamsEnabled = 0;
 	void Update()
 	{
 		if(!IsStreamsEnabled)
 			return;
 		IsAnyOtherStream = false;
 		T6SDK::InternalFunctions::SCR_UpdateScreen(2);
-		for (auto& stream : Streams)
+		StreamsEnabled = 0;
+		if(T6SDK::Theater::IsInTheater)
 		{
-			if (stream->toggle->current.enabled)
+			for (auto& stream : Streams)
 			{
-				IsAnyOtherStream = true; //NOFLASH
-				stream->Enable();
-				CaptureScreenshot(stream->Name);
-				stream->Disable();
+				if (stream->toggle->current.enabled)
+				{
+					StreamsEnabled++;
+					IsAnyOtherStream = true; //NOFLASH
+					stream->Enable();
+					CaptureScreenshot(stream->Name);
+					stream->Disable();
+				}
 			}
 		}
+		if(StreamsEnabled == 0)
+			CaptureScreenshot("Default");
 		frameCount++;
 	}
 	uintptr_t eaxTMP, ecxTMP, edxTMP, esiTMP, ediTMP, espTMP, ebpTMP;
@@ -227,10 +302,22 @@ namespace Streams
 		Streams.push_back(&NoGun);
 		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "No gun stream registered!");
 
+		//Depth
+		Depth.Init();
+		Streams.push_back(&Depth);
+		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Depth stream registered!");
+
+		//FxOnly
+		FxOnly.Init();
+		Streams.push_back(&FxOnly);
+		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "FxOnly stream registered!");
+
+
+
 		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Total streams registered: %i", Streams.size());
 		
 		T6SDK::ConsoleLog::Log("Initializing DX11...");
-		if(!initDX11())
+		if(initDX11() == false)
 		{
 			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED,"Failed to initialize DX11!");
 			return;
@@ -251,6 +338,7 @@ namespace Streams
 		IsStreamsEnabled = false;
 		IsAnyOtherStream = false;
 		LocalAddresses::h_TickIncreasing.UnHook();
+
 		frameCount = 0;
 	}
 	inline static void StreamsSwitchState() 

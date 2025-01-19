@@ -171,6 +171,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Depth.h" />
+    <ClInclude Include="FxOnly.h" />
     <ClInclude Include="LocalAddresses.h" />
     <ClInclude Include="BoneCamera.h" />
     <ClInclude Include="BoneCameraMenu.h" />

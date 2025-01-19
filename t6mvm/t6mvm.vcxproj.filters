@@ -105,6 +105,12 @@
     <ClInclude Include="ScreenGrab.h">
       <Filter>DX11</Filter>
     </ClInclude>
+    <ClInclude Include="Depth.h">
+      <Filter>Components\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="FxOnly.h">
+      <Filter>Components\Streams</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

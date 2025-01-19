@@ -24,10 +24,11 @@ public:
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor, 0x0000FF00);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor2, 0x0000FF00);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::fx_marks_draw, false);
-		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_znear, 10000.0f);
+		//T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_znear, 10000.0f);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, true);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, false);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::cg_drawGun, true);
+		Enabled = true;
 	}
 	void Disable()
 	{
@@ -41,6 +42,7 @@ public:
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, prevFlareEffects);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, prevSunFlares);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::cg_drawGun, prevDrawGun);
+		Enabled = false;
 	}
 	void Init()
 	{

@@ -3,12 +3,12 @@
 class Stream_NoPlayers : public IMVMStream
 {
 public:
-	bool Enabled = false;
-
-	void Enable() {
+	void Enable() 
+	{
 		Enabled = true;
 	}
-	void Disable() {
+	void Disable() 
+	{
 		Enabled = false;
 	}
 	void Init() 
