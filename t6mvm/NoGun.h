@@ -3,7 +3,7 @@
 class Stream_NoGun : public IMVMStream
 {
 private:
-	bool prevDrawGun = false;
+	bool prevDrawGun = true;
 public:
 	void Enable() 
 	{

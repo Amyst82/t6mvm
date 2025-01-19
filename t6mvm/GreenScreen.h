@@ -4,26 +4,35 @@ class Stream_GreenScreen : public IMVMStream
 {
 private:
 	bool prevBloomTweaks = false;
-	bool prevFxMarksDraw = false;
+	bool prevFxMarksDraw = true;
 	float prevZNear = 4.0f;
-	bool prevFlareEffects = false;
-	bool prevSunFlares = false;
-	bool prevDrawGun = false;
+	float prevZFar = 0.0f;
+	bool prevFlareEffects = true;
+	bool prevSunFlares = true;
+	bool prevDrawGun = true;
+	BYTE prevBaseTechType = 0x04;
+	BYTE prevEmissiveTechType = 0x03;
 public:
 	void Enable() 
 	{
+		prevBaseTechType = T6SDK::Addresses::GfxDrawMethod.Value().baseTechType;
+		prevEmissiveTechType = T6SDK::Addresses::GfxDrawMethod.Value().emissiveTechType;
 		prevBloomTweaks = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks);
 		prevFxMarksDraw = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::fx_marks_draw);
 		prevZNear = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::r_znear);
 		prevFlareEffects = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::flareDisableEffects);
 		prevSunFlares = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw);
 		prevDrawGun = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::cg_drawGun);
-		T6SDK::Addresses::Patches::RemoveSkyBoxPatch.Patch();
+		prevZFar = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::r_zfar);
+		//T6SDK::Addresses::Patches::RemoveSkyBoxPatch.Patch();
+		T6SDK::Addresses::GfxDrawMethod.Value().baseTechType = 0x04;
+		T6SDK::Addresses::GfxDrawMethod.Value().emissiveTechType = 0x01;
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_skipPvs, true);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks, true);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor, 0x0000FF00);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor2, 0x0000FF00);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::fx_marks_draw, false);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_zfar, 1.0f);
 		//T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_znear, 10000.0f);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, true);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, false);
@@ -32,13 +41,18 @@ public:
 	}
 	void Disable()
 	{
-		T6SDK::Addresses::Patches::RemoveSkyBoxPatch.UnPatch();
+		//T6SDK::Addresses::Patches::RemoveSkyBoxPatch.UnPatch();
+		
+		T6SDK::Addresses::GfxDrawMethod.Value().baseTechType= prevBaseTechType;
+		T6SDK::Addresses::GfxDrawMethod.Value().emissiveTechType = prevEmissiveTechType;
+
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_skipPvs, false);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks, prevBloomTweaks);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor, 0x00);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor2, 0x00);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::fx_marks_draw, prevFxMarksDraw);
 		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_znear, prevZNear);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_zfar, prevZFar);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, prevFlareEffects);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, prevSunFlares);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::cg_drawGun, prevDrawGun);

@@ -327,6 +327,11 @@ namespace Streams
 
 	inline static void StartStreams() 
 	{
+		CustomDvars::dvar_greenScreen->current.enabled = false;
+		for (auto& stream : Streams)
+		{
+			stream->Disable();
+		}
 		LocalAddresses::h_TickIncreasing.Hook(OnTickIncreasing);
 		IsStreamsEnabled = true;
 		T6SDK::Addresses::IsDemoPaused.Value() = false;
