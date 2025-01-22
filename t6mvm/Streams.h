@@ -147,10 +147,10 @@ namespace Streams
 		if(!IsAnyOtherStream)
 		{
 			HRES = p_present(p_swap_chain, sync_interval, flags);
-			T6SDK::ConsoleLog::LogSameLineFormatted("Frame %i", r_frameCount++);
+			//T6SDK::ConsoleLog::LogSameLineFormatted("Frame %i", r_frameCount++);
 		}
 		else
-			T6SDK::ConsoleLog::LogSameLineFormatted("Frozen HRES; Frame %i", r_frameCount++);
+			//T6SDK::ConsoleLog::LogSameLineFormatted("Frozen HRES; Frame %i", r_frameCount++);
 		return HRES;
 	}
 	static long __stdcall detour_ResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)

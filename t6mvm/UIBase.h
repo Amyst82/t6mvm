@@ -40,8 +40,10 @@ namespace UIBase
 	void OnEndFrameDrawn()
 	{
 
-		if (!T6SDK::Theater::IsInTheater())
+		if (!T6SDK::Theater::IsInTheater() || T6SDK::Input::BlankMenuOpened)
 		{
+			if (T6SDK::DevConsole::IsConsoleOpened == true)
+				return;
 			T6SDK::Drawing::DrawTextAbsolute("T6MVM v1.0.0 build 1337", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.2f }, T6SDK::AnchorPoint::TopLeft, 0x00);
 			return;
 		}
