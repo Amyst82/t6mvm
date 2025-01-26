@@ -37,6 +37,13 @@ namespace CustomDvars
 	cmd_function_s cmd_exportLights_VAR{};
 	cmd_function_s cmd_importLights_VAR{};
 
+	//STREAMS DVARS
+
+	//WEAPONS DVARS
+	static dvar_s* dvar_camoChanging;
+	static dvar_s* dvar_primaryCamo;
+	static dvar_s* dvar_secondaryCamo;
+
 	//MENU DVARS
 	static dvar_s* dvar_menuBlur;
 	static dvar_s* dvar_showBone;
@@ -76,6 +83,11 @@ namespace CustomDvars
 		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_importLights", nullptr, &cmd_importLights_VAR);
 		dvar_lightRadiusLimit = T6SDK::Dvars::RegisterFloat("mvm_lightRadiusLimit", 1000.0f, 0.0f, 10000.0f, "Light radius limit.");
 		dvar_lightColorLimit = T6SDK::Dvars::RegisterFloat("mvm_lightColorLimit", 1.0f, 0.0f, 255.0f, "Light color limit.");
+
+		//Register weapon dvars
+		dvar_camoChanging = T6SDK::Dvars::RegisterBool("mvm_camoChanging", false, "Enable weapon camo changing.");
+		dvar_primaryCamo = T6SDK::Dvars::RegisterInt("mvm_primaryCamo", -1, -1, 44, "Primary weapon camo index.");
+		dvar_secondaryCamo = T6SDK::Dvars::RegisterInt("mvm_secondaryCamo", -1, -1, 44, "Secondary weapon camo index.");
 
 		//Register menu dvars
 		dvar_menuBlur = T6SDK::Dvars::RegisterBool("mvm_menuBlur", true, "Menu blur.");

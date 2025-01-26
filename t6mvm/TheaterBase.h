@@ -5,6 +5,7 @@
 #include "Lights.h"
 #include "Misc.h"
 #include "FreeCamera.h"
+#include "Weapon.h"
 namespace TheaterBase
 {
 	void OnKeyPressed(BYTE key)
@@ -52,10 +53,14 @@ namespace TheaterBase
 		T6SDK::Theater::SetDemoTimescaleCustomStep(true, &CustomDvars::dvar_demoTimescaleStep->current.value);
 		T6SDK::Theater::SetFreeRoamCameraSpeed(CustomDvars::dvar_freeRoamSpeed->current.value);
 		T6SDK::Input::PreventScoreboardOpen(true);
+		T6SDK::Addresses::Patches::DisableClipRecordingPatch.Patch();
+
+		Camera::FreeCamera::Init();
+		Misc::Init();
 		BoneCamera::Init();
 		Lights::Init();
-		Misc::Init();
-		Camera::FreeCamera::Init();
+		Weapon::Init();
+
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnCameraModeChanged, (uintptr_t)&CameraModeChanged);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&BoneCamera::Update);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&Lights::Update);

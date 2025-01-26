@@ -69,6 +69,10 @@ namespace Misc
 	}
 	static void Update()
 	{
+		if (!T6SDK::Theater::IsInTheater())
+			return;
+		if (!T6SDK::Theater::IsPlaybackInited())
+			return;
 		if(CustomDvars::dvar_greenScreen->modified)
 		{
 			SwitchGreenScreenState();

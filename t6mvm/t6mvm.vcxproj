@@ -120,7 +120,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>C:\Users\Amyst Amyst\source\repos\T6SDK\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dxguid.lib;T6SDK.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxguid.lib;T6SDK.lib;vfw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Message>
@@ -171,6 +171,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AviFile.h" />
     <ClInclude Include="Depth.h" />
     <ClInclude Include="FxOnly.h" />
     <ClInclude Include="LocalAddresses.h" />
@@ -193,8 +194,11 @@
     <ClInclude Include="TheaterBase.h" />
     <ClInclude Include="UIBase.h" />
     <ClInclude Include="UIControls.h" />
+    <ClInclude Include="Weapon.h" />
+    <ClInclude Include="WeaponMenu.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AviFile.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

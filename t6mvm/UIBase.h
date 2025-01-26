@@ -4,6 +4,7 @@
 #include "BoneCameraMenu.h"
 #include "LightsMenu.h"
 #include "MiscMenu.h"
+#include "WeaponMenu.h"
 namespace UIBase
 {
 	static void CloseMenu()
@@ -17,10 +18,16 @@ namespace UIBase
 	}
 	void OnKeyPressed(BYTE keyCode)
 	{
+
 		if (!T6SDK::Theater::IsInTheater())
 			return;
 		if (keyCode == T6SDK::Input::Keys::TAB.KeyCode)
 		{
+			if (T6SDK::MAIN::DevConsoleOpened == true)
+			{
+				T6SDK::ConsoleLog::LogError("Console is opened! Aborting.");
+				return;
+			}
 			if (T6SDK::Input::Keys::ALT.IsAnyPressState())
 				return;
 			if(!T6SDK::Input::BlankMenuOpened)
@@ -39,13 +46,12 @@ namespace UIBase
 	}
 	void OnEndFrameDrawn()
 	{
-
+		if (T6SDK::MAIN::DevConsoleOpened == true)
+			return;
 		if (!T6SDK::Theater::IsInTheater() || T6SDK::Input::BlankMenuOpened)
 		{
-			if (T6SDK::DevConsole::IsConsoleOpened == true)
-				return;
 			T6SDK::Drawing::DrawTextAbsolute("T6MVM v1.0.0 build 1337", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.2f }, T6SDK::AnchorPoint::TopLeft, 0x00);
-			return;
+			//return;
 		}
 		//Draw tabs here
 		if (T6SDK::Input::BlankMenuOpened)
@@ -59,6 +65,7 @@ namespace UIBase
 			BoneCameraMenu::Draw();
 			LightsMenu::Draw();
 			MiscMenu::Draw();
+			WeaponMenu::Draw();
 			UIControls::MenuBlurCheckBox.Draw();
 			UIControls::CloseMenuButton.Draw();
 		}
@@ -74,6 +81,7 @@ namespace UIBase
 		BoneCameraMenu::Init();
 		LightsMenu::Init();
 		MiscMenu::Init();
+		WeaponMenu::Init();
 		UIControls::CloseMenuButton = T6SDK::Drawing::UI_ClickableButton("^3TAB ^7Back", 2, 35, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&UIBase::CloseMenu);
 		UIControls::CloseMenuButton.ToolTip = "Press ^3TAB ^7or ^3ESC ^7 or just click here to close the menu.";
 	}

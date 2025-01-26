@@ -43,6 +43,12 @@
     <Filter Include="DX11">
       <UniqueIdentifier>{b506e845-c22c-489b-b4cf-62c062f77b6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Components\Streams\CAviFile">
+      <UniqueIdentifier>{02a84438-a704-4998-ba9a-112ad333bc7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Theater\Weapon">
+      <UniqueIdentifier>{22275652-fb2a-4396-a58c-fc6eee35bd57}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -111,6 +117,15 @@
     <ClInclude Include="FxOnly.h">
       <Filter>Components\Streams</Filter>
     </ClInclude>
+    <ClInclude Include="AviFile.h">
+      <Filter>Components\Streams\CAviFile</Filter>
+    </ClInclude>
+    <ClInclude Include="Weapon.h">
+      <Filter>Components\Theater\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="WeaponMenu.h">
+      <Filter>Components\Theater\Weapon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -121,6 +136,9 @@
     </ClCompile>
     <ClCompile Include="ScreenGrab.cpp">
       <Filter>DX11</Filter>
+    </ClCompile>
+    <ClCompile Include="AviFile.cpp">
+      <Filter>Components\Streams\CAviFile</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
