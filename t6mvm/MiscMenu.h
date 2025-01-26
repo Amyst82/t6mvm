@@ -20,7 +20,7 @@ namespace MiscMenu
 
 	static void Init()
 	{
-		UIControls::UI_GreenScreen = T6SDK::Drawing::UI_CheckBoxButton("Green screen\t\t\t\tOFF", "Green screen\t\t\t\tON", 4, 5, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_greenScreen->current.enabled, (uintptr_t)&Misc::SwitchGreenScreenState);
+		UIControls::UI_GreenScreen = T6SDK::Drawing::UI_CheckBoxButton("Green screen OFF", "Green screen ON", 4, 5, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_greenScreen->current.enabled, (uintptr_t)&Misc::SwitchGreenScreenState);
 		UIControls::UI_GreenScreen.ToolTip = "Turn on/off green screen for POV and players.";
 
 		UIControls::UI_PlayersGreenScreen = T6SDK::Drawing::UI_EnumButton("Players green screen: ", 0, 3, &CustomDvars::dvar_greenScreenPlayers->current.integer, 4, 7, T6SDK::AnchorPoint::TopLeft, 0x00);

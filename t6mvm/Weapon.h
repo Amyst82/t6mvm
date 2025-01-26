@@ -37,7 +37,11 @@ namespace Weapon
 		if (!T6SDK::Theater::IsPlaybackInited())
 			return;
 		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_camoChanging))
+		{
+			T6SDK::Addresses::Patches::CamoChangingCinePatch.UnPatch();
 			return;
+		}
+		T6SDK::Addresses::Patches::CamoChangingCinePatch.Patch();
 		int demo_client = T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client);
 		if(T6SDK::Addresses::cg->client[demo_client].weaponSlot == 0x00) //If primary weapon
 		{

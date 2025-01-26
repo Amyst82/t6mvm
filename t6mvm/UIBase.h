@@ -5,6 +5,7 @@
 #include "LightsMenu.h"
 #include "MiscMenu.h"
 #include "WeaponMenu.h"
+#include "StreamsMenu.h"
 namespace UIBase
 {
 	static void CloseMenu()
@@ -32,6 +33,7 @@ namespace UIBase
 				return;
 			if(!T6SDK::Input::BlankMenuOpened)
 			{
+				Streams::StopStreams();
 				OpenMenu();
 			}
 			else
@@ -63,8 +65,9 @@ namespace UIBase
 
 			UIControls::DrawTabs();
 			BoneCameraMenu::Draw();
-			LightsMenu::Draw();
 			MiscMenu::Draw();
+			LightsMenu::Draw();
+			StreamsMenu::Draw();
 			WeaponMenu::Draw();
 			UIControls::MenuBlurCheckBox.Draw();
 			UIControls::CloseMenuButton.Draw();
@@ -78,9 +81,10 @@ namespace UIBase
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnKeyPressed, (uintptr_t)&OnKeyPressed);
 		//Init buttons and sliders here
 		UIControls::Init();
+		MiscMenu::Init();
 		BoneCameraMenu::Init();
 		LightsMenu::Init();
-		MiscMenu::Init();
+		StreamsMenu::Init();
 		WeaponMenu::Init();
 		UIControls::CloseMenuButton = T6SDK::Drawing::UI_ClickableButton("^3TAB ^7Back", 2, 35, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&UIBase::CloseMenu);
 		UIControls::CloseMenuButton.ToolTip = "Press ^3TAB ^7or ^3ESC ^7 or just click here to close the menu.";

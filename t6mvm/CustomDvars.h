@@ -1,5 +1,6 @@
 #pragma once
 #include <StdInclude.h>
+
 namespace CustomDvars
 {
 	//CAMERA DVARS
@@ -38,6 +39,19 @@ namespace CustomDvars
 	cmd_function_s cmd_importLights_VAR{};
 
 	//STREAMS DVARS
+	static dvar_s* dvar_streams;
+	static dvar_s* dvar_streams_noFlash;
+	static dvar_s* dvar_streams_directory;
+	static dvar_s* dvar_streams_fps;
+	static dvar_s* dvar_streams_JPG;
+	static dvar_s* dvar_streams_avi;
+	static dvar_s* dvar_streams_tickStart;
+	static dvar_s* dvar_streams_tickEnd;
+	static dvar_s* dvar_streams_recordCam;
+	cmd_function_s cmd_streams_start_VAR{};
+	cmd_function_s cmd_streams_stop_VAR{};
+	cmd_function_s cmd_streams_abort_VAR{};
+
 
 	//WEAPONS DVARS
 	static dvar_s* dvar_camoChanging;
@@ -79,10 +93,27 @@ namespace CustomDvars
 		dvar_zdepth = T6SDK::Dvars::RegisterBool("mvm_zdepth", false, "Z depth.");
 
 		//Register lights dvars
-		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_exportLights", nullptr, &cmd_exportLights_VAR);
+		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_exportLights", nullptr, &cmd_exportLights_VAR); //TODO Add implementation
 		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_importLights", nullptr, &cmd_importLights_VAR);
 		dvar_lightRadiusLimit = T6SDK::Dvars::RegisterFloat("mvm_lightRadiusLimit", 1000.0f, 0.0f, 10000.0f, "Light radius limit.");
 		dvar_lightColorLimit = T6SDK::Dvars::RegisterFloat("mvm_lightColorLimit", 1.0f, 0.0f, 255.0f, "Light color limit.");
+
+		//Register streams dvars
+		dvar_streams = T6SDK::Dvars::RegisterBool("mvm_streams", false, "Enable/disable streams recording.");
+		dvar_streams_noFlash = T6SDK::Dvars::RegisterBool("mvm_streams_noFlash", true, "Disable displaying any other passes on streams to prevent screen flash.");
+		dvar_streams_directory = T6SDK::Dvars::RegisterString("mvm_streams_directory", "", "Directory where streams will be saved.");
+		dvar_streams_fps = T6SDK::Dvars::RegisterInt("mvm_streams_fps", 50, 50, 1000, "Streams recording frame rate.");
+		dvar_streams_avi = T6SDK::Dvars::RegisterBool("mvm_streams_avi", false, "Streams recording AVI format.");
+		dvar_streams_JPG = T6SDK::Dvars::RegisterBool("mvm_streams_JPG", false, "Record streams in JPG format.");
+		dvar_streams_tickStart = T6SDK::Dvars::RegisterInt("mvm_streams_tickStart", -1, -1, 99999999, "Streams recording tick start value.");
+		dvar_streams_tickEnd = T6SDK::Dvars::RegisterInt("mvm_streams_tickEnd", -1, -1, 99999999, "Streams recording tick end value.");
+		dvar_streams_recordCam = T6SDK::Dvars::RegisterBool("mvm_streams_recordCam", false, "Collect camera data on each recorded frame.");
+
+		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_start", nullptr, &cmd_streams_start_VAR);
+		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_stop", nullptr, &cmd_streams_stop_VAR);
+		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_abort", nullptr, &cmd_streams_abort_VAR); //TODO Add implementation
+
+
 
 		//Register weapon dvars
 		dvar_camoChanging = T6SDK::Dvars::RegisterBool("mvm_camoChanging", false, "Enable weapon camo changing.");

@@ -36,6 +36,29 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_ClickableButton UI_ExportLightsButton{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_ImportLightsButton{};
 
+	//STREAMS controls
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_ToggleStreamsCheckBox{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_StreamsDirectoryButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_StreamsStartTickButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_StreamsEndTickButton{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsJPGCheckBox{};
+	inline static T6SDK::Drawing::UI_EnumButton UI_StreamsFPSEnum{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsAVICheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsNoFlashCheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_RecordCamCheckBox{};
+	//streams passes
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass1CheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass2CheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass3CheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass4CheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass5CheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass6CheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass7CheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass8CheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass9CheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass10CheckBox{};
+
+
 	//WEAPON controls
 	inline static T6SDK::Drawing::UI_Slider UI_GunXOffset{};
 	inline static T6SDK::Drawing::UI_Slider UI_GunYOffset{};

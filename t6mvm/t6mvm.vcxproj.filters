@@ -49,6 +49,9 @@
     <Filter Include="Components\Theater\Weapon">
       <UniqueIdentifier>{22275652-fb2a-4396-a58c-fc6eee35bd57}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Components\Theater\StreamsMenu">
+      <UniqueIdentifier>{0967ea7d-a248-485f-a929-cfa8581162f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -125,6 +128,18 @@
     </ClInclude>
     <ClInclude Include="WeaponMenu.h">
       <Filter>Components\Theater\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamsMenu.h">
+      <Filter>Components\Theater\StreamsMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="Default.h">
+      <Filter>Components\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthWithGun.h">
+      <Filter>Components\Streams</Filter>
+    </ClInclude>
+    <ClInclude Include="GreenSky.h">
+      <Filter>Components\Streams</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

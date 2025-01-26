@@ -172,8 +172,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AviFile.h" />
+    <ClInclude Include="Default.h" />
     <ClInclude Include="Depth.h" />
+    <ClInclude Include="DepthWithGun.h" />
     <ClInclude Include="FxOnly.h" />
+    <ClInclude Include="GreenSky.h" />
     <ClInclude Include="LocalAddresses.h" />
     <ClInclude Include="BoneCamera.h" />
     <ClInclude Include="BoneCameraMenu.h" />
@@ -191,6 +194,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="ScreenGrab.h" />
     <ClInclude Include="Streams.h" />
+    <ClInclude Include="StreamsMenu.h" />
     <ClInclude Include="TheaterBase.h" />
     <ClInclude Include="UIBase.h" />
     <ClInclude Include="UIControls.h" />
