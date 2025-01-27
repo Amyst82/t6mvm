@@ -26,8 +26,8 @@ namespace Streams
 {
 #pragma region Streams defs
 	int frameCount = 0;
-	bool ScreenshotRequested = false;
-	bool IsAnyOtherStream = false;
+	inline static bool ScreenshotRequested = false;
+	inline static bool IsAnyOtherStream = false;
 	bool FreeBufferRequested = false;
 	string filename = "";
 	inline static bool IsStreamsRunning = false;
@@ -109,9 +109,8 @@ namespace Streams
 		}
 		return false;
 	}
-	int r_frameCount = 0;
 
-	void ShowProgressOnScreen()
+	static void ShowProgressOnScreen()
 	{
 		if(!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
 			return;
@@ -119,19 +118,27 @@ namespace Streams
 			return;
 		if (T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) > -1 && T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) > -1)
 		{
-			char buffer1[512];
-			int totalFrames = T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) - T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart);
-			float percent = (float)r_frameCount / (float)(T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) - (float)T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart));
+			int totalFrames = (T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) - T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart))/(1000 / T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_fps));
+			float percent = (float)frameCount / (float)totalFrames;
 
-			char formatBuffer1[32];
-			sprintf(formatBuffer1, "%s", T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_avi) ? "^5AVI" : T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_JPG) ? "^5JPG ^7sequence" : "^5PNG ^7sequence");
-			sprintf(buffer1, "Progress: ^3%i/%i ^7(%.0f%%)\nRecording as %s.\nPress ^3F5 ^7to stop.\nPress ^1ESC ^7to abort recording and remove recorded files.", r_frameCount, totalFrames, percent * 100.0f, formatBuffer1);
-			T6SDK::Drawing::DrawTextRelative(buffer1, 0.5f, 0.35f, 1.5f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+			char buffer0[256];
+			sprintf(buffer0, "Progress: ^3%i/%i ^7(%.0f%%)", frameCount, totalFrames, percent * 100.0f);
+			vec2_t coords = T6SDK::Drawing::GetGridCellCoords(8, 19);
+			T6SDK::Drawing::DrawTextAbsolute(buffer0, coords.x, coords.y, 1.5f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+
+			char formatBuffer1[64];
+			sprintf(formatBuffer1, "%s", T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_avi) ? "Recording as ^3AVI" : T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_JPG) ? "Recording as ^3JPG ^7sequence" : "Recording as ^3PNG ^7sequence");
+			
+			vec2_t coords2 = T6SDK::Drawing::GetGridCellCoords(8, 21);
+			T6SDK::Drawing::DrawTextAbsolute(formatBuffer1, coords2.x, coords2.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+
+			vec2_t coords3 = T6SDK::Drawing::GetGridCellCoords(8, 22);
+			T6SDK::Drawing::DrawTextAbsolute("Press ^3F5 ^7to stop. Press ^1ESC ^7to abort recording and remove recorded files.", coords3.x, coords3.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 		}
 		else
 		{
 			char buffer1[256];
-			sprintf(buffer1, "Recorded ^3%i ^7frames", r_frameCount);
+			sprintf(buffer1, "Captured ^3%i ^7frames", frameCount);
 			vec2_t coords = T6SDK::Drawing::GetGridCellCoords(8, 19);
 			T6SDK::Drawing::DrawTextAbsolute(buffer1, coords.x, coords.y, 1.5f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 
@@ -185,7 +192,7 @@ namespace Streams
 
 		if (!IsAnyOtherStream)
 			HRES = p_present(p_swap_chain, sync_interval, flags);
-		
+
 		return HRES;
 	}
 	static long __stdcall detour_ResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
@@ -281,6 +288,7 @@ namespace Streams
 		LocalAddresses::h_TickIncreasing.UnHook();
 		IsStreamsRunning = false;
 		frameCount = 0;
+		T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden = false;
 	}
 
 	int StreamsPassesEnabled = 0;
@@ -318,6 +326,7 @@ namespace Streams
 		}
 		if(StreamsPassesEnabled == 0)
 			CaptureScreenshot(&Default);
+
 		frameCount++;
 		//T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Successfully captured %i", frameCount);
 	}
@@ -405,14 +414,14 @@ namespace Streams
 
 		//Init UI for passes
 		T6SDK::ConsoleLog::Log("Initializing streams passes UI...");
-		UIControls::UI_StreamsPass1CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEFAULT", "DEFAULT", 12, 5, T6SDK::AnchorPoint::TopLeft, &Streams::Default.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass2CheckBox = T6SDK::Drawing::UI_CheckBoxButton("NO GUN", "NO GUN", 12, 7, T6SDK::AnchorPoint::TopLeft, &Streams::NoGun.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass3CheckBox = T6SDK::Drawing::UI_CheckBoxButton("GREEN SCREEN", "GREEN SCREEN", 12, 9, T6SDK::AnchorPoint::TopLeft, &Streams::GreenScreen.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass4CheckBox = T6SDK::Drawing::UI_CheckBoxButton("NO PLAYERS", "NO PLAYERS", 12, 11, T6SDK::AnchorPoint::TopLeft, &Streams::NoPlayers.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass5CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEPTH", "DEPTH", 12, 13, T6SDK::AnchorPoint::TopLeft, &Streams::Depth.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass6CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEPTH WITH GUN", "DEPTH WITH GUN", 12, 15, T6SDK::AnchorPoint::TopLeft, &Streams::DepthWithGun.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass7CheckBox = T6SDK::Drawing::UI_CheckBoxButton("FX ONLY", "FX ONLY", 12, 17, T6SDK::AnchorPoint::TopLeft, &Streams::FxOnly.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass8CheckBox = T6SDK::Drawing::UI_CheckBoxButton("GREEN SKY", "GREEN SKY", 12, 19, T6SDK::AnchorPoint::TopLeft, &Streams::GreenSky.toggle->current.enabled, 0x00);
+		UIControls::UI_StreamsPass1CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEFAULT", "DEFAULT", 12, 6, T6SDK::AnchorPoint::TopLeft, &Streams::Default.toggle->current.enabled, 0x00);
+		UIControls::UI_StreamsPass2CheckBox = T6SDK::Drawing::UI_CheckBoxButton("NO GUN", "NO GUN", 12, 8, T6SDK::AnchorPoint::TopLeft, &Streams::NoGun.toggle->current.enabled, 0x00);
+		UIControls::UI_StreamsPass3CheckBox = T6SDK::Drawing::UI_CheckBoxButton("GREEN SCREEN", "GREEN SCREEN", 12, 10, T6SDK::AnchorPoint::TopLeft, &Streams::GreenScreen.toggle->current.enabled, 0x00);
+		UIControls::UI_StreamsPass4CheckBox = T6SDK::Drawing::UI_CheckBoxButton("NO PLAYERS", "NO PLAYERS", 12, 12, T6SDK::AnchorPoint::TopLeft, &Streams::NoPlayers.toggle->current.enabled, 0x00);
+		UIControls::UI_StreamsPass5CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEPTH", "DEPTH", 12, 14, T6SDK::AnchorPoint::TopLeft, &Streams::Depth.toggle->current.enabled, 0x00);
+		UIControls::UI_StreamsPass6CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEPTH WITH GUN", "DEPTH WITH GUN", 12, 16, T6SDK::AnchorPoint::TopLeft, &Streams::DepthWithGun.toggle->current.enabled, 0x00);
+		UIControls::UI_StreamsPass7CheckBox = T6SDK::Drawing::UI_CheckBoxButton("FX ONLY", "FX ONLY", 12, 18, T6SDK::AnchorPoint::TopLeft, &Streams::FxOnly.toggle->current.enabled, 0x00);
+		UIControls::UI_StreamsPass8CheckBox = T6SDK::Drawing::UI_CheckBoxButton("GREEN SKY", "GREEN SKY", 12, 20, T6SDK::AnchorPoint::TopLeft, &Streams::GreenSky.toggle->current.enabled, 0x00);
 		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN,"Streams passes UI initialized.");
 
 	} 
@@ -443,6 +452,7 @@ namespace Streams
 		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "newStreamFolder: %s", newStreamFolder);
 		if(T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) > -1)
 			T6SDK::Theater::Demo_JumpToTick(T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart));
+		T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden = true;
 		CustomDvars::dvar_greenScreen->current.enabled = false;
 		for (auto& stream : Streams)
 		{

@@ -72,7 +72,10 @@ namespace UIBase
 			UIControls::MenuBlurCheckBox.Draw();
 			UIControls::CloseMenuButton.Draw();
 		}
-
+		if (!Streams::ScreenshotRequested && !Streams::IsAnyOtherStream && Streams::IsStreamsRunning)
+		{
+			Streams::ShowProgressOnScreen();
+		}
 	}
 
 	inline static void Init()

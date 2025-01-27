@@ -54,6 +54,10 @@ namespace WeaponMenu
 	{
 		if (!*UIControls::WeaponTabButton.isChecked)
 			return;
+
+		vec2_t coords = T6SDK::Drawing::GetGridCellCoords(8, 5);
+		T6SDK::Drawing::DrawTextAbsolute("^9VIEWMODEL", coords.x, coords.y, 1.0f, T6SDK::Drawing::T_WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+
 		UIControls::UI_GunXOffset.Draw();
 		UIControls::UI_GunYOffset.Draw();
 		UIControls::UI_GunZOffset.Draw();
@@ -62,6 +66,8 @@ namespace WeaponMenu
 		UIControls::UI_GunRoll.Draw();
 		UIControls::UI_CamoChanging.Draw();
 
+		vec2_t coords2 = T6SDK::Drawing::GetGridCellCoords(8, 14);
+		T6SDK::Drawing::DrawTextAbsolute("^9CAMO", coords2.x, coords2.y, 1.0f, T6SDK::Drawing::T_WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 		char buffer[64];
 		sprintf_s(buffer, "Primary camo: ^3%s", CamoTags[CustomDvars::dvar_primaryCamo->current.integer+1]);
 		UIControls::UI_PrimaryCamo.Text = buffer;
@@ -75,28 +81,28 @@ namespace WeaponMenu
 
 	static void Init()
 	{
-		UIControls::UI_GunXOffset = T6SDK::Drawing::UI_Slider("X Offset", &(*T6SDK::Dvars::DvarList::cg_gun_x)->current.value, 0.0f, -5.0f, 5.0f, 4, 5, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_GunXOffset = T6SDK::Drawing::UI_Slider("X Offset", &(*T6SDK::Dvars::DvarList::cg_gun_x)->current.value, 0.0f, -5.0f, 5.0f, 4, 6, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_GunXOffset.ToolTip = "Weapon viemodel X position offset.";
 
-		UIControls::UI_GunYOffset = T6SDK::Drawing::UI_Slider("Y Offset", &(*T6SDK::Dvars::DvarList::cg_gun_y)->current.value, 0.0f, -5.0f, 5.0f, 7, 5, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_GunYOffset = T6SDK::Drawing::UI_Slider("Y Offset", &(*T6SDK::Dvars::DvarList::cg_gun_y)->current.value, 0.0f, -5.0f, 5.0f, 7, 6, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_GunYOffset.ToolTip = "Weapon viemodel Y position offset.";
 
-		UIControls::UI_GunZOffset = T6SDK::Drawing::UI_Slider("Z Offset", &(*T6SDK::Dvars::DvarList::cg_gun_z)->current.value, 0.0f, -5.0f, 5.0f, 10, 5, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_GunZOffset = T6SDK::Drawing::UI_Slider("Z Offset", &(*T6SDK::Dvars::DvarList::cg_gun_z)->current.value, 0.0f, -5.0f, 5.0f, 10, 6, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_GunZOffset.ToolTip = "Weapon viemodel Z position offset.";
 
-		UIControls::UI_GunPitch = T6SDK::Drawing::UI_Slider("Viewmodel pitch", &(*T6SDK::Dvars::DvarList::cg_gun_rot_p)->current.value, 0.0f, -90.0f, 90.0f, 4, 8, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_GunPitch = T6SDK::Drawing::UI_Slider("Viewmodel pitch", &(*T6SDK::Dvars::DvarList::cg_gun_rot_p)->current.value, 0.0f, -90.0f, 90.0f, 4, 9, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_GunPitch.ToolTip = "Weapon viemodel pitch rotation offset.";
 
-		UIControls::UI_GunYaw = T6SDK::Drawing::UI_Slider("Viewmodel yaw", &(*T6SDK::Dvars::DvarList::cg_gun_rot_y)->current.value, 0.0f, -90.0f, 90.0f, 7, 8, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_GunYaw = T6SDK::Drawing::UI_Slider("Viewmodel yaw", &(*T6SDK::Dvars::DvarList::cg_gun_rot_y)->current.value, 0.0f, -90.0f, 90.0f, 7, 9, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_GunYaw.ToolTip = "Weapon viemodel yaw rotation offset.";
 
-		UIControls::UI_GunRoll = T6SDK::Drawing::UI_Slider("Viewmodel roll", &(*T6SDK::Dvars::DvarList::cg_gun_rot_r)->current.value, 0.0f, -90.0f, 90.0f, 10, 8, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_GunRoll = T6SDK::Drawing::UI_Slider("Viewmodel roll", &(*T6SDK::Dvars::DvarList::cg_gun_rot_r)->current.value, 0.0f, -90.0f, 90.0f, 10, 9, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_GunRoll.ToolTip = "Weapon viemodel roll rotation offset.";
 
-		UIControls::UI_CamoChanging = T6SDK::Drawing::UI_CheckBoxButton("Enable camo changing", "Disable camo changing", 4, 11, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_camoChanging->current.enabled, 0x00);
+		UIControls::UI_CamoChanging = T6SDK::Drawing::UI_CheckBoxButton("Enable camo changing", "Disable camo changing", 4, 15, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_camoChanging->current.enabled, 0x00);
 
-		UIControls::UI_PrimaryCamo = T6SDK::Drawing::UI_EnumButton("Primary camo", -1, 44, &CustomDvars::dvar_primaryCamo->current.integer, 4, 13, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_PrimaryCamo = T6SDK::Drawing::UI_EnumButton("Primary camo", -1, 44, &CustomDvars::dvar_primaryCamo->current.integer, 4, 17, T6SDK::AnchorPoint::TopLeft, 0x00);
 
-		UIControls::UI_SecondaryCamo = T6SDK::Drawing::UI_EnumButton("Secondary camo", -1, 44, &CustomDvars::dvar_secondaryCamo->current.integer, 10, 13, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_SecondaryCamo = T6SDK::Drawing::UI_EnumButton("Secondary camo", -1, 44, &CustomDvars::dvar_secondaryCamo->current.integer, 10, 17, T6SDK::AnchorPoint::TopLeft, 0x00);
 	}
 }

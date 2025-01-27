@@ -56,6 +56,13 @@ namespace LightsMenu
 		{
 			UIControls::UI_DeleteAllLightsButton.Draw();
 		}
+		else
+		{
+			vec2_t coords = T6SDK::Drawing::GetGridCellCoords(8, 19);
+			T6SDK::Drawing::DrawTextAbsolute("NO LIGHTS SPAWNED", coords.x, coords.y, 1.5f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+			vec2_t coords2 = T6SDK::Drawing::GetGridCellCoords(8, 21);
+			T6SDK::Drawing::DrawTextAbsolute("^7ADD A LIGHT IN ^3LIGHTS ^7MODE", coords2.x, coords2.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+		}
 		UIControls::UI_ExportLightsButton.Draw(Lights::LightsList.size() > 0);
 		UIControls::UI_ImportLightsButton.Draw();
 	}
