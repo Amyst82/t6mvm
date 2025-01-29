@@ -37,11 +37,7 @@ namespace Weapon
 		if (!T6SDK::Theater::IsPlaybackInited())
 			return;
 		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_camoChanging))
-		{
-			T6SDK::Addresses::Patches::CamoChangingCinePatch.UnPatch();
 			return;
-		}
-		T6SDK::Addresses::Patches::CamoChangingCinePatch.Patch();
 		int demo_client = T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client);
 		if(T6SDK::Addresses::cg->client[demo_client].weaponSlot == 0x00) //If primary weapon
 		{
@@ -58,9 +54,36 @@ namespace Weapon
 			}
 		}
 	}
+
+	uintptr_t eaxTMP, ecxTMP, edxTMP, esiTMP, ediTMP, espTMP, ebpTMP;
+	__declspec(naked) void CinesCamoPatch()
+	{
+		_asm
+		{
+			mov[eaxTMP], eax
+			mov[edxTMP], edx
+			mov[ecxTMP], ecx
+			mov[esiTMP], esi
+			mov[ediTMP], edi
+			mov[espTMP], esp
+			mov[ebpTMP], ebp
+			call Update
+			mov eax, [eaxTMP]
+			mov edx, [edxTMP]
+			mov ecx, [ecxTMP]
+			mov esi, [esiTMP]
+			mov edi, [ediTMP]
+			mov esp, [espTMP]
+			mov ebp, [ebpTMP]
+			mov ecx, 0x3E
+			jmp[T6SDK::Addresses::HookAddresses::h_CamoChangingCinePatch.JumpBackAddress]
+		}
+	}
+
 	static void Init()
 	{
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&Update);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnPovCamoWriting, (uintptr_t)&PovCamoUpdate);
+		T6SDK::Addresses::HookAddresses::h_CamoChangingCinePatch.Hook(CinesCamoPatch);
 	}
 }

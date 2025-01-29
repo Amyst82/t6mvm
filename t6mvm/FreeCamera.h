@@ -15,7 +15,7 @@ namespace Camera
 		}
 		void HandleRollAndFov(float mouseWheelDelta)
 		{
-			if (!T6SDK::Theater::IsInTheater())
+			if (T6SDK::Input::IsInputLocked() || !T6SDK::Theater::IsInTheater() || T6SDK::Addresses::IsGameInFocus.Value() == 0)
 				return;
 			if (T6SDK::Addresses::DemoPlayback.Value()->CameraMode == T6SDK::DemoCameraMode::NONE || T6SDK::Addresses::DemoPlayback.Value()->CameraMode == T6SDK::DemoCameraMode::THIRDPERSON)
 				return;

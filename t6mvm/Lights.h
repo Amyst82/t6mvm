@@ -18,10 +18,10 @@ namespace Lights
 		float b = 0.0f;
 		float a = 1.0f;
 	};
-	static T6SDK::Theater::CustomCameraMode LIGHTMODE("LIGHTS", { "OMNI", "SPOT" });
+	static T6SDK::Theater::CustomCameraMode LIGHTMODE("LIGHTS", { "OMNI"});
 	inline static T6SDK::Drawing::UI_KeyReactiveText SpawnLightButton{};
 	inline static vector<LightDef> LightsList;
-	inline static int SelectedLight = -1;
+	inline static int SelectedLight = 0;
 	inline static bool IsLightRepositioning = false;
 
 	inline static bool IsLightsMode()
@@ -42,7 +42,7 @@ namespace Lights
 				SelectedLight = i;
 				return true;
 			}
-			SelectedLight = -1;
+			//SelectedLight = -1;
 		}
 		return false;
 	}
@@ -146,8 +146,8 @@ namespace Lights
 			LightDef newLight;
 			if(T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == (T6SDK::DemoFreeCameraMode)0x04)//OMNI
 				newLight.spotLight = false;
-			else if( T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == (T6SDK::DemoFreeCameraMode)0x05)//SPOT
-				newLight.spotLight = true;
+			//else if( T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == (T6SDK::DemoFreeCameraMode)0x05)//SPOT
+			//	newLight.spotLight = true;
 			newLight.org = T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin;
 			newLight.dir = T6SDK::Addresses::cg->RefDef.viewAxis;
 			if (LightsList.size() > 0)
@@ -176,6 +176,7 @@ namespace Lights
 	static void RemoveAllLights()
 	{
 		LightsList.clear();
+		SelectedLight = -1;
 	}
 	static void RepositionLight()
 	{

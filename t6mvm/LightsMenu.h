@@ -2,13 +2,17 @@
 #include <StdInclude.h>
 #include "Lights.h"
 #include "UIControls.h"
+#include "LightsListBoxControl.h"
 namespace LightsMenu
 {
 	int LastSelectedLight = -1;
+	inline static Lights::UI_ListBox UI_LightsListBox{};
 	inline static void Init()
 	{
 		UIControls::UI_ExportLightsButton = T6SDK::Drawing::UI_ClickableButton("Export lights", 12, 30, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Lights::ExportLights);
 		UIControls::UI_ImportLightsButton = T6SDK::Drawing::UI_ClickableButton("Import lights", 12, 32, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Lights::ImportLights);
+
+		UI_LightsListBox = Lights::UI_ListBox("LIGHTS", 4, 5, 7, 28, &Lights::LightsList, &Lights::SelectedLight, T6SDK::AnchorPoint::TopLeft, 0x00);
 	}
 	void Reinit()
 	{
@@ -23,6 +27,7 @@ namespace LightsMenu
 		UIControls::UI_RepositionLightButton = T6SDK::Drawing::UI_ClickableButton("Reposition light", 12, 23, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Lights::RepositionLight);
 		UIControls::UI_DeleteLightButton = T6SDK::Drawing::UI_ClickableButton("Remove light", 12, 25, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Lights::RemoveLight);
 		UIControls::UI_DeleteAllLightsButton = T6SDK::Drawing::UI_ClickableButton("Remove all lights", 12, 28, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Lights::RemoveAllLights);
+
 	}
 	inline static void Draw()
 	{
@@ -55,6 +60,7 @@ namespace LightsMenu
 		if (Lights::LightsList.size() > 0)
 		{
 			UIControls::UI_DeleteAllLightsButton.Draw();
+			UI_LightsListBox.Draw();
 		}
 		else
 		{

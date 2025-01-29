@@ -1,5 +1,6 @@
 #pragma once
 #include <StdInclude.h>
+
 namespace UIControls
 {
 
@@ -74,6 +75,8 @@ namespace UIControls
 	//MENU controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton MenuBlurCheckBox{};
 	inline static T6SDK::Drawing::UI_ClickableButton CloseMenuButton{};
+
+
 
 	inline static void Init()
 	{

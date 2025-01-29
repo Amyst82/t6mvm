@@ -141,6 +141,9 @@
     <ClInclude Include="GreenSky.h">
       <Filter>Components\Streams</Filter>
     </ClInclude>
+    <ClInclude Include="LightsListBoxControl.h">
+      <Filter>Components\Theater\Lights</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
