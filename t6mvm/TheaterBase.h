@@ -5,6 +5,7 @@
 #include "Lights.h"
 #include "Misc.h"
 #include "FreeCamera.h"
+#include "DollyCamera.h"
 #include "Weapon.h"
 namespace TheaterBase
 {
@@ -16,8 +17,7 @@ namespace TheaterBase
 		{
 			if (T6SDK::Input::Keys::CTRL.IsAnyPressState())
 			{
-				if(T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount > 0)
-					T6SDK::Theater::Demo_JumpToDollyCamMarkerTime(0);
+				Camera::DollyCamera::GoToFirstMarker();
 			}
 		}
 		if (key == T6SDK::Input::Keys::F5.KeyCode)
@@ -56,6 +56,7 @@ namespace TheaterBase
 		T6SDK::Addresses::Patches::DisableClipRecordingPatch.Patch();
 
 		Camera::FreeCamera::Init();
+		Camera::DollyCamera::Init();
 		Misc::Init();
 		BoneCamera::Init();
 		Lights::Init();

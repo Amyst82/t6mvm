@@ -105,9 +105,11 @@ namespace BoneCamera
 	Matrix44_s storedTransformation{};
 	inline static void Update()
 	{
-		if(!T6SDK::Addresses::DemoPlayback.IsValid())
+		if (!T6SDK::Theater::IsInTheater())
 			return;
-		if(!IsBoneCamera())
+		if (!T6SDK::Addresses::DemoPlayback.IsValid())
+			return;
+		if (!IsBoneCamera())
 			return;
 		if (!BoneAttached)
 			return;
@@ -132,7 +134,7 @@ namespace BoneCamera
 			Matrix44_s boneMatrix{};
 			T6SDK::InternalFunctions::MatrixSet44(&boneMatrix, &pos, &rot, 1.0f);
 			Matrix44_s inversedBoneMatrix{};
-			if(!T6SDK::InternalFunctions::MatrixInverse44(&boneMatrix, &inversedBoneMatrix))
+			if (!T6SDK::InternalFunctions::MatrixInverse44(&boneMatrix, &inversedBoneMatrix))
 			{
 				T6SDK::ConsoleLog::LogError("Bone inversed matrix failed!");
 				return;
@@ -149,10 +151,9 @@ namespace BoneCamera
 			Matrix33_s rotationMatrix = T6SDK::InternalFunctions::GetRotation33FromMatrix44(&resultMatrix);
 			T6SDK::Addresses::cg->RefDef.viewAxis = rotationMatrix;
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin = T6SDK::InternalFunctions::GetOriginFromMatrix44(&resultMatrix);
-
-			T6SDK::InternalFunctions::AxisToAngles(&T6SDK::Addresses::cg->RefDef.viewAxis, &T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles);
+			//
+			//T6SDK::InternalFunctions::AxisToAngles(&T6SDK::Addresses::cg->RefDef.viewAxis, &T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles);
 		}
-		
 	}
 
 	static void DrawBoneCameraControls()
@@ -178,20 +179,32 @@ namespace BoneCamera
 	}
 	static void DetachBone()
 	{
-		BoneAttached = false;
-		IsTransformMatrixSet = false;
-		T6SDK::Addresses::IsDemoPaused.Value() = true;
-		//T6SDK::Addresses::Patches::PreventFreeRoamCameraWriting.UnPatch();
-		T6SDK::InternalFunctions::GrabRefDefViewAxisMatrix(false);
-		T6SDK::Theater::GrabFreeCameraAngles = false;
-		T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.z = 0.0f;
+		try
+		{
+			BoneAttached = false;
+			IsTransformMatrixSet = false;
+			T6SDK::Addresses::IsDemoPaused.Value() = true;
+			T6SDK::InternalFunctions::GrabRefDefViewAxisMatrix(false);
+			T6SDK::Theater::GrabFreeCameraAngles = false;
+			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.z = 0.0f;
+		}
+		catch (const char* e)
+		{
+			T6SDK::ConsoleLog::LogError(e);
+		}
 	}
 	static void AttachBone()
 	{
-		T6SDK::Theater::GrabFreeCameraAngles = true;
-		T6SDK::InternalFunctions::GrabRefDefViewAxisMatrix(true);
-		//T6SDK::Addresses::Patches::PreventFreeRoamCameraWriting.Patch();
-		BoneAttached = true;
+		try
+		{
+			T6SDK::Theater::GrabFreeCameraAngles = true;
+			T6SDK::InternalFunctions::GrabRefDefViewAxisMatrix(true);
+			BoneAttached = true;
+		}
+		catch (const char* e)
+		{
+			T6SDK::ConsoleLog::LogError(e);
+		}
 	}
 	static void SwitchBoneState()
 	{
@@ -238,5 +251,6 @@ namespace BoneCamera
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnMouseRightButtonClicked, (uintptr_t)&IncreaseSelectedBoneNumber);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnMouseLeftButtonClicked, (uintptr_t)&DecreaseSelectedBoneNumber);
 		AttachToBoneButton = T6SDK::Drawing::UI_KeyReactiveText("^7Press ^3F ^7to attach to selected bone", 8, 33, &T6SDK::Input::Keys::F, 0x00, T6SDK::AnchorPoint::BottomCenter, (uintptr_t)&BoneCamera::SwitchBoneState);
+		T6SDK::ConsoleLog::LogFormatted("AttachBone: 0x%X", &AttachBone);
 	}
 }

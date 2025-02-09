@@ -26,6 +26,7 @@ namespace Streams
 {
 #pragma region Streams defs
 	int frameCount = 0;
+	inline static bool IsStreamsStarted = false;
 	inline static bool ScreenshotRequested = false;
 	inline static bool IsAnyOtherStream = false;
 	bool FreeBufferRequested = false;
@@ -289,13 +290,15 @@ namespace Streams
 		IsStreamsRunning = false;
 		frameCount = 0;
 		T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden = false;
+		IsStreamsStarted = false;
 	}
 
 	int StreamsPassesEnabled = 0;
-	void Update()
+	inline static void Update()
 	{
-		//T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Updating streams");
 		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
+			return;
+		if (!IsStreamsStarted)
 			return;
 		if (T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) > -1 && T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) > -1)
 		{
@@ -309,7 +312,7 @@ namespace Streams
 		IsAnyOtherStream = false;
 		T6SDK::InternalFunctions::SCR_UpdateScreen(2);
 		StreamsPassesEnabled = 0;
-		if(T6SDK::Theater::IsInTheater)
+		if(T6SDK::Theater::IsInTheater())
 		{
 			for (auto& stream : Streams)
 			{
@@ -330,11 +333,14 @@ namespace Streams
 		frameCount++;
 		//T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Successfully captured %i", frameCount);
 	}
+
 	uintptr_t eaxTMP, ecxTMP, edxTMP, esiTMP, ediTMP, espTMP, ebpTMP;
-	int tickStep = 1;
+	int tickStep = 0;
 	__declspec(naked) void OnTickIncreasing()
 	{
 		tickStep = 1000 / T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_fps);
+		if(T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
+			tickStep = 0;
 		__asm
 		{
 			mov[eaxTMP], eax
@@ -344,9 +350,9 @@ namespace Streams
 			mov[ediTMP], edi
 			mov[espTMP], esp
 			mov[ebpTMP], ebp
-			
+
 			call Update
-			
+
 			mov eax, tickStep
 			mov edx, [edxTMP]
 			mov ecx, [ecxTMP]
@@ -354,7 +360,7 @@ namespace Streams
 			mov edi, [ediTMP]
 			mov esp, [espTMP]
 			mov ebp, [ebpTMP]
-			call [LocalAddresses::InternalTickIncreaseFunc]
+			call[LocalAddresses::InternalTickIncreaseFunc]
 			jmp[LocalAddresses::h_TickIncreasing.JumpBackAddress]
 		}
 	}
@@ -426,8 +432,6 @@ namespace Streams
 
 	} 
 
-	
-	
 	inline static void StartStreams()
 	{
 		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
@@ -468,8 +472,8 @@ namespace Streams
 			}
 		}
 		LocalAddresses::h_TickIncreasing.Hook(OnTickIncreasing);
-
 		T6SDK::Addresses::IsDemoPaused.Value() = false;
+		IsStreamsStarted = true;
 	}
 	inline static void StreamsSwitchState() 
 	{

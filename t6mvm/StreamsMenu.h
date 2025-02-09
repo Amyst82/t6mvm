@@ -12,12 +12,12 @@ namespace StreamsMenu
 		int startTick = T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart);
 		if (startTick == -1)
 		{
-			if (T6SDK::Addresses::Tick.Value() > T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) && T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) != -1)
+			if (T6SDK::Addresses::cg->Tick > T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) && T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) != -1)
 			{
 				T6SDK::Theater::Demo_Error("Unable to set start tick.", "We can't record backwards yet.");
 				return;
 			}
-			T6SDK::Dvars::SetInt(CustomDvars::dvar_streams_tickStart, T6SDK::Addresses::Tick.Value());
+			T6SDK::Dvars::SetInt(CustomDvars::dvar_streams_tickStart, T6SDK::Addresses::cg->Tick);
 			int tick = T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart);
 			char buffer[256];
 			sprintf(buffer, "Start: ^3%i ^7(%02i:%02i)", tick, tick / 60000, tick % 60000 / 1000);
@@ -34,12 +34,12 @@ namespace StreamsMenu
 		int endTick = T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd);
 		if (endTick == -1)
 		{
-			if (T6SDK::Addresses::Tick.Value() < T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) && T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) != -1)
+			if (T6SDK::Addresses::cg->Tick < T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) && T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) != -1)
 			{
 				T6SDK::Theater::Demo_Error("Unable to set end tick.", "We can't record backwards yet.");
 				return;
 			}
-			T6SDK::Dvars::SetInt(CustomDvars::dvar_streams_tickEnd, T6SDK::Addresses::Tick.Value());
+			T6SDK::Dvars::SetInt(CustomDvars::dvar_streams_tickEnd, T6SDK::Addresses::cg->Tick);
 			int tick = T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd);
 			char buffer[256];
 			sprintf(buffer, "End: ^3%i ^7(%02i:%02i)", tick, tick / 60000, tick % 60000 / 1000);

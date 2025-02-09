@@ -1,6 +1,5 @@
 #pragma once
 #include <StdInclude.h>
-
 namespace CustomDvars
 {
 	//CAMERA DVARS
@@ -57,12 +56,17 @@ namespace CustomDvars
 	static dvar_s* dvar_camoChanging;
 	static dvar_s* dvar_primaryCamo;
 	static dvar_s* dvar_secondaryCamo;
+	static dvar_s* dvar_cameraSway;
+	static dvar_s* dvar_cameraSwayMaxAngle;
 
 	//MENU DVARS
 	static dvar_s* dvar_menuBlur;
 	static dvar_s* dvar_showBone;
 
-
+	void CheckDvars()
+	{
+		
+	}
 	inline static void Init()
 	{
 		dvar_shake = T6SDK::Dvars::RegisterBool("mvm_shake", false, "Dolly camera shake.");
@@ -119,12 +123,14 @@ namespace CustomDvars
 		dvar_camoChanging = T6SDK::Dvars::RegisterBool("mvm_camoChanging", false, "Enable weapon camo changing.");
 		dvar_primaryCamo = T6SDK::Dvars::RegisterInt("mvm_primaryCamo", -1, -1, 44, "Primary weapon camo index.");
 		dvar_secondaryCamo = T6SDK::Dvars::RegisterInt("mvm_secondaryCamo", -1, -1, 44, "Secondary weapon camo index.");
+		dvar_cameraSway = T6SDK::Dvars::RegisterBool("mvm_cameraSway", false, "Enable camera sway.");
+		dvar_cameraSwayMaxAngle = T6SDK::Dvars::RegisterFloat("mvm_cameraSwayMaxAngle", 20.0f, 0.0f, 90.0f, "Camera sway max angle.");
 
 		//Register menu dvars
 		dvar_menuBlur = T6SDK::Dvars::RegisterBool("mvm_menuBlur", true, "Menu blur.");
 		dvar_showBone = T6SDK::Dvars::RegisterBool("mvm_showBone", true, "Show selected bone.");
 
-
+		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&CheckDvars);
 		T6SDK::ConsoleLog::LogSuccess("Custom dvars and commands initialized!");
 	}
 }

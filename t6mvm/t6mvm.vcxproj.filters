@@ -52,6 +52,9 @@
     <Filter Include="Components\Theater\StreamsMenu">
       <UniqueIdentifier>{0967ea7d-a248-485f-a929-cfa8581162f3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Components\Theater\Sun">
+      <UniqueIdentifier>{0bed2ee2-1911-4cbf-a1b2-73f3330763d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -144,6 +147,15 @@
     <ClInclude Include="LightsListBoxControl.h">
       <Filter>Components\Theater\Lights</Filter>
     </ClInclude>
+    <ClInclude Include="SunMenu.h">
+      <Filter>Components\Theater\Sun</Filter>
+    </ClInclude>
+    <ClInclude Include="DollyCamera.h">
+      <Filter>Components\Theater\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Shake.h">
+      <Filter>Components\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -157,6 +169,9 @@
     </ClCompile>
     <ClCompile Include="AviFile.cpp">
       <Filter>Components\Streams\CAviFile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shake.cpp">
+      <Filter>Components\Common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

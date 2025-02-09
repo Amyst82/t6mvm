@@ -77,6 +77,8 @@ namespace Lights
 
 	static void Update()
 	{
+		if(!T6SDK::Theater::IsInTheater())
+			return;
 		if(!T6SDK::Drawing::CheckResources())
 			return;
 		//Draw lights here

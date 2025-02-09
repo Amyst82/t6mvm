@@ -6,6 +6,7 @@
 #include "MiscMenu.h"
 #include "WeaponMenu.h"
 #include "StreamsMenu.h"
+#include "SunMenu.h"
 namespace UIBase
 {
 	static void CloseMenu()
@@ -65,6 +66,7 @@ namespace UIBase
 
 			UIControls::DrawTabs();
 			BoneCameraMenu::Draw();
+			SunMenu::Draw();
 			MiscMenu::Draw();
 			LightsMenu::Draw();
 			StreamsMenu::Draw();
@@ -86,6 +88,7 @@ namespace UIBase
 		UIControls::Init();
 		MiscMenu::Init();
 		BoneCameraMenu::Init();
+		SunMenu::Init();
 		LightsMenu::Init();
 		StreamsMenu::Init();
 		WeaponMenu::Init();

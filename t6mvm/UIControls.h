@@ -24,6 +24,18 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_EnumButton UI_SelectedBoneButton{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_AttachToBoneButton{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_ShowBonesButton{};
+
+	//SUN controls
+	inline static T6SDK::Drawing::UI_Slider UI_SunColorR{};
+	inline static T6SDK::Drawing::UI_Slider UI_SunColorG{};
+	inline static T6SDK::Drawing::UI_Slider UI_SunColorB{};
+	inline static T6SDK::Drawing::UI_Slider UI_SkyTemp{};
+	inline static T6SDK::Drawing::UI_Slider UI_SkyBrightness{};
+	inline static T6SDK::Drawing::UI_Slider UI_SkyRotation{};
+	inline static T6SDK::Drawing::UI_Slider UI_SunX{};
+	inline static T6SDK::Drawing::UI_Slider UI_SunY{};
+	inline static T6SDK::Drawing::UI_Slider UI_SunZ{};
+
 	/// LIGHTS controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_LightType{};
 	inline static T6SDK::Drawing::UI_Slider UI_LightColorR{};
