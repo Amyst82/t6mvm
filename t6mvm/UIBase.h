@@ -9,6 +9,24 @@
 #include "SunMenu.h"
 namespace UIBase
 {
+	static void CopyCFGtoClipboard()
+	{
+		bool result = false;
+		if (*UIControls::MainCameraTabButton.isChecked)
+			return;
+		else if (*UIControls::MiscTabButton.isChecked)
+			result = T6SDK::InternalFunctions::SetClipboardText(MiscMenu::GetCFG());
+		else if (*UIControls::SunSkyTabButton.isChecked)
+			result = T6SDK::InternalFunctions::SetClipboardText(SunMenu::GetCFG());
+		else if (*UIControls::StreamsTabButton.isChecked)
+			result = T6SDK::InternalFunctions::SetClipboardText(StreamsMenu::GetCFG());
+		else if (*UIControls::WeaponTabButton.isChecked)
+			result = T6SDK::InternalFunctions::SetClipboardText(WeaponMenu::GetCFG());
+		if(!result)
+			T6SDK::ConsoleLog::LogError("Failed to copy to clipboard.");
+		else 
+			T6SDK::ConsoleLog::LogSuccess("Copied to clipboard.");
+	}
 	static void CloseMenu()
 	{
 		(*T6SDK::Dvars::DvarList::r_blur)->current.value = 0.0f;
@@ -73,6 +91,7 @@ namespace UIBase
 			WeaponMenu::Draw();
 			UIControls::MenuBlurCheckBox.Draw();
 			UIControls::CloseMenuButton.Draw();
+			UIControls::AddToCFGButton.Draw(*UIControls::MainCameraTabButton.isChecked || *UIControls::MiscTabButton.isChecked || *UIControls::SunSkyTabButton.isChecked || *UIControls::StreamsTabButton.isChecked || *UIControls::WeaponTabButton.isChecked);
 		}
 		if (!Streams::ScreenshotRequested && !Streams::IsAnyOtherStream && Streams::IsStreamsRunning)
 		{
@@ -94,5 +113,8 @@ namespace UIBase
 		WeaponMenu::Init();
 		UIControls::CloseMenuButton = T6SDK::Drawing::UI_ClickableButton("^3TAB ^7Back", 2, 35, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&UIBase::CloseMenu);
 		UIControls::CloseMenuButton.ToolTip = "Press ^3TAB ^7or ^3ESC ^7 or just click here to close the menu.";
+
+		UIControls::AddToCFGButton = T6SDK::Drawing::UI_ClickableButton("Copy CFG to clipboard", 8, 35, T6SDK::AnchorPoint::TopCenter, (uintptr_t)&UIBase::CopyCFGtoClipboard);
+		UIControls::AddToCFGButton.ToolTip = "^7Copy the current settings to clipboard as ^5CFG ^7commands.";
 	}
 }

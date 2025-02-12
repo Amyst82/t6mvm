@@ -164,7 +164,7 @@ namespace Camera
 				if (T6SDK::Addresses::IsDemoPaused.Value() == 0)
 				{
 					float _timescale = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::timescale) * T6SDK::Addresses::Demo_timescale.Value();
-					t += (int)(_timescale * 100.0f);
+					t = T6SDK::Addresses::Tick.Value();
 				}
 			}
 			else
@@ -184,6 +184,7 @@ namespace Camera
 				{
 					T6SDK::Addresses::IsDemoPaused.SetValueSafe(1);
 					t = 0;
+					Streams::StopStreams();
 					return;
 				}
 				t = T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[MarkersCount - 1].Tick;
@@ -213,31 +214,18 @@ namespace Camera
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.y = angles.y + (shakeEnabled == true ? ShakedPitch : 0.0f) + camRotOffset.y;
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.z = InterpoldatedValues[increment].roll + (shakeEnabled == true ? ShakedRoll : 0.0f) + camRotOffset.z;
 
-			//T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::cg_fov, InterpoldatedValues[increment].fov);
-			//T6SDK::Addresses::DemoPlayback.Value()->fov = InterpoldatedValues[increment].fov;
+			T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::cg_fov, InterpoldatedValues[increment].fov);
+			T6SDK::Addresses::DemoPlayback.Value()->fov = InterpoldatedValues[increment].fov;
 		}
 
 		static void OnMarkerAdded(CameraMarker_s* marker)
 		{
-			//if (!T6SDK::Theater::IsInTheater())
-			//	return;
-			//T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount - 1].Fov = (*T6SDK::Dvars::DvarList::cg_fov)->current.value;
-			//T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount - 1].Roll = T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.z;
 			if (T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
 			{
-				int lastTick = T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount - 1].Tick;
-				marker->Tick = lastTick+10000;
-			}
-			//CreateCamera();
-
-		}
-		static void OnFreeCameraModeChanged(int mode)
-		{
-			if ((T6SDK::DemoFreeCameraMode)mode == T6SDK::DemoFreeCameraMode::DOLLY)
-			{
-				CreateCamera();
+				T6SDK::Addresses::cg->FakeTick += 500;
 			}
 		}
+	
 		void PreventChangingRotation(bool state)
 		{
 			if (state == true)
@@ -262,13 +250,26 @@ namespace Camera
 				T6SDK::Memory::MemoryCopySafe((LPVOID)(T6SDK::Addresses::Patches::PreventDollyCamPositonWriting.EndPointerAddress()), btArray, 33);
 			}
 		}
+
+		static void OnFreeCameraModeChanged(int mode)
+		{
+			if ((T6SDK::DemoFreeCameraMode)mode == T6SDK::DemoFreeCameraMode::DOLLY)
+			{
+				PreventChangingRotation(true);
+				PreventChangingPosition(true);
+				CreateCamera();
+			}
+			else
+			{
+				PreventChangingRotation(false);
+				PreventChangingPosition(false);
+			}
+		}
 		void HandleOnTickChanged()
 		{
 			CheckDollyCamDvars();
 			if (T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == T6SDK::DemoFreeCameraMode::DOLLY) //If camera mode is DollyCam
 			{
-				PreventChangingRotation(true);
-				PreventChangingPosition(true);
 				Update();
 			}
 			else if (T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == T6SDK::DemoFreeCameraMode::FREEROAM || T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == T6SDK::DemoFreeCameraMode::EDIT)
@@ -278,20 +279,15 @@ namespace Camera
 					T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount].Fov = (*T6SDK::Dvars::DvarList::cg_fov)->current.value;
 					T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount].Roll = T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.z;
 				}
-				PreventChangingRotation(false);
-				PreventChangingPosition(false);
-			}
-			else
-			{
-				PreventChangingRotation(false);
-				PreventChangingPosition(false);
 			}
 		}
 		bool frozenCam = false;
+		bool notPovMode = false;
 		uintptr_t eaxTMP, ecxTMP, edxTMP, esiTMP, ediTMP, espTMP, ebpTMP;
 		__declspec(naked) void OnTickChanged()
 		{
 			frozenCam = T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam);
+			notPovMode = T6SDK::Addresses::DemoPlayback.Value()->CameraMode != T6SDK::DemoCameraMode::NONE;
 			__asm
 			{
 				mov[eaxTMP], eax
@@ -307,6 +303,10 @@ namespace Camera
 				cmp al, 1
 				je L7
 				mov[esi + 0x4808C], ebp
+				mov al, notPovMode
+				cmp al, 0
+				je L7
+				mov[esi + 0x4809C], ebp
 				L7 :
 				mov[esi + 0x480A4], ebp
 				call HandleOnTickChanged
@@ -330,7 +330,8 @@ namespace Camera
 			else
 			{
 				if (T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount > 0)
-					T6SDK::Theater::Demo_JumpToTick(T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick);
+					T6SDK::Theater::Demo_JumpToDollyCamMarkerTime(0);
+					//T6SDK::Theater::Demo_JumpToTick(T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick);
 			}
 		}
 		static void Init()

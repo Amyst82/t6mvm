@@ -291,6 +291,8 @@ namespace Streams
 		frameCount = 0;
 		T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden = false;
 		IsStreamsStarted = false;
+		if(T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
+			T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::timescale, 1.0f);
 	}
 
 	int StreamsPassesEnabled = 0;
@@ -339,8 +341,6 @@ namespace Streams
 	__declspec(naked) void OnTickIncreasing()
 	{
 		tickStep = 1000 / T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_fps);
-		if(T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
-			tickStep = 0;
 		__asm
 		{
 			mov[eaxTMP], eax

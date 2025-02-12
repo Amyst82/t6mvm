@@ -3,6 +3,54 @@
 #include "CustomDvars.h"
 namespace SunMenu
 {
+	float RadianToDegree(float angle)
+	{
+		return angle * 180.0 / 3.141592653589793f;
+	}
+	vec3_t SunPositionToAngles(vec3_t position)
+	{
+		// Normalize the position vector to ensure it has a length of 1
+		double length = sqrt(position.x * position.x + position.y * position.y + position.z * position.z);
+		double x = position.x / length;
+		double y = position.y / length;
+		double z = position.z / length;
+
+		// Calculate pitch (elevation angle)
+		double pitch = asin(z); // z = sin(pitch)
+		double pitchDegrees = RadianToDegree(pitch);
+
+		// Calculate yaw (azimuth angle)
+		double yaw = atan2(y, x); // y = sin(yaw) * cos(pitch), x = cos(yaw) * cos(pitch)
+		double yawDegrees = RadianToDegree(yaw);
+
+		// Ensure yaw is in the range [0, 360)
+		if (yawDegrees < 0)
+		{
+			yawDegrees += 360.0;
+		}
+		if(position.x == 0.0f && position.y == 0.0f && position.z == 0.0f)
+			return vec3_t{ 0.0f, 0.0f, 0.0f };
+		// Return the angles as a Vector3 (pitch in X, yaw in Y, and 0 in Z)
+		return vec3_t
+		{
+			abs((float)pitchDegrees),
+			(float)yawDegrees,
+			0.0f // Z is unused in this context
+		};
+	}
+
+	static string GetCFG()
+	{
+		vec3_t pos = SunPositionToAngles(T6SDK::Addresses::SunPosition.Value());
+		vec3_t col = T6SDK::Addresses::SunColor.Value();
+		std::string cfg =
+			std::string("r_lightTweakSunDirection ") + std::to_string(pos.x) + " " + std::to_string(pos.y) + " " + std::to_string(pos.z) + ";\n" +
+			std::string("r_lightTweakSunColor ") + std::to_string(col.x) + " " + std::to_string(col.y) + " " + std::to_string(col.z) + ";\n" +
+			std::string("r_skyColorTemp ") + std::to_string((*T6SDK::Dvars::DvarList::r_skyColorTemp)->current.value) + ";\n" +
+			std::string("r_sky_intensity_factor0 ") + std::to_string((*T6SDK::Dvars::DvarList::r_sky_intensity_factor0)->current.value) + ";\n" + 
+			std::string("r_skyRotation ") + std::to_string((*T6SDK::Dvars::DvarList::r_skyRotation)->current.value) + ";\n";
+		return cfg;
+	}
 	bool Inited = false;
 	static void Init()
 	{
