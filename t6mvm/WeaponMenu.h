@@ -96,6 +96,11 @@ namespace WeaponMenu
 		sprintf_s(buffer2, "Secondary camo: ^3%s", CamoTags[CustomDvars::dvar_secondaryCamo->current.integer + 1]);
 		UIControls::UI_SecondaryCamo.Text = buffer2;
 		UIControls::UI_SecondaryCamo.Draw(CustomDvars::dvar_camoChanging->current.enabled);
+
+		vec2_t coords3 = T6SDK::Drawing::GetGridCellCoords(8, 21);
+		T6SDK::Drawing::DrawTextAbsolute("^9MISC", coords3.x, coords3.y, 1.0f, T6SDK::Drawing::T_WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+		UIControls::UI_CameraSway.Draw();
+		UIControls::UI_CameraSwayMaxAngle.Draw();
 	}
 
 	static void Init()
@@ -118,10 +123,16 @@ namespace WeaponMenu
 		UIControls::UI_GunRoll = T6SDK::Drawing::UI_Slider("Viewmodel roll", &(*T6SDK::Dvars::DvarList::cg_gun_rot_r)->current.value, 0.0f, -90.0f, 90.0f, 10, 9, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_GunRoll.ToolTip = "Weapon viemodel roll rotation offset.";
 
-		UIControls::UI_CamoChanging = T6SDK::Drawing::UI_CheckBoxButton("Enable camo changing", "Disable camo changing", 4, 15, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_camoChanging->current.enabled, 0x00);
+		UIControls::UI_CamoChanging = T6SDK::Drawing::UI_CheckBoxButton("CAMO CHANGING OFF", "CAMO CHANGING ON", 4, 15, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_camoChanging->current.enabled, 0x00);
 
 		UIControls::UI_PrimaryCamo = T6SDK::Drawing::UI_EnumButton("Primary camo", -1, 44, &CustomDvars::dvar_primaryCamo->current.integer, 4, 17, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 		UIControls::UI_SecondaryCamo = T6SDK::Drawing::UI_EnumButton("Secondary camo", -1, 44, &CustomDvars::dvar_secondaryCamo->current.integer, 10, 17, T6SDK::AnchorPoint::TopLeft, 0x00);
+
+		UIControls::UI_CameraSway = T6SDK::Drawing::UI_CheckBoxButton("POV CAMERA SWAY OFF", "POV CAMERA SWAY ON", 4, 22, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_cameraSway->current.enabled, 0x00);
+		UIControls::UI_CameraSway.ToolTip = "POV camera sway (lowkey bodycam mode).";
+
+		UIControls::UI_CameraSwayMaxAngle = T6SDK::Drawing::UI_Slider("Camera sway max angle", &CustomDvars::dvar_cameraSwayMaxAngle->current.value, 20.0f, 00.0f, 50.0f, 4, 24, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_CameraSwayMaxAngle.ToolTip = "POV camera sway max angle.";
 	}
 }

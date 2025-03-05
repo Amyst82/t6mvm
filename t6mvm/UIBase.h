@@ -1,6 +1,7 @@
 #pragma once
 #include <StdInclude.h>
 #include "UIControls.h"
+#include "CameraMenu.h"
 #include "BoneCameraMenu.h"
 #include "LightsMenu.h"
 #include "MiscMenu.h"
@@ -13,7 +14,7 @@ namespace UIBase
 	{
 		bool result = false;
 		if (*UIControls::MainCameraTabButton.isChecked)
-			return;
+			result = T6SDK::InternalFunctions::SetClipboardText(CameraMenu::GetCFG());
 		else if (*UIControls::MiscTabButton.isChecked)
 			result = T6SDK::InternalFunctions::SetClipboardText(MiscMenu::GetCFG());
 		else if (*UIControls::SunSkyTabButton.isChecked)
@@ -83,6 +84,7 @@ namespace UIBase
 			T6SDK::Drawing::DrawRectRelative(0.0f, 0.0f, 1.0f, 1.0f, CustomDvars::dvar_menuBlur->current.enabled ? T6SDK::Drawing::T_BLACKCOLOR : tColor{ 0.0f, 0.0f, 0.0f, 0.0f }, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 			UIControls::DrawTabs();
+			CameraMenu::Draw();
 			BoneCameraMenu::Draw();
 			SunMenu::Draw();
 			MiscMenu::Draw();
@@ -105,6 +107,7 @@ namespace UIBase
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnKeyPressed, (uintptr_t)&OnKeyPressed);
 		//Init buttons and sliders here
 		UIControls::Init();
+		CameraMenu::Init();
 		MiscMenu::Init();
 		BoneCameraMenu::Init();
 		SunMenu::Init();

@@ -12,7 +12,7 @@
 #include "FxOnly.h"
 #include "DepthWithGun.h"
 #include "GreenSky.h"
-
+#include <filesystem>
 #include "LocalAddresses.h"
 #include "ScreenGrab.h"
 #include <cassert>
@@ -32,7 +32,8 @@ namespace Streams
 	bool FreeBufferRequested = false;
 	string filename = "";
 	inline static bool IsStreamsRunning = false;
-	const char* newStreamFolder = "";
+	static const char* newStreamFolder = "";
+	static string folderToDeleteWhenAborted = "";
 
 	inline static vector<IMVMStream*> Streams{};
 	inline static Stream_Default Default;
@@ -43,6 +44,10 @@ namespace Streams
 	inline static Stream_DepthWithGun DepthWithGun;
 	inline static Stream_FxOnly FxOnly;
 	inline static Stream_GreenSky GreenSky;
+
+	cmd_function_s cmd_streams_start_VAR{};
+	cmd_function_s cmd_streams_stop_VAR{};
+	cmd_function_s cmd_streams_abort_VAR{};
 
 #pragma endregion
 #pragma region DX11 defs
@@ -134,7 +139,7 @@ namespace Streams
 			T6SDK::Drawing::DrawTextAbsolute(formatBuffer1, coords2.x, coords2.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 
 			vec2_t coords3 = T6SDK::Drawing::GetGridCellCoords(8, 22);
-			T6SDK::Drawing::DrawTextAbsolute("Press ^3F5 ^7to stop. Press ^1ESC ^7to abort recording and remove recorded files.", coords3.x, coords3.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+			T6SDK::Drawing::DrawTextAbsolute("Press ^3F5 ^7to stop. Press ^1F6 ^7to abort recording and remove recorded files.", coords3.x, coords3.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 		}
 		else
 		{
@@ -144,7 +149,7 @@ namespace Streams
 			T6SDK::Drawing::DrawTextAbsolute(buffer1, coords.x, coords.y, 1.5f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 
 			vec2_t coords2 = T6SDK::Drawing::GetGridCellCoords(8, 21);
-			T6SDK::Drawing::DrawTextAbsolute("Press ^3F5 ^7to stop. Press ^1ESC ^7to abort recording and remove recorded files.", coords2.x, coords2.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+			T6SDK::Drawing::DrawTextAbsolute("Press ^3F5 ^7to stop. Press ^1F6 ^7to abort recording and remove recorded files.", coords2.x, coords2.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 		}
 	}
 
@@ -266,6 +271,32 @@ namespace Streams
 #pragma endregion
 
 #pragma region Streams methods
+
+	ofstream ExportCameraFile{};
+	void RecordCamera()
+	{
+		if (ExportCameraFile.is_open())
+		{
+			char exportStringline[256];
+			bool isPov = T6SDK::Addresses::DemoPlayback.Value()->CameraMode == T6SDK::DemoCameraMode::NONE;
+			if (isPov)
+			{
+				//FOV;X;Y;Z;PITCH;YAW;ROLL
+				sprintf(exportStringline, "%f,%f,%f,%f,%f,%f,%f", T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::cg_fov),
+					T6SDK::Addresses::cg->RefDef.vOrigin.x, T6SDK::Addresses::cg->RefDef.vOrigin.y, T6SDK::Addresses::cg->RefDef.vOrigin.z,
+					T6SDK::Addresses::cg->RefDefViewAngles.x, T6SDK::Addresses::cg->RefDefViewAngles.y, T6SDK::Addresses::cg->RefDefViewAngles.z);
+			}
+			else
+			{
+				//FOV;X;Y;Z;PITCH;YAW;ROLL
+				sprintf(exportStringline, "%f,%f,%f,%f,%f,%f,%f", T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::cg_fov),
+					T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin.x, T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin.y, T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin.z,
+					T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.x, T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.y, T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.z);
+			}
+			ExportCameraFile << exportStringline << endl;
+		}
+	}
+
 	void CaptureScreenshot(IMVMStream* currentStream)
 	{
 		char formatBuffer[32];
@@ -293,6 +324,11 @@ namespace Streams
 		IsStreamsStarted = false;
 		if(T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
 			T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::timescale, 1.0f);
+
+		if (ExportCameraFile.is_open())
+		{
+			ExportCameraFile.close();
+		}
 	}
 
 	int StreamsPassesEnabled = 0;
@@ -333,6 +369,10 @@ namespace Streams
 			CaptureScreenshot(&Default);
 
 		frameCount++;
+		if (T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_recordCam))
+		{
+			RecordCamera();
+		}
 		//T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Successfully captured %i", frameCount);
 	}
 
@@ -363,6 +403,97 @@ namespace Streams
 			call[LocalAddresses::InternalTickIncreaseFunc]
 			jmp[LocalAddresses::h_TickIncreasing.JumpBackAddress]
 		}
+	}
+
+	inline static void StartStreams()
+	{
+		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
+			return;
+		//Creating a new directory for streams
+		if (std::string(T6SDK::Dvars::GetString(CustomDvars::dvar_streams_directory)).empty())
+		{
+			T6SDK::Theater::Demo_Error("Streams directory is not set!", "Use ^5mvm_streams_directory ^7dvar or use ^5TAB ^7menu to set a directory for streams.");
+			return;
+		}
+		char streamsDirectory[256];
+		sprintf(streamsDirectory, "%s\\Streams_%s", T6SDK::Dvars::GetString(CustomDvars::dvar_streams_directory), T6SDK::InternalFunctions::getCurrentDateTimeString().c_str());
+		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Creating directory for streams at: %s", streamsDirectory);
+		if (!T6SDK::InternalFunctions::CreateNewDirectory(streamsDirectory))
+		{
+			T6SDK::Theater::Demo_Error("Error occured!", "Failed to create directory for streams!");
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to create directory for streams!");
+			StopStreams();
+			return;
+		}
+		newStreamFolder = streamsDirectory;
+		folderToDeleteWhenAborted = string(streamsDirectory);
+		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "newStreamFolder: %s", newStreamFolder);
+		if(T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) > -1)
+			T6SDK::Theater::Demo_JumpToTick(T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart));
+		T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden = true;
+		CustomDvars::dvar_greenScreen->current.enabled = false;
+		for (auto& stream : Streams)
+		{
+			stream->Disable();
+			if (stream->toggle->current.enabled)
+			{
+				char buffer[256];
+				sprintf(buffer, "%s\\%s", newStreamFolder, stream->Name);
+				T6SDK::InternalFunctions::CreateNewDirectory(buffer);
+				//strcpy(stream->Dir, buffer);
+				stream->Dir = buffer;
+				T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "New stream directory for %s", stream->Dir.c_str());
+			}
+		}
+
+		if (T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_recordCam))
+		{
+			bool isPov = T6SDK::Addresses::DemoPlayback.Value()->CameraMode == T6SDK::DemoCameraMode::NONE;
+			char CameraFileBuffer[256];
+			sprintf(CameraFileBuffer, "%s\\%s_CameraData.t6cr", newStreamFolder, isPov ? "Pov" : "Cine");
+			string str(CameraFileBuffer);
+			ExportCameraFile.open(str, ios_base::out);
+		}
+
+		LocalAddresses::h_TickIncreasing.Hook(OnTickIncreasing);
+		T6SDK::Addresses::IsDemoPaused.Value() = false;
+		IsStreamsStarted = true;
+	}
+
+	inline static void AbortStreams()
+	{
+		StopStreams();
+		T6SDK::ConsoleLog::Log("Attempting to delete the streams folder...");
+		T6SDK::ConsoleLog::Log(folderToDeleteWhenAborted.c_str());
+		try 
+		{
+			// Check if the folder exists
+			if (std::filesystem::exists(folderToDeleteWhenAborted.c_str()))
+			{
+				// Delete the folder and its contents
+				std::filesystem::remove_all(folderToDeleteWhenAborted.c_str());
+				T6SDK::ConsoleLog::LogSuccess("Folder deleted successfully");
+			}
+			else 
+			{
+				T6SDK::ConsoleLog::LogError("Folder does not exist");
+			}
+		}
+		catch (const std::filesystem::filesystem_error& e)
+		{
+			// Handle filesystem errors
+			T6SDK::ConsoleLog::LogError("Error deleting folder:");
+		}
+	}
+
+	inline static void StreamsSwitchState() 
+	{
+		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
+			return;
+		if (IsStreamsRunning)
+			StopStreams();
+		else
+			StartStreams();
 	}
 
 	inline static void InitStreams()
@@ -409,14 +540,14 @@ namespace Streams
 
 
 		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Total streams registered: %i", Streams.size());
-		
+
 		T6SDK::ConsoleLog::Log("Initializing DX11...");
-		if(initDX11() == false)
+		if (initDX11() == false)
 		{
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED,"Failed to initialize DX11!");
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to initialize DX11!");
 			return;
 		}
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN,"DX11 initialized.");
+		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "DX11 initialized.");
 
 		//Init UI for passes
 		T6SDK::ConsoleLog::Log("Initializing streams passes UI...");
@@ -428,61 +559,12 @@ namespace Streams
 		UIControls::UI_StreamsPass6CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEPTH WITH GUN", "DEPTH WITH GUN", 12, 16, T6SDK::AnchorPoint::TopLeft, &Streams::DepthWithGun.toggle->current.enabled, 0x00);
 		UIControls::UI_StreamsPass7CheckBox = T6SDK::Drawing::UI_CheckBoxButton("FX ONLY", "FX ONLY", 12, 18, T6SDK::AnchorPoint::TopLeft, &Streams::FxOnly.toggle->current.enabled, 0x00);
 		UIControls::UI_StreamsPass8CheckBox = T6SDK::Drawing::UI_CheckBoxButton("GREEN SKY", "GREEN SKY", 12, 20, T6SDK::AnchorPoint::TopLeft, &Streams::GreenSky.toggle->current.enabled, 0x00);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN,"Streams passes UI initialized.");
+		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Streams passes UI initialized.");
 
-	} 
 
-	inline static void StartStreams()
-	{
-		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
-			return;
-		//Creating a new directory for streams
-		if (std::string(T6SDK::Dvars::GetString(CustomDvars::dvar_streams_directory)).empty())
-		{
-			T6SDK::Theater::Demo_Error("Streams directory is not set!", "Use ^5mvm_streams_directory ^7dvar or use ^5TAB ^7menu to set a directory for streams.");
-			return;
-		}
-		char streamsDirectory[256];
-		sprintf(streamsDirectory, "%s\\Streams_%s", T6SDK::Dvars::GetString(CustomDvars::dvar_streams_directory), T6SDK::InternalFunctions::getCurrentDateTimeString().c_str());
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Creating directory for streams at: %s", streamsDirectory);
-		if (!T6SDK::InternalFunctions::CreateNewDirectory(streamsDirectory))
-		{
-			T6SDK::Theater::Demo_Error("Error occured!", "Failed to create directory for streams!");
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to create directory for streams!");
-			StopStreams();
-			return;
-		}
-		newStreamFolder = streamsDirectory;
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "newStreamFolder: %s", newStreamFolder);
-		if(T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) > -1)
-			T6SDK::Theater::Demo_JumpToTick(T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart));
-		T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden = true;
-		CustomDvars::dvar_greenScreen->current.enabled = false;
-		for (auto& stream : Streams)
-		{
-			stream->Disable();
-			if (stream->toggle->current.enabled)
-			{
-				char buffer[256];
-				sprintf(buffer, "%s\\%s", newStreamFolder, stream->Name);
-				T6SDK::InternalFunctions::CreateNewDirectory(buffer);
-				//strcpy(stream->Dir, buffer);
-				stream->Dir = buffer;
-				T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "New stream directory for %s", stream->Dir.c_str());
-			}
-		}
-		LocalAddresses::h_TickIncreasing.Hook(OnTickIncreasing);
-		T6SDK::Addresses::IsDemoPaused.Value() = false;
-		IsStreamsStarted = true;
-	}
-	inline static void StreamsSwitchState() 
-	{
-		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
-			return;
-		if (IsStreamsRunning)
-			StopStreams();
-		else
-			StartStreams();
+		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_start", StartStreams, &cmd_streams_start_VAR);
+		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_stop", StopStreams, &cmd_streams_stop_VAR);
+		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_abort", AbortStreams, &cmd_streams_abort_VAR);
 	}
 #pragma endregion
 }

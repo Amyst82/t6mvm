@@ -14,6 +14,25 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_RadioButton WeaponTabButton("^7WEAPON", 0, 2, 17, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 	//CAMERA controls
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_FrozenCamera{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_ShowDollyCamInfo{};
+	inline static T6SDK::Drawing::UI_Slider UI_DollyCamOffsetX{};
+	inline static T6SDK::Drawing::UI_Slider UI_DollyCamOffsetY{};
+	inline static T6SDK::Drawing::UI_Slider UI_DollyCamOffsetZ{};
+	inline static T6SDK::Drawing::UI_Slider UI_DollyCamRotationOffsetX{};
+	inline static T6SDK::Drawing::UI_Slider UI_DollyCamRotationOffsetY{};
+	inline static T6SDK::Drawing::UI_Slider UI_DollyCamRotationOffsetZ{};
+	inline static T6SDK::Drawing::UI_Slider UI_FreeRoamSpeed{};
+	inline static T6SDK::Drawing::UI_Slider UI_FreeRoamAcceleration{};
+	inline static T6SDK::Drawing::UI_Slider UI_FreeRoamSlowing{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_Shake{};
+	inline static T6SDK::Drawing::UI_Slider UI_ShakeSpeed{};
+	inline static T6SDK::Drawing::UI_Slider UI_ShakeAmount{};
+	inline static T6SDK::Drawing::UI_Slider UI_ShakePositionAmount{};
+	inline static T6SDK::Drawing::UI_Slider UI_ShakeRotationAmount{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_ExportCampathButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_ImportCampathButton{};
+
 
 	//MISC controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_GreenScreen{};
@@ -82,6 +101,8 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_CamoChanging{};
 	inline static T6SDK::Drawing::UI_EnumButton UI_PrimaryCamo{};
 	inline static T6SDK::Drawing::UI_EnumButton UI_SecondaryCamo{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_CameraSway{};
+	inline static T6SDK::Drawing::UI_Slider UI_CameraSwayMaxAngle{};
 
 
 	//MENU controls

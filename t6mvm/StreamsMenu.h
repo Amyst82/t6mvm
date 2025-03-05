@@ -152,7 +152,7 @@ namespace StreamsMenu
 
 		UIControls::UI_StreamsAVICheckBox.Draw(false);
 		UIControls::UI_StreamsNoFlashCheckBox.Draw(streamsEnabled);
-		UIControls::UI_RecordCamCheckBox.Draw(false);
+		UIControls::UI_RecordCamCheckBox.Draw(streamsEnabled);
 
 		//Draw stream passes
 

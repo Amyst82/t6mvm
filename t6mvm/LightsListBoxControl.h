@@ -34,7 +34,7 @@ namespace Lights
 		int* SelectedIndex = &InternalSelected;
 		const char* Title{};
 		vector<LightDef>* Items;
-
+		uintptr_t OnSelectedItemChanged = 0;
 		/// <summary>
 		/// Draw a list box with a title 
 		/// </summary>
@@ -98,7 +98,7 @@ namespace Lights
 		{
 
 		}
-
+		
 		void Draw()
 		{
 			if (*SelectedIndex == -1 || Items->size() == 0)
@@ -196,6 +196,12 @@ namespace Lights
 					if (clickedIndex >= 0 && clickedIndex < Items->size())
 					{
 						*SelectedIndex = clickedIndex;
+						if (OnSelectedItemChanged != 0)
+						{
+							func* f = (func*)OnSelectedItemChanged;
+							if (f)
+								f(*SelectedIndex);
+						}
 					}
 				}
 				else

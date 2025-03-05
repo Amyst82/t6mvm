@@ -156,6 +156,9 @@
     <ClInclude Include="Shake.h">
       <Filter>Components\Common</Filter>
     </ClInclude>
+    <ClInclude Include="CameraMenu.h">
+      <Filter>Components\Theater\Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

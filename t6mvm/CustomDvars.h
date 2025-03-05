@@ -20,8 +20,6 @@ namespace CustomDvars
 	static dvar_s* dvar_accelerationFactor;
 	static dvar_s* dvar_slowingFactor;
 
-	cmd_function_s cmd_exportCam_VAR{};
-	cmd_function_s cmd_importCam_VAR{};
 
 	//MISC DVARS
 	static dvar_s* dvar_greenScreen;
@@ -34,8 +32,7 @@ namespace CustomDvars
 	//LIGHTS DVARS
 	static dvar_s* dvar_lightRadiusLimit;
 	static dvar_s* dvar_lightColorLimit;
-	cmd_function_s cmd_exportLights_VAR{};
-	cmd_function_s cmd_importLights_VAR{};
+
 
 	//STREAMS DVARS
 	static dvar_s* dvar_streams;
@@ -47,9 +44,7 @@ namespace CustomDvars
 	static dvar_s* dvar_streams_tickStart;
 	static dvar_s* dvar_streams_tickEnd;
 	static dvar_s* dvar_streams_recordCam;
-	cmd_function_s cmd_streams_start_VAR{};
-	cmd_function_s cmd_streams_stop_VAR{};
-	cmd_function_s cmd_streams_abort_VAR{};
+
 
 
 	//WEAPONS DVARS
@@ -87,8 +82,6 @@ namespace CustomDvars
 		dvar_accelerationFactor = T6SDK::Dvars::RegisterFloat("mvm_accelerationFactor", 2.0f, 0.0f, 10.0f, "Free camera acceleration factor.");
 		dvar_slowingFactor = T6SDK::Dvars::RegisterFloat("mvm_slowingFactor", 0.25f, 0.0f, 10.0f, "Free camera slowing factor.");
 
-		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_exportCam", nullptr, &cmd_exportCam_VAR); //TODO Add implementation
-		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_importCam", nullptr, &cmd_importCam_VAR);
 
 		//Register misc dvars
 		dvar_greenScreen = T6SDK::Dvars::RegisterBool("mvm_greenScreen", false, "Green screen.");
@@ -97,8 +90,6 @@ namespace CustomDvars
 		dvar_zdepth = T6SDK::Dvars::RegisterBool("mvm_zdepth", false, "Z depth.");
 
 		//Register lights dvars
-		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_exportLights", nullptr, &cmd_exportLights_VAR); //TODO Add implementation
-		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_importLights", nullptr, &cmd_importLights_VAR);
 		dvar_lightRadiusLimit = T6SDK::Dvars::RegisterFloat("mvm_lightRadiusLimit", 1000.0f, 0.0f, 10000.0f, "Light radius limit.");
 		dvar_lightColorLimit = T6SDK::Dvars::RegisterFloat("mvm_lightColorLimit", 1.0f, 0.0f, 255.0f, "Light color limit.");
 
@@ -112,11 +103,6 @@ namespace CustomDvars
 		dvar_streams_tickStart = T6SDK::Dvars::RegisterInt("mvm_streams_tickStart", -1, -1, 99999999, "Streams recording tick start value.");
 		dvar_streams_tickEnd = T6SDK::Dvars::RegisterInt("mvm_streams_tickEnd", -1, -1, 99999999, "Streams recording tick end value.");
 		dvar_streams_recordCam = T6SDK::Dvars::RegisterBool("mvm_streams_recordCam", false, "Collect camera data on each recorded frame.");
-
-		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_start", nullptr, &cmd_streams_start_VAR);
-		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_stop", nullptr, &cmd_streams_stop_VAR);
-		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_abort", nullptr, &cmd_streams_abort_VAR); //TODO Add implementation
-
 
 
 		//Register weapon dvars

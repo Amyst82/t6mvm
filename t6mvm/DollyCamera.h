@@ -13,6 +13,9 @@ namespace Camera
 		Shake shake1(420.0f);
 		Shake shake2(1337.0f);
 
+		cmd_function_s cmd_exportCam_VAR{};
+		cmd_function_s cmd_importCam_VAR{};
+
 #pragma region Interpolators
 
 		float lerpf(float a, float b, float f)
@@ -46,7 +49,7 @@ namespace Camera
 			return Remap(k1, k2, B1, B2, u);
 		}
 #pragma endregion
-		void CheckDollyCamDvars()
+		inline static void CheckDollyCamDvars()
 		{
 			if (!T6SDK::Theater::IsInTheater())
 				return;
@@ -222,7 +225,9 @@ namespace Camera
 		{
 			if (T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
 			{
+				T6SDK::ConsoleLog::LogFormatted("Added frozen marker at tick %i", T6SDK::Addresses::cg->FakeTick);
 				T6SDK::Addresses::cg->FakeTick += 500;
+				T6SDK::ConsoleLog::LogFormatted("New tick %i", T6SDK::Addresses::cg->FakeTick);
 			}
 		}
 	
@@ -330,8 +335,148 @@ namespace Camera
 			else
 			{
 				if (T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount > 0)
-					T6SDK::Theater::Demo_JumpToDollyCamMarkerTime(0);
-					//T6SDK::Theater::Demo_JumpToTick(T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick);
+				{
+					T6SDK::Theater::Demo_JumpToTick(T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick);
+					T6SDK::Addresses::InitialTick.SetValueSafe(T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick);
+				}
+			}
+		}
+
+		static void ExportCampath()
+		{
+			char openedFileName[MAX_PATH];
+			const TCHAR* FilterSpec = (const TCHAR*)"BO2 Campath(.t6campath)\0*.t6campath*\0";
+			const TCHAR* Title = (const TCHAR*)"Save current campath";
+			if (T6SDK::InternalFunctions::OpenFileDialog((TCHAR*)openedFileName, true, FilterSpec, Title))
+			{
+				string str(openedFileName);
+				string strMirrored(openedFileName);
+				str.append(".t6campath");
+				strMirrored.append(" - mirrored.t6campath");
+				ofstream ExportFile(str, ios_base::out);
+				ofstream ExportFileMirrored(strMirrored, ios_base::out); //export mirrored campath file for "inception"-like cines
+				if (ExportFile.good() && ExportFileMirrored.good())
+				{
+					int StartTick = T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick;
+					ExportFile << "StartTick: " << StartTick << endl;
+					ExportFileMirrored << "StartTick: " << StartTick << endl;
+					for (int i = 0; i < T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount; i++)
+					{
+						CameraMarker_s marker = T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[i];
+						char exportStringline[256];
+						// T; X; Y; Z;DX;DY;DZ; R; F
+						sprintf(exportStringline, "%i;%f;%f;%f;%f;%f;%f;%f;%f", marker.Tick - StartTick, marker.Position.x, marker.Position.y, marker.Position.z, marker.Direction.x, marker.Direction.y, marker.Direction.z, marker.Roll, marker.Fov);
+						ExportFile << exportStringline << endl;
+
+						sprintf(exportStringline, "%i;%f;%f;%f;%f;%f;%f;%f;%f", marker.Tick - StartTick, -marker.Position.x, marker.Position.y, -marker.Position.z, -marker.Direction.x, marker.Direction.y, -marker.Direction.z, marker.Roll, marker.Fov);
+						ExportFileMirrored << exportStringline << endl;
+					}
+					ExportFile.close();
+					ExportFileMirrored.close();
+					char buffer[256];
+					sprintf(buffer, "%i marker(s) exported to %s.", T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount, openedFileName);
+					T6SDK::Theater::Demo_Error("Camera Export", buffer);
+					T6SDK::ConsoleLog::Log("Camera was exported!");
+				}
+			}
+			else
+				T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTYELLOW, "User cancelled camera export operation");
+		}
+
+		static void ImportCampath()
+		{
+			char openedFileName[MAX_PATH];
+			const TCHAR* FilterSpec = (const TCHAR*)"BO2 Campath(.t6campath)\0*.t6campath*\0";
+			const TCHAR* Title = (const TCHAR*)"Load campath";
+			if (T6SDK::InternalFunctions::OpenFileDialog((TCHAR*)openedFileName, false, FilterSpec, Title))
+			{
+				string str(openedFileName);
+				ofstream ImportFile(str, ios_base::in);
+				if (ImportFile.good())
+				{
+					ifstream fileopen(str);
+					int counter = 0;
+					bool successStatus = false;
+					if (fileopen.is_open())
+					{
+						try
+						{
+							stringstream buffer;
+							buffer << fileopen.rdbuf();
+							std::string line;
+							stringstream s;
+							std::string segment;
+							int startTick = 0;
+							while (std::getline(buffer, line))
+							{
+								if (line == "")
+									continue;
+								s.clear();
+								s << line;
+								segment.clear();
+								if (counter == 0) // reading first line
+								{
+									vector<string> list;
+									while (std::getline(s, segment, ' '))
+									{
+										list.push_back(segment.c_str());
+									}
+									startTick = stoi(list[1]);
+									T6SDK::ConsoleLog::Log("Start tick loaded!");
+
+								}
+								else // reading all other lines and split them by ';'
+								{
+									vector<string> list;
+									while (std::getline(s, segment, ';'))
+									{
+										list.push_back(segment);
+									}
+									if (list.size() == 9)
+									{
+										T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[counter - 1].Tick = stoi(list[0].c_str()) + startTick; // loading tick offset by summing it with start tick
+										T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[counter - 1].Position.x = stof(list[1].c_str());
+										T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[counter - 1].Position.y = stof(list[2].c_str());
+										T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[counter - 1].Position.z = stof(list[3].c_str());
+										T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[counter - 1].Direction.x = stof(list[4].c_str());
+										T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[counter - 1].Direction.y = stof(list[5].c_str());
+										T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[counter - 1].Direction.z = stof(list[6].c_str());
+										T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[counter - 1].Roll = stof(list[7].c_str());
+										T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[counter - 1].Fov = stof(list[8].c_str());
+									}
+									else
+									{
+										T6SDK::Theater::Demo_Error("Camera Import", "Camera wasn't imported due to an error!");
+										T6SDK::ConsoleLog::Log("Error during loading markers!");
+										successStatus = false;
+										break;
+									}
+								}
+								counter++;
+							}
+							successStatus = true;
+						}
+						catch (exception ex)
+						{
+							fileopen.close();
+							T6SDK::Theater::Demo_Error("Camera Import", "Camera wasn't imported due to an error!");
+							T6SDK::ConsoleLog::Log("Error during loading markers!");
+							T6SDK::ConsoleLog::Log(ex.what());
+							successStatus = false;
+							return;
+						}
+
+					}
+					if (successStatus)
+					{
+						T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount = counter - 1;
+						fileopen.close();
+						char buffer[256];
+						sprintf(buffer, "Successfully loaded %i marker(s)!", T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount);
+						T6SDK::Theater::Demo_Error("Camera Import", buffer);
+						T6SDK::ConsoleLog::Log("Camera was imported!");
+					}
+				}
 			}
 		}
 		static void Init()
@@ -342,6 +487,12 @@ namespace Camera
 			T6SDK::Events::RegisterListener(T6SDK::EventType::OnTheaterControlsDrawn, (uintptr_t)&OnTheaterControlsDrawn);
 			T6SDK::Events::RegisterListener(T6SDK::EventType::OnCameraMarkerAdded, (uintptr_t)&OnMarkerAdded);
 			T6SDK::Events::RegisterListener(T6SDK::EventType::OnFreeCameraModeChanged, (uintptr_t)&OnFreeCameraModeChanged);
+
+			T6SDK::Dvars::Cmd_AddCommandInternal("mvm_exportCam", ExportCampath, &cmd_exportCam_VAR);
+			T6SDK::Dvars::Cmd_AddCommandInternal("mvm_importCam", ImportCampath, &cmd_importCam_VAR);
+
+			UIControls::UI_ExportCampathButton = T6SDK::Drawing::UI_ClickableButton("Export campath", 12, 30, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Camera::DollyCamera::ExportCampath);
+			UIControls::UI_ImportCampathButton = T6SDK::Drawing::UI_ClickableButton("Import campath", 12, 32, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Camera::DollyCamera::ImportCampath);
 		}
 	}
 }

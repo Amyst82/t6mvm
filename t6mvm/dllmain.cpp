@@ -13,6 +13,7 @@ void OnGameLoaded()
         T6SDK::InternalFunctions::UI_OpenToastPopup("^5T6MVM loaded!", "Please wait for a few seconds til its completed.", 10000);
     Streams::InitStreams();
     T6SDK::MAIN::InitializeDevConsole();
+    
 }
 
 void Init()

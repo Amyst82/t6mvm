@@ -24,6 +24,10 @@ namespace TheaterBase
 		{
 			Streams::StreamsSwitchState();
 		}
+		if(key == T6SDK::Input::Keys::F6.KeyCode)
+		{
+			Streams::AbortStreams();
+		}
 	}
 	void HandleSafeStringTranslate(const char** string)
 	{

@@ -1,5 +1,7 @@
 #pragma once
 #include <StdInclude.h>
+#include <fstream>
+#include <sstream>
 #include "UIBase.h"
 namespace Lights
 {
@@ -18,11 +20,16 @@ namespace Lights
 		float b = 0.0f;
 		float a = 1.0f;
 	};
-	static T6SDK::Theater::CustomCameraMode LIGHTMODE("LIGHTS", { "OMNI"});
+	static T6SDK::Theater::CustomCameraMode LIGHTMODE("LIGHTS", { "OMNI", "SPOT"});
 	inline static T6SDK::Drawing::UI_KeyReactiveText SpawnLightButton{};
 	inline static vector<LightDef> LightsList;
 	inline static int SelectedLight = 0;
+	int LastSelectedLight = -1;
 	inline static bool IsLightRepositioning = false;
+	inline static uintptr_t OnSelectedLightChanged = 0;
+	typedef void func(int);
+	cmd_function_s cmd_exportLights_VAR{};
+	cmd_function_s cmd_importLights_VAR{};
 
 	inline static bool IsLightsMode()
 	{
@@ -39,7 +46,16 @@ namespace Lights
 			float threshhold = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::demo_dollycamHighlightThreshholdDistance);
 			if (T6SDK::InternalFunctions::Distance(LightsList[i].org, T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin) < threshhold)
 			{
-				SelectedLight = i;
+				if(i != SelectedLight)
+				{
+					SelectedLight = i;
+					LastSelectedLight = SelectedLight;
+					T6SDK::ConsoleLog::LogFormatted("Selected light: #%i", SelectedLight);
+					func* f = (func*)OnSelectedLightChanged;
+					if (f)
+						f(SelectedLight);
+					return true;
+				}
 				return true;
 			}
 			//SelectedLight = -1;
@@ -148,22 +164,22 @@ namespace Lights
 			LightDef newLight;
 			if(T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == (T6SDK::DemoFreeCameraMode)0x04)//OMNI
 				newLight.spotLight = false;
-			//else if( T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == (T6SDK::DemoFreeCameraMode)0x05)//SPOT
-			//	newLight.spotLight = true;
+			else if( T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == (T6SDK::DemoFreeCameraMode)0x05)//SPOT
+				newLight.spotLight = true;
 			newLight.org = T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin;
 			newLight.dir = T6SDK::Addresses::cg->RefDef.viewAxis;
-			if (LightsList.size() > 0)
-			{
-				LightDef lastLight = LightsList[LightsList.size() - 1];
-				newLight.radius = lastLight.radius;
-				newLight.startRadius = lastLight.startRadius;
-				newLight.endRadius = lastLight.endRadius;
-				newLight.fovInnerFraction = lastLight.fovInnerFraction;
-				newLight.r = lastLight.r;
-				newLight.g = lastLight.g;
-				newLight.b = lastLight.b;
-				newLight.a = lastLight.a;
-			}
+			//if (LightsList.size() > 0)
+			//{
+			//	LightDef lastLight = LightsList[LightsList.size() - 1];
+			//	newLight.radius = lastLight.radius;
+			//	newLight.startRadius = lastLight.startRadius;
+			//	newLight.endRadius = lastLight.endRadius;
+			//	newLight.fovInnerFraction = lastLight.fovInnerFraction;
+			//	newLight.r = lastLight.r;
+			//	newLight.g = lastLight.g;
+			//	newLight.b = lastLight.b;
+			//	newLight.a = lastLight.a;
+			//}
 
 			LightsList.push_back(newLight);
 			T6SDK::ConsoleLog::LogFormatted("%s light added! Total lights: %i", newLight.spotLight ? "Spot" : "Omni", LightsList.size());
@@ -171,9 +187,21 @@ namespace Lights
 	}
 	static void RemoveLight()
 	{
-		if(SelectedLight == -1)
-			return;
-		LightsList.erase(LightsList.begin() + SelectedLight);
+		try
+		{
+			if (SelectedLight == -1)
+				return;
+			if (SelectedLight > LightsList.size())
+				return;
+			LightsList.erase(LightsList.begin() + SelectedLight);
+			func* f = (func*)OnSelectedLightChanged;
+			if (f)
+				f(LightsList.size() - 1);
+		}
+		catch(const char* e)
+		{
+			T6SDK::ConsoleLog::LogError(e);
+		}
 	}
 	static void RemoveAllLights()
 	{
@@ -191,11 +219,132 @@ namespace Lights
 	}
 	static void ExportLights()
 	{
+		char openedFileName[MAX_PATH];
+		const TCHAR* FilterSpec = (const TCHAR*)"BO2 Lights list(.t6lights)\0*.t6lights*\0";
+		const TCHAR* Title = (const TCHAR*)"Save current lights list";
+		if (T6SDK::InternalFunctions::OpenFileDialog((TCHAR*)openedFileName, true, FilterSpec, Title))
+		{
+			string str(openedFileName);
+			str.append(".t6lights");
+			ofstream ExportFile(str, ios_base::out);
+			if (ExportFile.good())
+			{
+				for (int i = 0; i < (int)LightsList.size(); i++)
+				{
+					char exportStringline[256];
+					vec3_t dir{};
+					T6SDK::InternalFunctions::AxisToAngles(&LightsList[i].dir, &dir);
+					//TYPE;X;Y;Z;DIRX;DIRY;DIRZ;RADIUS;R;G;B;A
+					sprintf(exportStringline, "%i;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f",
+						LightsList[i].spotLight, LightsList[i].org.x, LightsList[i].org.y, LightsList[i].org.z,
+						dir.x, dir.y, dir.z,
+						LightsList[i].radius, LightsList[i].r, LightsList[i].g, LightsList[i].b, LightsList[i].a);
 
+					ExportFile << exportStringline << endl;
+				}
+				ExportFile.close();
+				char buffer[256];
+				sprintf(buffer, "%i light(s) exported to %s.", (int)LightsList.size(), str);
+				T6SDK::ConsoleLog::LogSuccess(buffer);
+			}
+		}
+		else
+			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTYELLOW, "User cancelled light export operation");
 	}
 	static void ImportLights()
 	{
+		char openedFileName[MAX_PATH];
+		const TCHAR* FilterSpec = (const TCHAR*)"BO2 Lights list(.t6lights)\0*.t6lights*\0";
+		const TCHAR* Title = (const TCHAR*)"Load lights list";
+		if (T6SDK::InternalFunctions::OpenFileDialog((TCHAR*)openedFileName, false, FilterSpec, Title))
+		{
+			string str(openedFileName);
+			ofstream ImportFile(str, ios_base::in);
+			if (ImportFile.good())
+			{
+				ifstream fileopen(str);
+				int counter = 0;
+				bool successStatus = false;
+				vector<LightDef> tempLightsList{};
+				if (fileopen.is_open())
+				{
+					try
+					{
+						stringstream buffer;
+						buffer << fileopen.rdbuf();
+						std::string line;
+						stringstream s;
+						std::string segment;
+						int startTick = 0;
+						while (std::getline(buffer, line))
+						{
+							if (line == "")
+								continue;
+							s.clear();
+							s << line;
+							segment.clear();
+							vector<string> list;
+							while (std::getline(s, segment, ';'))
+							{
+								list.push_back(segment);
+							}
+							if (list.size() == 12)
+							{
+								LightDef tmpLight{};
+								tmpLight.spotLight = atoi(list[0].c_str()) == 1 ? true : false;
+								tmpLight.org.x = stof(list[1].c_str());
+								tmpLight.org.y = stof(list[2].c_str());
+								tmpLight.org.z = stof(list[3].c_str());
+								tmpLight.dir;
+								vec3_t lightrDir = { stof(list[4].c_str()) , stof(list[5].c_str()) , stof(list[6].c_str()) };
+								T6SDK::InternalFunctions::AnglesToAxis(&lightrDir, &tmpLight.dir);
+								tmpLight.radius = stof(list[7].c_str());
+								tmpLight.r = stof(list[8].c_str());
+								tmpLight.g = stof(list[9].c_str());
+								tmpLight.b = stof(list[10].c_str());
+								tmpLight.a = stof(list[11].c_str());
+								tempLightsList.push_back(tmpLight);
+							}
+							else
+							{
+								T6SDK::ConsoleLog::Log("Error during loading lights!");
+								successStatus = false;
+								tempLightsList.clear();
+								break;
+							}
+							counter++;
+						}
+						successStatus = true;
+					}
+					catch (const char* error)
+					{
+						fileopen.close();
+						T6SDK::ConsoleLog::Log("Error occured during loading lights!");
+						T6SDK::ConsoleLog::Log(error);
+						successStatus = false;
+						tempLightsList.clear();
+						return;
+					}
 
+				}
+				if (successStatus)
+				{
+					if (tempLightsList.size() > 0)
+					{
+						LightsList.clear();
+						for (int i = 0; i < tempLightsList.size(); i++)
+						{
+							LightsList.push_back(tempLightsList[i]);
+						}
+						tempLightsList.clear();
+					}
+					fileopen.close();
+					T6SDK::ConsoleLog::Log("Lights were imported!");
+				}
+			}
+			else
+				T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTYELLOW, "User cancelled light export operation");
+		}
 	}
 	inline static void Init()
 	{
@@ -203,5 +352,7 @@ namespace Lights
 		SpawnLightButton = T6SDK::Drawing::UI_KeyReactiveText("^7Press ^3F ^7to add light", 8, 33, &T6SDK::Input::Keys::F, 0x00, T6SDK::AnchorPoint::BottomCenter, (uintptr_t)&Lights::AddEditLight);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnTheaterControlsDrawn, (uintptr_t)&DrawLightsControls);
 		LightsList = {};
+		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_exportLights", ExportLights, &cmd_exportLights_VAR);
+		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_importLights", ImportLights, &cmd_importLights_VAR);
 	}
 }
