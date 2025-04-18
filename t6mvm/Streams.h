@@ -380,28 +380,39 @@ namespace Streams
 	int tickStep = 0;
 	__declspec(naked) void OnTickIncreasing()
 	{
-		tickStep = 1000 / T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_fps);
-		__asm
+		if (T6SDK::MAIN::ENABLED)
 		{
-			mov[eaxTMP], eax
-			mov[edxTMP], edx
-			mov[ecxTMP], ecx
-			mov[esiTMP], esi
-			mov[ediTMP], edi
-			mov[espTMP], esp
-			mov[ebpTMP], ebp
+			tickStep = 1000 / T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_fps);
+			__asm
+			{
+				mov[eaxTMP], eax
+				mov[edxTMP], edx
+				mov[ecxTMP], ecx
+				mov[esiTMP], esi
+				mov[ediTMP], edi
+				mov[espTMP], esp
+				mov[ebpTMP], ebp
 
-			call Update
+				call Update
 
-			mov eax, tickStep
-			mov edx, [edxTMP]
-			mov ecx, [ecxTMP]
-			mov esi, [esiTMP]
-			mov edi, [ediTMP]
-			mov esp, [espTMP]
-			mov ebp, [ebpTMP]
-			call[LocalAddresses::InternalTickIncreaseFunc]
-			jmp[LocalAddresses::h_TickIncreasing.JumpBackAddress]
+				mov eax, tickStep
+				mov edx, [edxTMP]
+				mov ecx, [ecxTMP]
+				mov esi, [esiTMP]
+				mov edi, [ediTMP]
+				mov esp, [espTMP]
+				mov ebp, [ebpTMP]
+				call[LocalAddresses::InternalTickIncreaseFunc]
+				jmp[LocalAddresses::h_TickIncreasing.JumpBackAddress]
+			}
+		}
+		else
+		{
+			__asm
+			{
+				call[LocalAddresses::InternalTickIncreaseFunc]
+				jmp[LocalAddresses::h_TickIncreasing.JumpBackAddress]
+			}
 		}
 	}
 

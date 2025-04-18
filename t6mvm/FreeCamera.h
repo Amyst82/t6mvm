@@ -54,7 +54,7 @@ namespace Camera
 			{
 				if (CustomDvars::dvar_freeRoamSpeed->current.value > 0.0f)
 				{
-					CustomDvars::dvar_freeRoamSpeed->current.value -= 0.0025f;
+					CustomDvars::dvar_freeRoamSpeed->current.value -= 0.000025f;
 					CustomDvars::dvar_freeRoamSpeed->modified = true;
 				}
 				else
@@ -64,7 +64,7 @@ namespace Camera
 			{
 				if (CustomDvars::dvar_freeRoamSpeed->current.value < 10.0f)
 				{
-					CustomDvars::dvar_freeRoamSpeed->current.value += 0.0025f;
+					CustomDvars::dvar_freeRoamSpeed->current.value += 0.000025f;
 					CustomDvars::dvar_freeRoamSpeed->modified = true;
 				}
 				else
@@ -110,7 +110,7 @@ namespace Camera
 			if (T6SDK::Input::Keys::Q.Hold())
 				z = -1;
 
-			vec3_t v = (T6SDK::Addresses::CameraForwardVector.Value() * x + T6SDK::Addresses::CameraRightVector.Value() * y + T6SDK::Addresses::CameraUpVector.Value() * z) * freeRoamSpeed * 500.0f;
+			vec3_t v = (T6SDK::Addresses::CameraForwardVector.Value() * x + T6SDK::Addresses::CameraRightVector.Value() * y + T6SDK::Addresses::CameraUpVector.Value() * z) * freeRoamSpeed * 5.0f;
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin += v;
 
 		}

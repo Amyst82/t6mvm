@@ -291,38 +291,49 @@ namespace Camera
 		uintptr_t eaxTMP, ecxTMP, edxTMP, esiTMP, ediTMP, espTMP, ebpTMP;
 		__declspec(naked) void OnTickChanged()
 		{
-			frozenCam = T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam);
-			notPovMode = T6SDK::Addresses::DemoPlayback.Value()->CameraMode != T6SDK::DemoCameraMode::NONE;
-			__asm
+			if (T6SDK::MAIN::ENABLED)
 			{
-				mov[eaxTMP], eax
-				mov[ecxTMP], ecx
-				mov[edxTMP], edx
-				mov[esiTMP], esi
-				mov[ediTMP], edi
-				mov[espTMP], esp
-				mov[ebpTMP], ebp
+				frozenCam = T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam);
+				notPovMode = T6SDK::Addresses::DemoPlayback.Value()->CameraMode != T6SDK::DemoCameraMode::NONE;
+				__asm
+				{
+					mov[eaxTMP], eax
+					mov[ecxTMP], ecx
+					mov[edxTMP], edx
+					mov[esiTMP], esi
+					mov[ediTMP], edi
+					mov[espTMP], esp
+					mov[ebpTMP], ebp
 
-				//Route pointer of main tick to a fake one so the game will be paused
-				mov al, frozenCam
-				cmp al, 1
-				je L7
-				mov[esi + 0x4808C], ebp
-				mov al, notPovMode
-				cmp al, 0
-				je L7
-				mov[esi + 0x4809C], ebp
-				L7 :
-				mov[esi + 0x480A4], ebp
-				call HandleOnTickChanged
-				mov eax, [eaxTMP]
-				mov edx, [edxTMP]
-				mov ecx, [ecxTMP]
-				mov esi, [esiTMP]
-				mov edi, [ediTMP]
-				mov esp, [espTMP]
-				mov ebp, [ebpTMP]
-				jmp[T6SDK::Addresses::HookAddresses::h_TickChanged.JumpBackAddress]
+					//Route pointer of main tick to a fake one so the game will be paused
+					mov al, frozenCam
+					cmp al, 1
+					je L7
+					mov[esi + 0x4808C], ebp
+					mov al, notPovMode
+					cmp al, 0
+					je L7
+					mov[esi + 0x4809C], ebp
+					L7 :
+					mov[esi + 0x480A4], ebp
+					call HandleOnTickChanged
+					mov eax, [eaxTMP]
+					mov edx, [edxTMP]
+					mov ecx, [ecxTMP]
+					mov esi, [esiTMP]
+					mov edi, [ediTMP]
+					mov esp, [espTMP]
+					mov ebp, [ebpTMP]
+					jmp[T6SDK::Addresses::HookAddresses::h_TickChanged.JumpBackAddress]
+				}
+			}
+			else
+			{
+				__asm
+				{
+					mov[esi + 0x4808C], ebp
+					jmp[T6SDK::Addresses::HookAddresses::h_TickChanged.JumpBackAddress]
+				}
 			}
 		}
 		static void GoToFirstMarker()

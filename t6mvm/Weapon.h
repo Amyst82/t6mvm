@@ -58,25 +58,36 @@ namespace Weapon
 	uintptr_t eaxTMP, ecxTMP, edxTMP, esiTMP, ediTMP, espTMP, ebpTMP;
 	__declspec(naked) void CinesCamoPatch()
 	{
-		_asm
+		if (T6SDK::MAIN::ENABLED)
 		{
-			mov[eaxTMP], eax
-			mov[edxTMP], edx
-			mov[ecxTMP], ecx
-			mov[esiTMP], esi
-			mov[ediTMP], edi
-			mov[espTMP], esp
-			mov[ebpTMP], ebp
-			call Update
-			mov eax, [eaxTMP]
-			mov edx, [edxTMP]
-			mov ecx, [ecxTMP]
-			mov esi, [esiTMP]
-			mov edi, [ediTMP]
-			mov esp, [espTMP]
-			mov ebp, [ebpTMP]
-			mov ecx, 0x3E
-			jmp[T6SDK::Addresses::HookAddresses::h_CamoChangingCinePatch.JumpBackAddress]
+			_asm
+			{
+				mov[eaxTMP], eax
+				mov[edxTMP], edx
+				mov[ecxTMP], ecx
+				mov[esiTMP], esi
+				mov[ediTMP], edi
+				mov[espTMP], esp
+				mov[ebpTMP], ebp
+				call Update
+				mov eax, [eaxTMP]
+				mov edx, [edxTMP]
+				mov ecx, [ecxTMP]
+				mov esi, [esiTMP]
+				mov edi, [ediTMP]
+				mov esp, [espTMP]
+				mov ebp, [ebpTMP]
+				mov ecx, 0x3E
+				jmp[T6SDK::Addresses::HookAddresses::h_CamoChangingCinePatch.JumpBackAddress]
+			}
+		}
+		else
+		{
+			_asm
+			{
+				mov ecx, 0x3E
+				jmp[T6SDK::Addresses::HookAddresses::h_CamoChangingCinePatch.JumpBackAddress]
+			}
 		}
 	}
 
