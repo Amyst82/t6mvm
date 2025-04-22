@@ -54,6 +54,7 @@ namespace WeaponMenu
 	static string GetCFG()
 	{
 		std::string cfg =
+			"//WEAPON\n" + 
 			std::string("cg_gun_x ") + std::to_string(T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::cg_gun_x)) + ";\n" +
 			std::string("cg_gun_y ") + std::to_string(T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::cg_gun_y)) + ";\n" +
 			std::string("cg_gun_z ") + std::to_string(T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::cg_gun_z)) + ";\n" +

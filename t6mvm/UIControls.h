@@ -1,17 +1,22 @@
 #pragma once
 #include <StdInclude.h>
-
+#include "UI_Timeline.h"
+#include "UI_DemoBrowseButton.h"
 namespace UIControls
 {
 
 	//TABS
-	inline static T6SDK::Drawing::UI_RadioButton MainCameraTabButton("^7CAMERA", 0, 2, 5, T6SDK::AnchorPoint::TopLeft, 0x00);
-	inline static T6SDK::Drawing::UI_RadioButton MiscTabButton("^7MISC", 0, 2, 7, T6SDK::AnchorPoint::TopLeft, 0x00);
-	inline static T6SDK::Drawing::UI_RadioButton BoneCameraTabButton("^7BONE CAMERA", 0, 2, 9, T6SDK::AnchorPoint::TopLeft, 0x00);
-	inline static T6SDK::Drawing::UI_RadioButton SunSkyTabButton("^7SUN", 0, 2, 11, T6SDK::AnchorPoint::TopLeft, 0x00);
-	inline static T6SDK::Drawing::UI_RadioButton LightsTabButton("^7LIGHTS", 0, 2, 13, T6SDK::AnchorPoint::TopLeft, 0x00);
-	inline static T6SDK::Drawing::UI_RadioButton StreamsTabButton("^7STREAMS", 0, 2, 15, T6SDK::AnchorPoint::TopLeft, 0x00);
-	inline static T6SDK::Drawing::UI_RadioButton WeaponTabButton("^7WEAPON", 0, 2, 17, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton MainTabButton("^7MAIN", 0, 2, 5, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton MainCameraTabButton("^7CAMERA", 0, 2, 7, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton MiscTabButton("^7MISC", 0, 2, 9, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton BoneCameraTabButton("^7BONE CAMERA", 0, 2, 11, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton SsaoTabButton("^7SSAO", 0, 2, 13, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton FogTabButton("^7FOG", 0, 2, 15, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton DofTabButton("^7DOF", 0, 2, 17, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton SunSkyTabButton("^7SUN", 0, 2, 19, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton LightsTabButton("^7LIGHTS", 0, 2, 21, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton StreamsTabButton("^7STREAMS", 0, 2, 23, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton WeaponTabButton("^7WEAPON", 0, 2, 25, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 	//CAMERA controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_FrozenCamera{};
@@ -38,11 +43,42 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_GreenScreen{};
 	inline static T6SDK::Drawing::UI_EnumButton UI_PlayersGreenScreen{};
 	inline static T6SDK::Drawing::UI_Slider UI_PlayersGreenScreenThreshold{};
+	inline static T6SDK::Drawing::UI_Slider UI_GreenScreenColorR{};
+	inline static T6SDK::Drawing::UI_Slider UI_GreenScreenColorG{};
+	inline static T6SDK::Drawing::UI_Slider UI_GreenScreenColorB{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_ZDepth{};
+	inline static T6SDK::Drawing::UI_Slider UI_ZDepthDistance{};
+	inline static T6SDK::Drawing::UI_CheckBoxButtonInversed UI_RemoveGun{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_RemovePlayers{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_GreenSky{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_BloomTweaks{};
+	inline static T6SDK::Drawing::UI_CheckBoxButtonInversed UI_RemoveTheaterBarrier{};
 
 	//BONE CAMERA controls
 	inline static T6SDK::Drawing::UI_EnumButton UI_SelectedBoneButton{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_AttachToBoneButton{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_ShowBonesButton{};
+
+	//SSAO controls
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_SsaoToggle{};
+	inline static T6SDK::Drawing::UI_Slider UI_SsaoScale{};
+	inline static T6SDK::Drawing::UI_Slider UI_SsaoRadius{};
+	inline static T6SDK::Drawing::UI_Slider UI_SsaoBias{};
+	inline static T6SDK::Drawing::UI_Slider UI_SsaoIntensity{};
+	inline static T6SDK::Drawing::UI_Slider UI_Znear{};
+
+	//DOF controls
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_DofToggle{};
+	inline static T6SDK::Drawing::UI_Slider			UI_DofFarBlur{};
+	inline static T6SDK::Drawing::UI_Slider			UI_DofFarStart{};
+	inline static T6SDK::Drawing::UI_Slider			UI_DofFarEnd{};
+	inline static T6SDK::Drawing::UI_Slider			UI_DofNearBlur{};
+	inline static T6SDK::Drawing::UI_Slider			UI_DofNearStart{};
+	inline static T6SDK::Drawing::UI_Slider			UI_DofNearEnd{};
+	inline static T6SDK::Drawing::UI_Slider			UI_DofViewmodelStart{};
+	inline static T6SDK::Drawing::UI_Slider			UI_DofViewmodelEnd{};
+	inline static T6SDK::Drawing::UI_Slider			UI_DofBias{};
+	inline static T6SDK::Drawing::UI_EnumButton		UI_DofHDR{};
 
 	//SUN controls
 	inline static T6SDK::Drawing::UI_Slider UI_SunColorR{};
@@ -109,25 +145,36 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_CheckBoxButton MenuBlurCheckBox{};
 	inline static T6SDK::Drawing::UI_ClickableButton CloseMenuButton{};
 	inline static T6SDK::Drawing::UI_ClickableButton AddToCFGButton{};
-
+	inline static UI_TimelineNS::UI_Timeline UI_TimelineSlider{};
+	inline static T6SDK::Drawing::UI_EnumButton UI_DemoClient{};
+	inline static UIDemoBrowseButtonNS::UI_DemoBrowseButton UI_DemoBrowseCheckButton{};
 
 	inline static void Init()
 	{
+		MainTabButton.ToolTip = "Control timeline, execute ^5cfg ^7and more.";
 		MainCameraTabButton.ToolTip = "Manage free camera, dolly camera and etc!";
 		MiscTabButton.ToolTip = "Various misc features such as green screen and depth!";
 		BoneCameraTabButton.ToolTip = "Create cool stabilized camera angles using boner camera!"; //TODO replace with actual description
+		SsaoTabButton.ToolTip = "Tweak your screen space ambient occlusion.";
+		FogTabButton.ToolTip = "Add a little bit of depth to the scene with FOG.";
+		DofTabButton.ToolTip = "Blur things on background out with tweaking depth of field.";
 		SunSkyTabButton.ToolTip = "Change sun and sky settings such as sun position and color!";
 		LightsTabButton.ToolTip = "Create and manage your custom lights on map!";
 		StreamsTabButton.ToolTip = "Record multiple passes simultaneously as screensots to get perfect sync!";
 		WeaponTabButton.ToolTip = "Change weapon camo and viewmodel offsets!";
 		MenuBlurCheckBox = T6SDK::Drawing::UI_CheckBoxButton("^7BLUR ^9OFF", "^7BLUR ON", 12, 35, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_menuBlur->current.enabled, 0x00);
 		MenuBlurCheckBox.ToolTip = "Turn on/off menu background blur.";
+		UI_DemoBrowseCheckButton = UIDemoBrowseButtonNS::UI_DemoBrowseButton(13, 4, T6SDK::AnchorPoint::TopLeft);
 	}
 	inline static void DrawTabs()
 	{
+		MainTabButton.Draw();
 		MainCameraTabButton.Draw();
 		MiscTabButton.Draw();
 		BoneCameraTabButton.Draw();
+		SsaoTabButton.Draw();
+		FogTabButton.Draw();
+		DofTabButton.Draw();
 		SunSkyTabButton.Draw();
 		LightsTabButton.Draw();
 		StreamsTabButton.Draw();

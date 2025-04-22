@@ -23,6 +23,13 @@ namespace LocalAddresses
 		T6SDK::Addresses::t6mpv43 + 0x16C2D1, T6SDK::Addresses::t6mp + 0x14F521,
 		T6SDK::Addresses::t6zmv41 + 0x1614B1, T6SDK::Addresses::t6zm + 0x170801).GetValue(), { 0xB8 });
 
+	inline static T6SDK::MemoryHook h_DisplayMarkerInfoHook(T6SDK::CrossVersion::CrossValue<DWORD>(
+		T6SDK::Addresses::t6mpv43 + 0x2DFF0E, T6SDK::Addresses::t6mp + 0x17BADE,
+		T6SDK::Addresses::t6zmv41 + 0x13509E, T6SDK::Addresses::t6zm + 0x116C6E).GetValue(), 6);
+
+	inline static DWORD RemoveTheaterBarrierAddress = T6SDK::CrossVersion::CrossValue<DWORD>(
+		T6SDK::Addresses::t6mpv43 + 0x213130C, T6SDK::Addresses::t6mp + FILLIN,
+		T6SDK::Addresses::t6zmv41 + FILLIN, T6SDK::Addresses::t6zm + FILLIN).GetValue();
 	inline static void InitAddresses()
 	{
 

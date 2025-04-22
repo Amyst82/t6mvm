@@ -54,7 +54,7 @@ public:
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_dof_enable, true);
 		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_farBlur, 1.0f);
 		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_farStart, 0.0f);
-		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_farEnd, 1000.0f);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_farEnd, T6SDK::Dvars::GetFloat(CustomDvars::dvar_zdepthDistance));
 		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_nearBlur, 1.0f);
 		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_nearStart, 1.0f);
 		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_nearEnd, 1.0f);

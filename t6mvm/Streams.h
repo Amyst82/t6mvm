@@ -2,7 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS 
 #define WIN32_LEAN_AND_MEAN
 #include <d3d11.h>
-
+#include "../../../../Downloads/json.hpp"
 #include "IMVMStream.h"
 #include "Default.h"
 #include "GreenScreen.h"
@@ -16,10 +16,11 @@
 #include "LocalAddresses.h"
 #include "ScreenGrab.h"
 #include <cassert>
-
 #include "..\MinHook\MinHook.h"
 #pragma comment(lib, "libMinHook.x86.lib")
 #include <sstream>
+using json = nlohmann::json;
+
 #pragma comment(lib, "d3d11.lib")
 
 namespace Streams
@@ -203,7 +204,7 @@ namespace Streams
 	}
 	static long __stdcall detour_ResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
 	{
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Resizing buffers to %ix%i", Width, Height);
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", "Resizing buffers to %ix%i", Width, Height);
 		IsAnyOtherStream = false;
 		return p_ResizeBuffers(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
 	}
@@ -211,7 +212,7 @@ namespace Streams
 	static long __stdcall detour_ResizeTarget(IDXGISwapChain* pSwapChain, const DXGI_MODE_DESC* pNewTargetParameters)
 	{
 		IsAnyOtherStream = false;
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Resizing target to %ix%i", pNewTargetParameters->Width, pNewTargetParameters->Height);
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", "Resizing target to %ix%i", pNewTargetParameters->Width, pNewTargetParameters->Height);
 		return p_ResizeTarget(pSwapChain, pNewTargetParameters);
 	}
 
@@ -219,50 +220,50 @@ namespace Streams
 	{
 		if (!get_present_pointer())
 		{
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to get present pointer");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to get present pointer");
 			return false;
 		}
 
 		MH_STATUS status = MH_Initialize();
 		if (status != MH_OK)
 		{
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to initialize MinHook");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to initialize MinHook");
 			return false;
 		}
 		
 		if (MH_CreateHook(reinterpret_cast<void**>(p_present_target), &detour_present, reinterpret_cast<void**>(&p_present)) != MH_OK) 
 		{
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to hook present");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to hook present");
 			return false;
 		}
 		
 		if (MH_EnableHook(p_present_target) != MH_OK) 
 		{
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to enable present");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to enable present");
 			return false;
 		}
 
 		if (MH_CreateHook(reinterpret_cast<void**>(p_ResizeBuffers_target), &detour_ResizeBuffers, reinterpret_cast<void**>(&p_ResizeBuffers)) != MH_OK) 
 		{
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to hook ResizeBuffers");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to hook ResizeBuffers");
 			return false;
 		}
 
 		if (MH_EnableHook(p_ResizeBuffers_target) != MH_OK) 
 		{
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to enable ResizeBuffers");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to enable ResizeBuffers");
 			return false;
 		}
 
 		if (MH_CreateHook(reinterpret_cast<void**>(p_ResizeTarget_target), &detour_ResizeTarget, reinterpret_cast<void**>(&p_ResizeTarget)) != MH_OK) 
 		{
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to hook ResizeTarget");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to hook ResizeTarget");
 			return false;
 		}
 
 		if (MH_EnableHook(p_ResizeTarget_target) != MH_OK) 
 		{
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to enable ResizeTarget");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to enable ResizeTarget");
 			return false;
 		}
 
@@ -309,7 +310,7 @@ namespace Streams
 		ScreenshotRequested = true;
 		T6SDK::InternalFunctions::SCR_UpdateScreen(2);
 	}
-
+	bool abortingStreams = false;
 	inline static void StopStreams()
 	{
 		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
@@ -319,11 +320,60 @@ namespace Streams
 		IsAnyOtherStream = false;
 		LocalAddresses::h_TickIncreasing.UnHook();
 		IsStreamsRunning = false;
+		if (frameCount > 0)
+		{
+			if (abortingStreams == false)
+			{
+				std::string settingsPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\t6mvm.json";
+				if (!std::filesystem::exists(settingsPath))
+				{
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "STREAMS", "Settings JSON not found.");
+				}
+				else
+				{
+					std::ifstream file(settingsPath);
+					json data = json::parse(file);
+
+					std::string accountKey = data.value("AlertzyKey", "");
+					bool notification = data["PostStreamsActions"].value("Notification", false);
+					bool openStreamsFolder = data["PostStreamsActions"].value("OpenStreamsFolder", false);
+					if (notification && lstrcmp(accountKey.c_str(), "") > 0)
+					{
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Sending notification via Alertzy.");
+						try
+						{
+							// Get the current time
+							auto now = std::chrono::system_clock::now();
+							auto in_time_t = std::chrono::system_clock::to_time_t(now);
+
+							// Format the time as a string (e.g., "2023-10-05_14-30-45")
+							std::stringstream ss{};
+							ss << std::put_time(std::localtime(&in_time_t), "%B %d %Y at %I:%M %p");
+							std::string message = "Streams recording finished on " + ss.str();
+							std::string script = "curl -s -X POST https://alertzy.app/send \\ -d \"accountKey=" + accountKey + "\" \\ -d \"title=T6MVM\" \\ -d \"message=" + message + "\"";
+							std::system(script.c_str());
+							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "Notification sent.");
+						}
+						catch (const char* error)
+						{
+							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Notification was not sent dut to an error.");
+						}
+					}
+					if (openStreamsFolder)
+					{
+						//Open folder when streams are done
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Attempting to open the streams folder...");
+						std::string cmd = "explorer " + folderToDeleteWhenAborted;
+						std::system(cmd.c_str());
+					}
+				}
+			}
+		}
 		frameCount = 0;
 		T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden = false;
 		IsStreamsStarted = false;
-		if(T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
-			T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::timescale, 1.0f);
+		/*if(T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
+			T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::timescale, 1.0f);*/
 
 		if (ExportCameraFile.is_open())
 		{
@@ -380,19 +430,27 @@ namespace Streams
 	int tickStep = 0;
 	__declspec(naked) void OnTickIncreasing()
 	{
+		__asm
+		{
+			mov[eaxTMP], eax
+			mov[edxTMP], edx
+			mov[ecxTMP], ecx
+			mov[esiTMP], esi
+			mov[ediTMP], edi
+			mov[espTMP], esp
+			mov[ebpTMP], ebp
+		}
 		if (T6SDK::MAIN::ENABLED)
 		{
 			tickStep = 1000 / T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_fps);
 			__asm
 			{
-				mov[eaxTMP], eax
-				mov[edxTMP], edx
-				mov[ecxTMP], ecx
-				mov[esiTMP], esi
-				mov[ediTMP], edi
-				mov[espTMP], esp
-				mov[ebpTMP], ebp
-
+				mov edx, [edxTMP]
+				mov ecx, [ecxTMP]
+				mov esi, [esiTMP]
+				mov edi, [ediTMP]
+				mov esp, [espTMP]
+				mov ebp, [ebpTMP]
 				call Update
 
 				mov eax, tickStep
@@ -410,6 +468,12 @@ namespace Streams
 		{
 			__asm
 			{
+				mov edx, [edxTMP]
+				mov ecx, [ecxTMP]
+				mov esi, [esiTMP]
+				mov edi, [ediTMP]
+				mov esp, [espTMP]
+				mov ebp, [ebpTMP]
 				call[LocalAddresses::InternalTickIncreaseFunc]
 				jmp[LocalAddresses::h_TickIncreasing.JumpBackAddress]
 			}
@@ -428,17 +492,17 @@ namespace Streams
 		}
 		char streamsDirectory[256];
 		sprintf(streamsDirectory, "%s\\Streams_%s", T6SDK::Dvars::GetString(CustomDvars::dvar_streams_directory), T6SDK::InternalFunctions::getCurrentDateTimeString().c_str());
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Creating directory for streams at: %s", streamsDirectory);
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", "Creating directory for streams at: %s", streamsDirectory);
 		if (!T6SDK::InternalFunctions::CreateNewDirectory(streamsDirectory))
 		{
 			T6SDK::Theater::Demo_Error("Error occured!", "Failed to create directory for streams!");
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to create directory for streams!");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to create directory for streams!");
 			StopStreams();
 			return;
 		}
 		newStreamFolder = streamsDirectory;
 		folderToDeleteWhenAborted = string(streamsDirectory);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "newStreamFolder: %s", newStreamFolder);
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "newStreamFolder: %s", newStreamFolder);
 		if(T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) > -1)
 			T6SDK::Theater::Demo_JumpToTick(T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart));
 		T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden = true;
@@ -453,7 +517,7 @@ namespace Streams
 				T6SDK::InternalFunctions::CreateNewDirectory(buffer);
 				//strcpy(stream->Dir, buffer);
 				stream->Dir = buffer;
-				T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "New stream directory for %s", stream->Dir.c_str());
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "New stream directory for %s", stream->Dir.c_str());
 			}
 		}
 
@@ -473,9 +537,11 @@ namespace Streams
 
 	inline static void AbortStreams()
 	{
+		abortingStreams = true;
 		StopStreams();
-		T6SDK::ConsoleLog::Log("Attempting to delete the streams folder...");
-		T6SDK::ConsoleLog::Log(folderToDeleteWhenAborted.c_str());
+		abortingStreams = false;
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Attempting to delete the streams folder...");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", folderToDeleteWhenAborted.c_str());
 		try 
 		{
 			// Check if the folder exists
@@ -483,17 +549,17 @@ namespace Streams
 			{
 				// Delete the folder and its contents
 				std::filesystem::remove_all(folderToDeleteWhenAborted.c_str());
-				T6SDK::ConsoleLog::LogSuccess("Folder deleted successfully");
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "Folder deleted successfully");
 			}
 			else 
 			{
-				T6SDK::ConsoleLog::LogError("Folder does not exist");
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "STREAMS", "Folder does not exist");
 			}
 		}
 		catch (const std::filesystem::filesystem_error& e)
 		{
 			// Handle filesystem errors
-			T6SDK::ConsoleLog::LogError("Error deleting folder:");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Error deleting folder:");
 		}
 	}
 
@@ -512,56 +578,56 @@ namespace Streams
 		//Default
 		Default.Init();
 		Streams.push_back(&Default);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Default stream registered!");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Default stream registered!");
 
 		//GreenScreen
 		GreenScreen.Init();
 		Streams.push_back(&GreenScreen);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Green screen stream registered!");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Green screen stream registered!");
 
 		//NoPlayers
 		NoPlayers.Init();
 		Streams.push_back(&NoPlayers);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "No players stream registered!");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "No players stream registered!");
 
 		//NoGun
 		NoGun.Init();
 		Streams.push_back(&NoGun);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "No gun stream registered!");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "No gun stream registered!");
 
 		//Depth
 		Depth.Init();
 		Streams.push_back(&Depth);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Depth stream registered!");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Depth stream registered!");
 
 		//FxOnly
 		FxOnly.Init();
 		Streams.push_back(&FxOnly);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "FxOnly stream registered!");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "FxOnly stream registered!");
 
 		//DepthWithGun
 		DepthWithGun.Init();
 		Streams.push_back(&DepthWithGun);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Depth with gun stream registered!");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Depth with gun stream registered!");
 
 		//Green sky
 		GreenSky.Init();
 		Streams.push_back(&GreenSky);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Green sky stream registered!");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Green sky stream registered!");
 
 
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Total streams registered: %i", Streams.size());
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "Total streams registered: %i", Streams.size());
 
-		T6SDK::ConsoleLog::Log("Initializing DX11...");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", "Initializing DX11...");
 		if (initDX11() == false)
 		{
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTRED, "Failed to initialize DX11!");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to initialize DX11!");
 			return;
 		}
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "DX11 initialized.");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "DX11 initialized.");
 
 		//Init UI for passes
-		T6SDK::ConsoleLog::Log("Initializing streams passes UI...");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", "Initializing streams passes UI...");
 		UIControls::UI_StreamsPass1CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEFAULT", "DEFAULT", 12, 6, T6SDK::AnchorPoint::TopLeft, &Streams::Default.toggle->current.enabled, 0x00);
 		UIControls::UI_StreamsPass2CheckBox = T6SDK::Drawing::UI_CheckBoxButton("NO GUN", "NO GUN", 12, 8, T6SDK::AnchorPoint::TopLeft, &Streams::NoGun.toggle->current.enabled, 0x00);
 		UIControls::UI_StreamsPass3CheckBox = T6SDK::Drawing::UI_CheckBoxButton("GREEN SCREEN", "GREEN SCREEN", 12, 10, T6SDK::AnchorPoint::TopLeft, &Streams::GreenScreen.toggle->current.enabled, 0x00);
@@ -570,7 +636,7 @@ namespace Streams
 		UIControls::UI_StreamsPass6CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEPTH WITH GUN", "DEPTH WITH GUN", 12, 16, T6SDK::AnchorPoint::TopLeft, &Streams::DepthWithGun.toggle->current.enabled, 0x00);
 		UIControls::UI_StreamsPass7CheckBox = T6SDK::Drawing::UI_CheckBoxButton("FX ONLY", "FX ONLY", 12, 18, T6SDK::AnchorPoint::TopLeft, &Streams::FxOnly.toggle->current.enabled, 0x00);
 		UIControls::UI_StreamsPass8CheckBox = T6SDK::Drawing::UI_CheckBoxButton("GREEN SKY", "GREEN SKY", 12, 20, T6SDK::AnchorPoint::TopLeft, &Streams::GreenSky.toggle->current.enabled, 0x00);
-		T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Streams passes UI initialized.");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "Streams passes UI initialized.");
 
 
 		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_start", StartStreams, &cmd_streams_start_VAR);

@@ -50,7 +50,7 @@ namespace Lights
 				{
 					SelectedLight = i;
 					LastSelectedLight = SelectedLight;
-					T6SDK::ConsoleLog::LogFormatted("Selected light: #%i", SelectedLight);
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "LIGHTS", "Selected light: #%i", SelectedLight);
 					func* f = (func*)OnSelectedLightChanged;
 					if (f)
 						f(SelectedLight);
@@ -182,7 +182,7 @@ namespace Lights
 			//}
 
 			LightsList.push_back(newLight);
-			T6SDK::ConsoleLog::LogFormatted("%s light added! Total lights: %i", newLight.spotLight ? "Spot" : "Omni", LightsList.size());
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "LIGHTS", "%s light added! Total lights: %i", newLight.spotLight ? "Spot" : "Omni", LightsList.size());
 		}
 	}
 	static void RemoveLight()
@@ -200,7 +200,7 @@ namespace Lights
 		}
 		catch(const char* e)
 		{
-			T6SDK::ConsoleLog::LogError(e);
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "LIGHTS", e);
 		}
 	}
 	static void RemoveAllLights()
@@ -245,11 +245,11 @@ namespace Lights
 				ExportFile.close();
 				char buffer[256];
 				sprintf(buffer, "%i light(s) exported to %s.", (int)LightsList.size(), str);
-				T6SDK::ConsoleLog::LogSuccess(buffer);
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "LIGHTS", buffer);
 			}
 		}
 		else
-			T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTYELLOW, "User cancelled light export operation");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "LIGHTS", "User cancelled light export operation");
 	}
 	static void ImportLights()
 	{
@@ -307,7 +307,7 @@ namespace Lights
 							}
 							else
 							{
-								T6SDK::ConsoleLog::Log("Error during loading lights!");
+								T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "LIGHTS", "Error during loading lights!");
 								successStatus = false;
 								tempLightsList.clear();
 								break;
@@ -319,8 +319,8 @@ namespace Lights
 					catch (const char* error)
 					{
 						fileopen.close();
-						T6SDK::ConsoleLog::Log("Error occured during loading lights!");
-						T6SDK::ConsoleLog::Log(error);
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "LIGHTS", "Error occured during loading lights!");
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "LIGHTS", error);
 						successStatus = false;
 						tempLightsList.clear();
 						return;
@@ -339,11 +339,11 @@ namespace Lights
 						tempLightsList.clear();
 					}
 					fileopen.close();
-					T6SDK::ConsoleLog::Log("Lights were imported!");
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "LIGHTS", "Lights were imported!");
 				}
 			}
 			else
-				T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTYELLOW, "User cancelled light export operation");
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "LIGHTS", "User cancelled light export operation");
 		}
 	}
 	inline static void Init()

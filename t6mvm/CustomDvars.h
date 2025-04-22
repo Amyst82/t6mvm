@@ -26,7 +26,9 @@ namespace CustomDvars
 	const char* gsPlayersEnum[4] = {"No", "Selected player", "Threshold", "All players"};
 	static dvar_s* dvar_greenScreenPlayers;
 	static dvar_s* dvar_greenScreenPlayersThreshold;
+	static dvar_s* dvar_greenScreenColor;
 	static dvar_s* dvar_zdepth;
+	static dvar_s* dvar_zdepthDistance;
 
 
 	//LIGHTS DVARS
@@ -57,10 +59,16 @@ namespace CustomDvars
 	//MENU DVARS
 	static dvar_s* dvar_menuBlur;
 	static dvar_s* dvar_showBone;
+	static dvar_s* dvar_tick;
 
 	void CheckDvars()
 	{
-		
+		if (dvar_tick->modified)
+		{
+			T6SDK::Theater::GoToTick(T6SDK::Dvars::GetInt(dvar_tick));
+			T6SDK::Dvars::SetInt(dvar_tick, 0);
+			dvar_tick->modified = false;
+		}
 	}
 	inline static void Init()
 	{
@@ -87,7 +95,9 @@ namespace CustomDvars
 		dvar_greenScreen = T6SDK::Dvars::RegisterBool("mvm_greenScreen", false, "Green screen.");
 		dvar_greenScreenPlayers = T6SDK::Dvars::RegisterEnum("mvm_greenScreenPlayers", gsPlayersEnum, 1, "Green screen players.");
 		dvar_greenScreenPlayersThreshold = T6SDK::Dvars::RegisterFloat("mvm_greenScreenPlayersThreshold", 500.0f, 0.0f, 5000.0f, "Green screen players threshold.");
+		dvar_greenScreenColor = T6SDK::Dvars::RegisterVec3("mvm_greenScreenColor", 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, "Green screen color");
 		dvar_zdepth = T6SDK::Dvars::RegisterBool("mvm_zdepth", false, "Z depth.");
+		dvar_zdepthDistance = T6SDK::Dvars::RegisterFloat("mvm_zdepthDistance", 1000.0f, 0.0f, 5000.0f, "Z depth distance.");
 
 		//Register lights dvars
 		dvar_lightRadiusLimit = T6SDK::Dvars::RegisterFloat("mvm_lightRadiusLimit", 1000.0f, 0.0f, 10000.0f, "Light radius limit.");
@@ -115,8 +125,9 @@ namespace CustomDvars
 		//Register menu dvars
 		dvar_menuBlur = T6SDK::Dvars::RegisterBool("mvm_menuBlur", true, "Menu blur.");
 		dvar_showBone = T6SDK::Dvars::RegisterBool("mvm_showBone", true, "Show selected bone.");
+		dvar_tick = T6SDK::Dvars::RegisterInt("mvm_tick", 0, 11000, 99999999, "Go to desired tick.");
 
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&CheckDvars);
-		T6SDK::ConsoleLog::LogSuccess("Custom dvars and commands initialized!");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "DVARS", "Custom dvars and commands initialized!");
 	}
 }

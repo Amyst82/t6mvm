@@ -55,6 +55,12 @@
     <Filter Include="Components\Theater\Sun">
       <UniqueIdentifier>{0bed2ee2-1911-4cbf-a1b2-73f3330763d1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Components\Theater\SSAO">
+      <UniqueIdentifier>{5879377e-2ebc-43f2-b06e-fe92e9527460}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Theater\DOF">
+      <UniqueIdentifier>{a20e269a-8302-434f-99ab-dbb4f8b55615}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -158,6 +164,21 @@
     </ClInclude>
     <ClInclude Include="CameraMenu.h">
       <Filter>Components\Theater\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="SsaoMenu.h">
+      <Filter>Components\Theater\SSAO</Filter>
+    </ClInclude>
+    <ClInclude Include="DofMenu.h">
+      <Filter>Components\Theater\DOF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Downloads\json.hpp">
+      <Filter>Components\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_Timeline.h">
+      <Filter>Components\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_DemoBrowseButton.h">
+      <Filter>Components\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

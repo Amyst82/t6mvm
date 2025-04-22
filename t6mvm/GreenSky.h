@@ -2,18 +2,48 @@
 #include "IMVMStream.h"
 class Stream_GreenSky : public IMVMStream
 {
+private:
+	bool prevBloomTweaks = false;
+	bool prevFlareEffects = true;
+	bool prevSunFlares = true;
 public:
 	void Enable()
 	{
 		T6SDK::Addresses::Patches::RemoveSkyBoxPatch.Patch();
-		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor, 0x0000FF00);
-		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor2, 0x0000FF00);
+		prevBloomTweaks = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks);
+		prevFlareEffects = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::flareDisableEffects);
+		prevSunFlares = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw);
+		//T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor, 0x0000FF00);
+		//T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor2, 0x0000FF00);
+
+		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks, true);
+		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, true);
+		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, false);
+
+		float clrR = max(0.0f, min(1.0f, CustomDvars::dvar_greenScreenColor->current.vector[0]));
+		(*T6SDK::Dvars::DvarList::r_clearColor)->current.color[0] = static_cast<unsigned char>(clrR * 255.0f + 0.5f);
+		(*T6SDK::Dvars::DvarList::r_clearColor2)->current.color[0] = static_cast<unsigned char>(clrR * 255.0f + 0.5f);
+
+		float clrG = max(0.0f, min(1.0f, CustomDvars::dvar_greenScreenColor->current.vector[1]));
+		(*T6SDK::Dvars::DvarList::r_clearColor)->current.color[1] = static_cast<unsigned char>(clrG * 255.0f + 0.5f);
+		(*T6SDK::Dvars::DvarList::r_clearColor2)->current.color[1] = static_cast<unsigned char>(clrG * 255.0f + 0.5f);
+
+		float clrB = max(0.0f, min(1.0f, CustomDvars::dvar_greenScreenColor->current.vector[2]));
+		(*T6SDK::Dvars::DvarList::r_clearColor)->current.color[2] = static_cast<unsigned char>(clrB * 255.0f + 0.5f);
+		(*T6SDK::Dvars::DvarList::r_clearColor2)->current.color[2] = static_cast<unsigned char>(clrB * 255.0f + 0.5f);
+
+		Enabled = true;
 	}
 	void Disable()
 	{
 		T6SDK::Addresses::Patches::RemoveSkyBoxPatch.UnPatch();
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor,  0x00000000);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor2, 0x00000000);
+
+		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, prevFlareEffects);
+		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, prevSunFlares);
+		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks, prevBloomTweaks);
+		Enabled = false;
 	}
 	void Init()
 	{

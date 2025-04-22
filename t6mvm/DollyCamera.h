@@ -57,6 +57,14 @@ namespace Camera
 			{
 				if (T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
 				{
+					if (T6SDK::Addresses::Tick.Value() > T6SDK::Addresses::cg->Tick)
+					{
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, true, "FROZENCAMERA", "Tick mismatch. Unable to turn frozen camera mode on.");
+						T6SDK::Theater::Demo_Error("TICK MISMATCH", "Seems some internal ticks do not match. Please skip back once and try again.");
+						CustomDvars::dvar_frozenCam->modified = false;
+						T6SDK::Dvars::SetBool(CustomDvars::dvar_frozenCam, false);
+						return;
+					}
 					T6SDK::Addresses::Patches::PreventDemoNavigation.Patch();
 					LocalAddresses::FakeTickDetour1.Patch();
 					LocalAddresses::FakeTickDetour2.Patch();
@@ -180,7 +188,7 @@ namespace Camera
 				t = T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick;
 			int increment = t - T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick;
 			if (increment < 0)
-				return;
+				t = 0;
 			if (t >= T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[MarkersCount - 1].Tick)
 			{
 				if (frozenCam)
@@ -188,6 +196,7 @@ namespace Camera
 					T6SDK::Addresses::IsDemoPaused.SetValueSafe(1);
 					t = 0;
 					Streams::StopStreams();
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, true, "FROZENCAMERA", "FROZEN CAMERA HAS FINISHED ITS MOVEMENT");
 					return;
 				}
 				t = T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[MarkersCount - 1].Tick;
@@ -225,9 +234,9 @@ namespace Camera
 		{
 			if (T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
 			{
-				T6SDK::ConsoleLog::LogFormatted("Added frozen marker at tick %i", T6SDK::Addresses::cg->FakeTick);
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DOLLYCAMERA", "Added frozen marker at tick %i", T6SDK::Addresses::cg->FakeTick);
 				T6SDK::Addresses::cg->FakeTick += 500;
-				T6SDK::ConsoleLog::LogFormatted("New tick %i", T6SDK::Addresses::cg->FakeTick);
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DOLLYCAMERA", "New tick %i", T6SDK::Addresses::cg->FakeTick);
 			}
 		}
 	
@@ -263,6 +272,11 @@ namespace Camera
 				PreventChangingRotation(true);
 				PreventChangingPosition(true);
 				CreateCamera();
+				if (T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
+				{
+
+				}
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, true, "DOLLYCAMERA", "Camera created!");
 			}
 			else
 			{
@@ -289,22 +303,112 @@ namespace Camera
 		bool frozenCam = false;
 		bool notPovMode = false;
 		uintptr_t eaxTMP, ecxTMP, edxTMP, esiTMP, ediTMP, espTMP, ebpTMP;
+
+		char testText[256];
+		uintptr_t textAddr;
+		void SetCustomInfoOfMarker(int markerIndex)
+		{
+			int index = markerIndex / 96;
+			int tick = T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[index].Tick;
+			float roll = T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[index].Roll;
+			float fov = T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[index].Fov;
+			if (CustomDvars::dvar_frozenCam->current.enabled == false)
+			{
+				if (CustomDvars::dvar_showMarkerInfo->current.enabled)
+					sprintf(testText, "%02i:%02i\nRoll: %0.1f; Fov: %0.1f", tick / 60000, tick % 60000 / 1000, roll, fov);
+				else
+					sprintf(testText, "%02i:%02i", tick / 60000, tick % 60000 / 1000);
+			}
+			else
+			{
+				if (CustomDvars::dvar_showMarkerInfo->current.enabled)
+					sprintf(testText, "Frozen\nRoll: %0.1f; Fov: %0.1f", roll, fov);
+				else
+					sprintf(testText, "Frozen");
+			}
+			textAddr = (uintptr_t)&testText;
+		}
+		// OnDisplayedMarkerInfoChanged
+		__declspec(naked) void OnDisplayedMarkerInfoChanged()
+		{
+			__asm
+			{
+				mov[eaxTMP], eax
+				mov[ecxTMP], ecx
+				mov[edxTMP], edx
+				mov[esiTMP], esi
+				mov[ediTMP], edi
+				mov[espTMP], esp
+				mov[ebpTMP], ebp
+			}
+			if (T6SDK::MAIN::ENABLED)
+			{
+				__asm
+				{
+					mov eax, [eaxTMP]
+					mov edx, [edxTMP]
+					mov ecx, [ecxTMP]
+					mov esi, [esiTMP]
+					mov edi, [ediTMP]
+					mov esp, [espTMP]
+					mov ebp, [ebpTMP]
+					push edi
+					call SetCustomInfoOfMarker
+					mov eax, [eaxTMP]
+					mov ecx, [ecxTMP]
+					mov edx, [edxTMP]
+					mov esi, [esiTMP]
+					mov edi, [ediTMP]
+					mov esp, [espTMP]
+					mov ebp, [ebpTMP]
+					push 0x7FFFFFFF
+					push[textAddr]
+					jmp[LocalAddresses::h_DisplayMarkerInfoHook.JumpBackAddress]
+				}
+			}
+			else
+			{
+				__asm
+				{
+					mov eax, [eaxTMP]
+					mov ecx, [ecxTMP]
+					mov edx, [edxTMP]
+					mov esi, [esiTMP]
+					mov edi, [ediTMP]
+					mov esp, [espTMP]
+					mov ebp, [ebpTMP]
+					push 0x7FFFFFFF
+					push edx
+					jmp[LocalAddresses::h_DisplayMarkerInfoHook.JumpBackAddress]
+				}
+			}
+		}
+
 		__declspec(naked) void OnTickChanged()
 		{
+			__asm
+			{
+				mov[eaxTMP], eax
+				mov[ecxTMP], ecx
+				mov[edxTMP], edx
+				mov[esiTMP], esi
+				mov[ediTMP], edi
+				mov[espTMP], esp
+				mov[ebpTMP], ebp
+			}
 			if (T6SDK::MAIN::ENABLED)
 			{
 				frozenCam = T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam);
 				notPovMode = T6SDK::Addresses::DemoPlayback.Value()->CameraMode != T6SDK::DemoCameraMode::NONE;
 				__asm
 				{
-					mov[eaxTMP], eax
-					mov[ecxTMP], ecx
-					mov[edxTMP], edx
-					mov[esiTMP], esi
-					mov[ediTMP], edi
-					mov[espTMP], esp
-					mov[ebpTMP], ebp
-
+					mov eax, [eaxTMP]
+					mov edx, [edxTMP]
+					mov ecx, [ecxTMP]
+					mov esi, [esiTMP]
+					mov edi, [ediTMP]
+					mov esp, [espTMP]
+					mov ebp, [ebpTMP]
 					//Route pointer of main tick to a fake one so the game will be paused
 					mov al, frozenCam
 					cmp al, 1
@@ -331,6 +435,13 @@ namespace Camera
 			{
 				__asm
 				{
+					mov eax, [eaxTMP]
+					mov edx, [edxTMP]
+					mov ecx, [ecxTMP]
+					mov esi, [esiTMP]
+					mov edi, [ediTMP]
+					mov esp, [espTMP]
+					mov ebp, [ebpTMP]
 					mov[esi + 0x4808C], ebp
 					jmp[T6SDK::Addresses::HookAddresses::h_TickChanged.JumpBackAddress]
 				}
@@ -347,8 +458,7 @@ namespace Camera
 			{
 				if (T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount > 0)
 				{
-					T6SDK::Theater::Demo_JumpToTick(T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick);
-					T6SDK::Addresses::InitialTick.SetValueSafe(T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick);
+					T6SDK::Theater::GoToTick(T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[0].Tick);
 				}
 			}
 		}
@@ -387,11 +497,11 @@ namespace Camera
 					char buffer[256];
 					sprintf(buffer, "%i marker(s) exported to %s.", T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount, openedFileName);
 					T6SDK::Theater::Demo_Error("Camera Export", buffer);
-					T6SDK::ConsoleLog::Log("Camera was exported!");
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "DOLLYCAMERA", "Camera was exported!");
 				}
 			}
 			else
-				T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTYELLOW, "User cancelled camera export operation");
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "DOLLYCAMERA", "User cancelled camera export operation");
 		}
 
 		static void ImportCampath()
@@ -433,7 +543,7 @@ namespace Camera
 										list.push_back(segment.c_str());
 									}
 									startTick = stoi(list[1]);
-									T6SDK::ConsoleLog::Log("Start tick loaded!");
+									T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DOLLYCAMERA", "Start tick loaded!");
 
 								}
 								else // reading all other lines and split them by ';'
@@ -458,7 +568,7 @@ namespace Camera
 									else
 									{
 										T6SDK::Theater::Demo_Error("Camera Import", "Camera wasn't imported due to an error!");
-										T6SDK::ConsoleLog::Log("Error during loading markers!");
+										T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DOLLYCAMERA", "Error during loading markers!");
 										successStatus = false;
 										break;
 									}
@@ -471,8 +581,8 @@ namespace Camera
 						{
 							fileopen.close();
 							T6SDK::Theater::Demo_Error("Camera Import", "Camera wasn't imported due to an error!");
-							T6SDK::ConsoleLog::Log("Error during loading markers!");
-							T6SDK::ConsoleLog::Log(ex.what());
+							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DOLLYCAMERA", "Error during loading markers!");
+							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "DOLLYCAMERA", ex.what());
 							successStatus = false;
 							return;
 						}
@@ -485,7 +595,7 @@ namespace Camera
 						char buffer[256];
 						sprintf(buffer, "Successfully loaded %i marker(s)!", T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount);
 						T6SDK::Theater::Demo_Error("Camera Import", buffer);
-						T6SDK::ConsoleLog::Log("Camera was imported!");
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "DOLLYCAMERA", "Camera was imported!");
 					}
 				}
 			}
@@ -493,7 +603,7 @@ namespace Camera
 		static void Init()
 		{
 			T6SDK::Addresses::HookAddresses::h_TickChanged.Hook(OnTickChanged);
-
+			LocalAddresses::h_DisplayMarkerInfoHook.Hook(OnDisplayedMarkerInfoChanged);
 			T6SDK::Events::RegisterListener(T6SDK::EventType::OnAxisToAngles, (uintptr_t)&PovCameraUpdate);
 			T6SDK::Events::RegisterListener(T6SDK::EventType::OnTheaterControlsDrawn, (uintptr_t)&OnTheaterControlsDrawn);
 			T6SDK::Events::RegisterListener(T6SDK::EventType::OnCameraMarkerAdded, (uintptr_t)&OnMarkerAdded);

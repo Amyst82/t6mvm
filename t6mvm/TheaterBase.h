@@ -52,6 +52,18 @@ namespace TheaterBase
 	{
 		BoneCamera::OnCameraModeChanged(newMode);
 	}
+	void HandleGameModeChanged(int mode)
+	{
+		if (mode == 32) //theater
+		{
+			T6SDK::InternalFunctions::GrabRefDefViewAxisMatrix(false);
+			T6SDK::Theater::GrabFreeCameraAngles = false;
+			T6SDK::Dvars::SetBool(CustomDvars::dvar_frozenCam, false);
+			CustomDvars::dvar_frozenCam->modified = true;
+			Camera::DollyCamera::PreventChangingRotation(false);
+			Camera::DollyCamera::PreventChangingPosition(false);
+		}
+	}
 	inline static void Init()
 	{
 		T6SDK::Theater::SetDemoTimescaleCustomStep(true, &CustomDvars::dvar_demoTimescaleStep->current.value);
@@ -71,6 +83,7 @@ namespace TheaterBase
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&Lights::Update);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnKeyPressed, (uintptr_t)&OnKeyPressed);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnSafeStringTranslated, (uintptr_t)&HandleSafeStringTranslate);
+		T6SDK::Events::RegisterListener(T6SDK::EventType::OnGameModeChanged, (uintptr_t)&HandleGameModeChanged);
 		T6SDK::Addresses::Patches::JumpToDollyCamMarkerPatch.Patch();
 		//T6SDK::Theater::SetFreeRoamCameraSpeed(0.2f);
 	}
