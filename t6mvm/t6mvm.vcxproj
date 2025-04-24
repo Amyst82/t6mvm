@@ -282,6 +282,7 @@
     <ClInclude Include="IMVMStream.h" />
     <ClInclude Include="Lights.h" />
     <ClInclude Include="LightsMenu.h" />
+    <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Misc.h" />
     <ClInclude Include="MiscMenu.h" />
     <ClInclude Include="NoGun.h" />
@@ -298,8 +299,12 @@
     <ClInclude Include="UIControls.h" />
     <ClInclude Include="UI_DemoBrowseButton.h" />
     <ClInclude Include="UI_Timeline.h" />
+    <ClInclude Include="WeapAnimListBoxControl.h" />
     <ClInclude Include="Weapon.h" />
+    <ClInclude Include="WeaponAnimationChangerMenu.h" />
+    <ClInclude Include="WeaponAnimations.h" />
     <ClInclude Include="WeaponMenu.h" />
+    <ClInclude Include="WeapsListBoxControl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AviFile.cpp" />

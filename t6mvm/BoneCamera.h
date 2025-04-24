@@ -121,12 +121,13 @@ namespace BoneCamera
 		{
 			for (int i = 0; i < 48; i++)
 			{
-				if (T6SDK::InternalFunctions::CG_GetEntity(i)->nextState.clientNum == playerindex && i != playerindex)
+				if (T6SDK::InternalFunctions::CG_GetEntity(i)->nextState.clientNum == playerindex && T6SDK::InternalFunctions::CG_GetEntity(i)->pose.eType == (BYTE)T6SDK::EntityType::PLAYERCORPSEENTITY && i != playerindex)
 				{
 					playerindex = i;
 					break;
 				}
 			}
+			//playerindex = (*(playerState_t*)(T6SDK::Addresses::PlayerStates + (playerindex * 0x2A08))).corpseIndex;
 			//T6SDK::ConsoleLog::LogErrorFormatted("Player is DEAD! Switching to corpse index: %i;", playerindex);
 		}
 		if (T6SDK::InternalFunctions::CG_DObjGetWorldTagMatrix(T6SDK::InternalFunctions::CG_GetEntity(playerindex), Bones[SelectedBone].Index, &rot, &pos))
@@ -151,7 +152,10 @@ namespace BoneCamera
 			Matrix33_s rotationMatrix = T6SDK::InternalFunctions::GetRotation33FromMatrix44(&resultMatrix);
 			T6SDK::Addresses::cg->RefDef.viewAxis = rotationMatrix;
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin = T6SDK::InternalFunctions::GetOriginFromMatrix44(&resultMatrix);
-			//
+			
+			entity_t* corpseEntity = T6SDK::InternalFunctions::CG_GetEntity(playerindex);
+			T6SDK::ConsoleLog::LogSameLineFormatted("ent pos: %.3f %.3f %3f", corpseEntity->pose.origin.x, corpseEntity->pose.origin.y, corpseEntity->pose.origin.z);
+
 			//T6SDK::InternalFunctions::AxisToAngles(&T6SDK::Addresses::cg->RefDef.viewAxis, &T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles);
 		}
 	}

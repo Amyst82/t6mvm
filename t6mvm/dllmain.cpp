@@ -3,6 +3,7 @@
 #include "CustomDvars.h"
 #include "UIBase.h"
 #include "TheaterBase.h"
+#include "WeaponAnimations.h"
 
 void OnGameLoaded()
 {
@@ -13,6 +14,7 @@ void OnGameLoaded()
         T6SDK::InternalFunctions::UI_OpenToastPopup("^5T6MVM loaded!", "Please wait for a few seconds til its completed.", 10000);
     Streams::InitStreams();
     T6SDK::MAIN::InitializeDevConsole();
+    WeaponAnimations::Init();
 }
 
 void Init()

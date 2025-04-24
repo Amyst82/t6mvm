@@ -7,7 +7,7 @@ namespace Misc
 {
 	void DetouredR_AddDObjToScene(void* obj, entity_t* entity, unsigned int entnum, unsigned int renderFxFlags, vec3_t* lightingOrigin, float* materialTime, float* burnFraction, char altXModel, int textureOverrideIndex, void* dobjConstantSet, float lightingOriginToleranceSq, float scale, bool isMarkableViewmodel)
 	{	
-		if (entity->pose.eType == (BYTE)T6SDK::EntityType::PLAYERENTITY || entity->pose.eType == (BYTE)T6SDK::EntityType::TEMPENTITY || entity->pose.eType == (BYTE)T6SDK::EntityType::ACTOR || entity->pose.eType == (BYTE)T6SDK::EntityType::ACTOR_CORPSE || entity->pose.eType == (BYTE)T6SDK::EntityType::PLAYERCORPSEENTITY)
+		if (entity->pose.eType == (BYTE)T6SDK::EntityType::PLAYERENTITY || entity->pose.eType == (BYTE)T6SDK::EntityType::TEMPENTITY || entity->pose.eType == (BYTE)T6SDK::EntityType::ACTOR || entity->pose.eType == (BYTE)T6SDK::EntityType::ACTOR_CORPSE || entity->pose.eType == (BYTE)T6SDK::EntityType::PLAYERCORPSEENTITY || entity->pose.eType == (BYTE)T6SDK::EntityType::ITEMENTITY)
 		{
 			if (T6SDK::Dvars::GetBool(CustomDvars::dvar_greenScreen) || (Streams::GreenScreen.toggle->current.enabled && Streams::GreenScreen.Enabled))
 			{
@@ -19,6 +19,11 @@ namespace Misc
 				else if (CustomDvars::dvar_greenScreenPlayers->current.integer == 1) //Selected player
 				{
 					if (entity->pose.eType == (BYTE)T6SDK::EntityType::PLAYERENTITY || entity->pose.eType == (BYTE)T6SDK::EntityType::PLAYERCORPSEENTITY)
+					{
+						if (entity->nextState.clientNum == T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client))
+							renderFxFlags = 0xFF44444;//  0xFF000006;
+					}
+					else if (entity->pose.eType == (BYTE)T6SDK::EntityType::ITEMENTITY) //Include weapon
 					{
 						if (entity->nextState.clientNum == T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client))
 							renderFxFlags = 0xFF44444;//  0xFF000006;
@@ -101,17 +106,22 @@ namespace Misc
 	static void GreenSkySwitchStates(T6SDK::Drawing::UI_CheckBoxButton* control)
 	{
 		bool state = *control->isChecked;
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "MISC", "Green sky state: %s", state ? "true":"false");
 		if (!state)
 		{
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "MISC", "Disabling green sky...");
 			Streams::GreenSky.Disable();
 			Streams::GreenSky.Enabled = false;
 			*control->isChecked = false;
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "MISC", "Green sky disabled.");
 		}
 		else
 		{
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "MISC", "Enabling green sky...");
 			Streams::GreenSky.Enable();
 			Streams::GreenSky.Enabled = true;
 			*control->isChecked = true;
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "MISC", "Green sky enabled.");
 		}
 	}
 
@@ -131,6 +141,13 @@ namespace Misc
 			return;
 		if (!T6SDK::Theater::IsPlaybackInited())
 			return;
+		if (CustomDvars::dvar_tick->modified)
+		{
+			T6SDK::Theater::GoToTick(T6SDK::Dvars::GetInt(CustomDvars::dvar_tick));
+			UIControls::UI_TimelineSlider.AddBookmark(T6SDK::Dvars::GetInt(CustomDvars::dvar_tick));
+			T6SDK::Dvars::SetInt(CustomDvars::dvar_tick, 0);
+			CustomDvars::dvar_tick->modified = false;
+		}
 		if(CustomDvars::dvar_greenScreen->modified)
 		{
 			SwitchGreenScreenState();

@@ -30,6 +30,19 @@ namespace CustomDvars
 	static dvar_s* dvar_zdepth;
 	static dvar_s* dvar_zdepthDistance;
 
+	//FOG DVARS
+	static dvar_s* dvar_fogStartDist;
+	static dvar_s* dvar_fogFadeDist;
+	static dvar_s* dvar_fogStartHeight;
+	static dvar_s* dvar_fogFadeHeight;
+	static dvar_s* dvar_fogOpacity;
+	static dvar_s* dvar_fogSunPitch;
+	static dvar_s* dvar_fogSunYaw;
+	static dvar_s* dvar_fogSunInner;
+	static dvar_s* dvar_fogSunOuter;
+	static dvar_s* dvar_fogColor;
+	static dvar_s* dvar_fogSunOpacity;
+	static dvar_s* dvar_fogSunColor;
 
 	//LIGHTS DVARS
 	static dvar_s* dvar_lightRadiusLimit;
@@ -60,15 +73,11 @@ namespace CustomDvars
 	static dvar_s* dvar_menuBlur;
 	static dvar_s* dvar_showBone;
 	static dvar_s* dvar_tick;
+	static dvar_s* dvar_uiGridDebug;
 
 	void CheckDvars()
 	{
-		if (dvar_tick->modified)
-		{
-			T6SDK::Theater::GoToTick(T6SDK::Dvars::GetInt(dvar_tick));
-			T6SDK::Dvars::SetInt(dvar_tick, 0);
-			dvar_tick->modified = false;
-		}
+		
 	}
 	inline static void Init()
 	{
@@ -99,6 +108,7 @@ namespace CustomDvars
 		dvar_zdepth = T6SDK::Dvars::RegisterBool("mvm_zdepth", false, "Z depth.");
 		dvar_zdepthDistance = T6SDK::Dvars::RegisterFloat("mvm_zdepthDistance", 1000.0f, 0.0f, 5000.0f, "Z depth distance.");
 
+
 		//Register lights dvars
 		dvar_lightRadiusLimit = T6SDK::Dvars::RegisterFloat("mvm_lightRadiusLimit", 1000.0f, 0.0f, 10000.0f, "Light radius limit.");
 		dvar_lightColorLimit = T6SDK::Dvars::RegisterFloat("mvm_lightColorLimit", 1.0f, 0.0f, 255.0f, "Light color limit.");
@@ -126,6 +136,7 @@ namespace CustomDvars
 		dvar_menuBlur = T6SDK::Dvars::RegisterBool("mvm_menuBlur", true, "Menu blur.");
 		dvar_showBone = T6SDK::Dvars::RegisterBool("mvm_showBone", true, "Show selected bone.");
 		dvar_tick = T6SDK::Dvars::RegisterInt("mvm_tick", 0, 11000, 99999999, "Go to desired tick.");
+		dvar_uiGridDebug = T6SDK::Dvars::RegisterBool("mvm_ui_grid", true, "Show UI grid.");
 
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&CheckDvars);
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "DVARS", "Custom dvars and commands initialized!");

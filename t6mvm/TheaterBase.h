@@ -7,6 +7,7 @@
 #include "FreeCamera.h"
 #include "DollyCamera.h"
 #include "Weapon.h"
+
 namespace TheaterBase
 {
 	void OnKeyPressed(BYTE key)
@@ -86,5 +87,7 @@ namespace TheaterBase
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnGameModeChanged, (uintptr_t)&HandleGameModeChanged);
 		T6SDK::Addresses::Patches::JumpToDollyCamMarkerPatch.Patch();
 		//T6SDK::Theater::SetFreeRoamCameraSpeed(0.2f);
+
+		//T6SDK::Dvars::Cmd_AddCommandInternal("mvm_removeTimelineBookmarks", UIControls::UI_TimelineSlider.RemoveAllBookmarks, &UIControls::UI_TimelineSlider.cmd_removeBookmarks_VAR);
 	}
 }

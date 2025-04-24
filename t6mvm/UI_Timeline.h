@@ -7,9 +7,11 @@ namespace UI_TimelineNS
 	{
 		typedef void func(int);
 	private:
+
 		bool Hovered = false;
 		bool Pressed = false;
 		bool Clicked = false;
+		bool BookmarkClicked = false;
 		bool IsEnabled = true;
 		bool MouseHold = false;
 		uintptr_t Function = 0;
@@ -40,6 +42,7 @@ namespace UI_TimelineNS
 
 
 	public:
+		cmd_function_s cmd_removeBookmarks_VAR;
 		int* value = &internalValue;
 		int Min = 0.0f;
 		int Max = 1.0f;
@@ -49,8 +52,14 @@ namespace UI_TimelineNS
 			*value = internalDefaultValue;
 			defaultValue = GetCoordByValue(internalDefaultValue, X, Y, WIDTH, Min, Max);
 		}
+		inline static vector<int> CustomBookmarks{};
 
 	public:
+		static void RemoveAllBookmarks()
+		{
+			CustomBookmarks.clear();
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, true, "UI_Timeline", "All bookmarks removed");
+		}
 		UI_Timeline()
 		{
 
@@ -82,6 +91,7 @@ namespace UI_TimelineNS
 			defaultValue = GetCoordByValue(T6SDK::Addresses::cg->activeSnapshots[0].serverTime, X, Y, WIDTH, Min, max);
 			Text = "00:00/00:00";
 			DrawRelative = drawRelative;
+			
 		}
 		/// <summary>
 		/// Slider.
@@ -109,6 +119,38 @@ namespace UI_TimelineNS
 			this->GridColumn = GridColumn;
 			this->GridRow = GridRow;
 		}
+
+		void AddBookmark(int tick)
+		{
+			if (CustomBookmarks.size() == 0)
+			{
+				CustomBookmarks.push_back(tick);
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "UI_Timeline", "Custom bookmark added at %02i:%02i (%i)", tick / 60000, tick % 60000 / 1000, tick);
+				T6SDK::MAIN::UI_ShowNotification("Timeline", "Custom bookmark added", 200);
+			}
+			else
+			{
+				bool found = false;
+				for (int i = 0; i < CustomBookmarks.size(); i++)
+				{
+					if (CustomBookmarks[i] == tick)
+					{
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, true, "UI_Timeline", "Bookmark already exists at %02i:%02i (%i)", tick / 60000, tick % 60000 / 1000, tick);
+						T6SDK::MAIN::UI_ShowNotification("Timeline", "^3Bookmark already exists at this tick.", 200);
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+				{
+					CustomBookmarks.push_back(tick);
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "UI_Timeline", "Custom bookmark added at %02i:%02i (%i)", tick / 60000, tick % 60000 / 1000, tick);
+					T6SDK::MAIN::UI_ShowNotification("Timeline", "Custom bookmark added", 200);
+					found = false;
+				}
+			}
+		}
+
 		bool gameUnpaused = false;
 		void Draw()
 		{
@@ -171,10 +213,8 @@ namespace UI_TimelineNS
 							Pressed = true;
 							if (Clicked == false)
 							{
-								//T6SDK::ConsoleLog::Log("Clicked!");
 								Clicked = true;
-								//Reset();
-								//TODO ADD BOOKMARK
+								AddBookmark(*value);
 							}
 						}
 						else
@@ -191,6 +231,7 @@ namespace UI_TimelineNS
 						Hovered = false;
 						Pressed = false;
 						Clicked = false;
+
 					}
 				}
 
@@ -261,10 +302,41 @@ namespace UI_TimelineNS
 					if (defaultValue > (float)sliderRect.right - 5.0f)
 					{
 						defaultValue = (float)sliderRect.right;
-						*value = Max;
+						*value = Max;	
 					}
 					//Drawing the slider
 					T6SDK::Drawing::DrawRectAbsolute((float)sliderRect.left, (float)sliderRect.top, defaultValue - (float)sliderRect.left, HEIGHT, !IsEnabled ? T6SDK::Drawing::GRAYCOLOR : T6SDK::Drawing::GRAYCOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+
+					//Drawing custom bookmarks
+					for (int i = 0; i < CustomBookmarks.size(); i++)
+					{
+						RECT bookmarkRect{};
+						bool tickNearBookmark = *value > (CustomBookmarks[i] - 100) && *value < (CustomBookmarks[i] + 100);
+						if (T6SDK::Drawing::DrawRectAbsolute(GetCoordByValue(CustomBookmarks[i], (float)sliderRect.left, (float)sliderRect.top, WIDTH * scale2, Min, Max), (float)sliderRect.top - 50.0f, 10.0f, 10.0f, 45.0f, tickNearBookmark ? T6SDK::Drawing::YELLOWCOLOR : T6SDK::Drawing::REDCOLOR, T6SDK::AnchorPoint::TopCenter, &bookmarkRect))
+						{
+							if (T6SDK::Input::MousePosX() > (float)bookmarkRect.left && T6SDK::Input::MousePosX() < (float)bookmarkRect.right && T6SDK::Input::MousePosY() > (float)bookmarkRect.top && T6SDK::Input::MousePosY() < (float)bookmarkRect.bottom)
+							{
+								char buffer[64];
+								sprintf(buffer, "Time: %02i:%02i, tick: %i", CustomBookmarks[i] / 60000, CustomBookmarks[i] % 60000 / 1000, CustomBookmarks[i]);
+								T6SDK::Drawing::DrawTextAbsolute(buffer, T6SDK::Input::MousePosX() + 25.0f, T6SDK::Input::MousePosY() + 10.0f, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+								if (T6SDK::Input::Keys::LMB.IsAnyPressState())
+								{
+									if (BookmarkClicked == false)
+									{
+										BookmarkClicked = true;
+										T6SDK::Theater::GoToTick(CustomBookmarks[i]);
+										T6SDK::Addresses::IsDemoPaused.SetValueSafe(0);
+										gameUnpaused = true;
+
+									}
+								}
+								else
+									BookmarkClicked = false;
+							}
+							else
+								BookmarkClicked = false;
+						}
+					}
 
 					//Draw kills and deaths bookmarks
 					int kdBookmarkType = 0;

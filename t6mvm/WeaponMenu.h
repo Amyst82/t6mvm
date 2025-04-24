@@ -1,7 +1,7 @@
 #pragma once
 #include "UIControls.h"
 #include "CustomDvars.h"
-
+#include "WeaponAnimationChangerMenu.h"
 namespace WeaponMenu
 {
 	vector<const char*> CamoTags = {"Don't change",
@@ -102,6 +102,8 @@ namespace WeaponMenu
 		T6SDK::Drawing::DrawTextAbsolute("^9MISC", coords3.x, coords3.y, 1.0f, T6SDK::Drawing::T_WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 		UIControls::UI_CameraSway.Draw();
 		UIControls::UI_CameraSwayMaxAngle.Draw();
+
+		UIControls::UI_WeaponAnimChanging.Draw();
 	}
 
 	static void Init()
@@ -135,5 +137,8 @@ namespace WeaponMenu
 
 		UIControls::UI_CameraSwayMaxAngle = T6SDK::Drawing::UI_Slider("Camera sway max angle", &CustomDvars::dvar_cameraSwayMaxAngle->current.value, 20.0f, 00.0f, 50.0f, 4, 24, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_CameraSwayMaxAngle.ToolTip = "POV camera sway max angle.";
+
+		UIControls::UI_WeaponAnimChanging = T6SDK::Drawing::UI_CheckBoxButton("OPEN ANIMATIONS MENU", "CHANGING SOME ANIMS OWO", 8, 22, T6SDK::AnchorPoint::TopLeft, &WeaponAnimationChangerMenu::MenuOpened, 0x00);
+		UIControls::UI_WeaponAnimChanging.ToolTip = "Change any weapon animation with any other.";
 	}
 }

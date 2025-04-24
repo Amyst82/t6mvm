@@ -2,6 +2,8 @@
 #include <StdInclude.h>
 #include "UI_Timeline.h"
 #include "UI_DemoBrowseButton.h"
+#include "WeapsListBoxControl.h"
+#include "WeapAnimListBoxControl.h"
 namespace UIControls
 {
 
@@ -90,6 +92,9 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_Slider UI_SunX{};
 	inline static T6SDK::Drawing::UI_Slider UI_SunY{};
 	inline static T6SDK::Drawing::UI_Slider UI_SunZ{};
+	inline static T6SDK::Drawing::UI_EnumButton	UI_SunQuiality{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_RemoveSunFlare{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_SkyTransition{};
 
 	/// LIGHTS controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_LightType{};
@@ -139,6 +144,16 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_EnumButton UI_SecondaryCamo{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_CameraSway{};
 	inline static T6SDK::Drawing::UI_Slider UI_CameraSwayMaxAngle{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_WeaponAnimChanging{};
+	//WEAPON ANIMATION MENU controls
+	inline static T6SDK::Drawing::UI_ClickableButton UI_ReplaceWeaponAnim{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_ResetSelectedWeaponAnim{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_ResetAllWeaponAnims{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_CloseWeaponAnimMenu{};
+	inline static Weapon::UI_WeapsListBox UI_WeapsLB1{};
+	inline static Weapon::UI_WeapsListBox UI_WeapsLB2{};
+	inline static Weapon::UI_WeapAnimListBox UI_WeapAnimsLB1{};
+	inline static Weapon::UI_WeapAnimListBox UI_WeapAnimsLB2{};
 
 
 	//MENU controls
@@ -148,9 +163,14 @@ namespace UIControls
 	inline static UI_TimelineNS::UI_Timeline UI_TimelineSlider{};
 	inline static T6SDK::Drawing::UI_EnumButton UI_DemoClient{};
 	inline static UIDemoBrowseButtonNS::UI_DemoBrowseButton UI_DemoBrowseCheckButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_RemoveCustomBookmarks{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_LoadCFGButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_SaveAllAsCFGButton{};
+
 
 	inline static void Init()
 	{
+		//MainTabButton.SetChecked();
 		MainTabButton.ToolTip = "Control timeline, execute ^5cfg ^7and more.";
 		MainCameraTabButton.ToolTip = "Manage free camera, dolly camera and etc!";
 		MiscTabButton.ToolTip = "Various misc features such as green screen and depth!";
@@ -165,6 +185,7 @@ namespace UIControls
 		MenuBlurCheckBox = T6SDK::Drawing::UI_CheckBoxButton("^7BLUR ^9OFF", "^7BLUR ON", 12, 35, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_menuBlur->current.enabled, 0x00);
 		MenuBlurCheckBox.ToolTip = "Turn on/off menu background blur.";
 		UI_DemoBrowseCheckButton = UIDemoBrowseButtonNS::UI_DemoBrowseButton(13, 4, T6SDK::AnchorPoint::TopLeft);
+		UI_DemoBrowseCheckButton.ToolTip = "Load a demo from file.";
 	}
 	inline static void DrawTabs()
 	{

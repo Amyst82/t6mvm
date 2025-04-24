@@ -52,6 +52,32 @@ namespace SunMenu
 			std::string("r_skyRotation ") + std::to_string((*T6SDK::Dvars::DvarList::r_skyRotation)->current.value) + ";\n";
 		return cfg;
 	}
+
+	void SunFlareCheckBoxChecked()
+	{
+		if (*UIControls::UI_RemoveSunFlare.isChecked)
+		{
+			T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, true);
+			T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, false);
+		}
+		else
+		{
+			T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, false);
+			T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, true);
+		}
+	}
+	bool dummySkyTransiotionFlag = false;
+	void SkyTransitionChanged()
+	{
+		if (*UIControls::UI_SkyTransition.isChecked)
+		{
+			T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_skyTransition, 1.0f);
+		}
+		else
+		{
+			T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_skyTransition, 0.0f);
+		}
+	}
 	bool Inited = false;
 	static void Init()
 	{
@@ -73,6 +99,10 @@ namespace SunMenu
 		UIControls::UI_SkyTemp = T6SDK::Drawing::UI_Slider("SKY TEMP", &(*T6SDK::Dvars::DvarList::r_skyColorTemp)->current.value, 6500.0f, 1650.0f, 25000.0f, 10, 6, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_SkyBrightness = T6SDK::Drawing::UI_Slider("SKY BRIGHTNESS", &(*T6SDK::Dvars::DvarList::r_sky_intensity_factor0)->current.value, 1.0f, 0.0f, 10.0f, 10, 9, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_SkyRotation = T6SDK::Drawing::UI_Slider("SKY ROTATION", &(*T6SDK::Dvars::DvarList::r_skyRotation)->current.value, 0.0f, -360.0f, 360.0f, 10, 12, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+
+		UIControls::UI_SunQuiality		= T6SDK::Drawing::UI_EnumButton("SUN QUALITY", 0, 9, &(*T6SDK::Dvars::DvarList::sm_sunQuality)->current.integer, 4, 17, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_RemoveSunFlare	= T6SDK::Drawing::UI_CheckBoxButton("SUN FLARE ON", "SUN FLARE OFF", 7, 17, T6SDK::AnchorPoint::TopLeft, &(*T6SDK::Dvars::DvarList::flareDisableEffects)->current.enabled, (uintptr_t)&SunFlareCheckBoxChecked);
+		UIControls::UI_SkyTransition	= T6SDK::Drawing::UI_CheckBoxButton("SUN TRANSITION OFF", "SUN TRANSITION ON", 10, 17, T6SDK::AnchorPoint::TopLeft, &dummySkyTransiotionFlag, (uintptr_t)&SkyTransitionChanged);
 	}
 	static void Draw()
 	{
@@ -98,6 +128,14 @@ namespace SunMenu
 		UIControls::UI_SkyTemp.Draw();
 		UIControls::UI_SkyBrightness.Draw();
 		UIControls::UI_SkyRotation.Draw();
+
+		T6SDK::Drawing::DrawTextAbsolute("^9MISC", T6SDK::Drawing::GetGridCellCoords(8, 16).x, T6SDK::Drawing::GetGridCellCoords(8, 16).y, 1.0f, T6SDK::Drawing::T_WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+		char buffer[64];
+		sprintf(buffer, "SUN QUALITY: %i", *UIControls::UI_SunQuiality.SelectedValue);
+		UIControls::UI_SunQuiality.Text = buffer;
+		UIControls::UI_SunQuiality.Draw();
+		UIControls::UI_RemoveSunFlare.Draw();
+		UIControls::UI_SkyTransition.Draw();
 	}
 
 }

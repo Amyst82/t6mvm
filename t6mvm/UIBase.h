@@ -10,6 +10,8 @@
 #include "SunMenu.h"
 #include "SsaoMenu.h"
 #include "DofMenu.h"
+#include "WeaponAnimationChangerMenu.h"
+#include "MainMenu.h"
 namespace UIBase
 {
 	static void CopyCFGtoClipboard()
@@ -30,13 +32,20 @@ namespace UIBase
 		else if (*UIControls::WeaponTabButton.isChecked)
 			result = T6SDK::InternalFunctions::SetClipboardText(WeaponMenu::GetCFG());
 		if(!result)
+		{
 			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "UI", "Failed to copy to clipboard.");
+			T6SDK::MAIN::UI_ShowNotification("CFG", "Failed to copy to clipboard.",200);
+		}
 		else 
+		{
 			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "UI", "Copied to clipboard.");
+			T6SDK::MAIN::UI_ShowNotification("CFG", "Copied to clipboard!", 200);
+		}
 	}
 	static void CloseMenu()
 	{
 		(*T6SDK::Dvars::DvarList::r_blur)->current.value = 0.0f;
+		*UIControls::UI_WeaponAnimChanging.isChecked = false;
 		T6SDK::Input::CloseBlankMenu();
 	}
 	bool gameUnpaused = false;
@@ -48,8 +57,9 @@ namespace UIBase
 	static void OpenMenu()
 	{
 		UIControls::UI_TimelineSlider = UI_TimelineNS::UI_Timeline(T6SDK::Addresses::DemoEndTick.Value(), 8, 28, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopCenter);
-		UIControls::UI_DemoClient = T6SDK::Drawing::UI_EnumButton("Demo client", 0, T6SDK::Addresses::cg->activeSnapshots[0].numClients-1, &(*T6SDK::Dvars::DvarList::demo_client)->current.integer, 8, 33, T6SDK::AnchorPoint::TopCenter, (uintptr_t)&unpauseGame);
+		UIControls::UI_DemoClient = T6SDK::Drawing::UI_EnumButton("Demo client", 0, T6SDK::Addresses::cg->activeSnapshots[0].numClients-1, &(*T6SDK::Dvars::DvarList::demo_client)->current.integer, 8, 35, T6SDK::AnchorPoint::TopCenter, (uintptr_t)&unpauseGame);
 		T6SDK::Input::OpenBlankMenu();
+
 	}
 	void OnKeyPressed(BYTE keyCode)
 	{
@@ -81,8 +91,36 @@ namespace UIBase
 		}
 	}
 
+	void DrawUIGrid()
+	{
+		//Drawing columns
+		for (int column = 0; column < 16; column++)
+		{
+			vec2_t gridXcoords = T6SDK::Drawing::GetGridCellCoords(column, 0);
+			T6SDK::Drawing::DrawRectAbsolute(gridXcoords.x, gridXcoords.y, 2.0f, T6SDK::Addresses::ScreenHeight.Value(), tColor{ 1.0f, 1.0f, 1.0f, 0.25f }, T6SDK::AnchorPoint::TopLeft, 0x00);
+		}
+		//Drawing rows
+		for (int row = 0; row < 40; row++)
+		{
+			vec2_t gridYcoords = T6SDK::Drawing::GetGridCellCoords(0, row);
+			T6SDK::Drawing::DrawRectAbsolute(0.0f, gridYcoords.y, T6SDK::Addresses::ScreenWidth.Value(), 2.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.25f }, T6SDK::AnchorPoint::TopLeft, 0x00);
+		}
+		//Drawing grid numbers
+		for (int column = 0; column < 16; column++)
+		{
+			for (int row = 0; row < 40; row++)
+			{
+				vec2_t gridCoords = T6SDK::Drawing::GetGridCellCoords(column, row);
+				char buffer[64];
+				sprintf(buffer, "%i / %i", column, row);
+				T6SDK::Drawing::DrawTextAbsolute(buffer, gridCoords.x, gridCoords.y, 1.0f, T6SDK::Drawing::T_WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+			}
+		}
+	}
+
 	void OnEndFrameDrawn()
 	{
+
 		if (T6SDK::MAIN::DevConsoleOpened == true)
 			return;
 		if (gameUnpaused)
@@ -101,31 +139,36 @@ namespace UIBase
 			(*T6SDK::Dvars::DvarList::r_blur)->current.value = CustomDvars::dvar_menuBlur->current.enabled ? 9.0f : 0.0f;
 			//bg color
 			T6SDK::Drawing::DrawRectRelative(0.0f, 0.0f, 1.0f, 1.0f, CustomDvars::dvar_menuBlur->current.enabled ? T6SDK::Drawing::T_BLACKCOLOR : tColor{ 0.0f, 0.0f, 0.0f, 0.0f }, T6SDK::AnchorPoint::TopLeft, 0x00);
-
-			UIControls::DrawTabs();
-			CameraMenu::Draw();
-			BoneCameraMenu::Draw();
-			SsaoMenu::Draw();
-			DofMenu::Draw();
-			SunMenu::Draw();
-			MiscMenu::Draw();
-			LightsMenu::Draw();
-			StreamsMenu::Draw();
-			WeaponMenu::Draw();
-			UIControls::MenuBlurCheckBox.Draw();
-			UIControls::CloseMenuButton.Draw();
-			if(*UIControls::MainCameraTabButton.isChecked || *UIControls::MiscTabButton.isChecked || *UIControls::SsaoTabButton.isChecked || *UIControls::DofTabButton.isChecked || *UIControls::SunSkyTabButton.isChecked || *UIControls::StreamsTabButton.isChecked || *UIControls::WeaponTabButton.isChecked)
-				UIControls::AddToCFGButton.Draw();
-			if(*UIControls::MainTabButton.isChecked)
-				UIControls::UI_TimelineSlider.Draw();
-
-
-			if (*UIControls::MainTabButton.isChecked || *UIControls::BoneCameraTabButton.isChecked || *UIControls::WeaponTabButton.isChecked)
+			
+			if (*UIControls::UI_WeaponAnimChanging.isChecked)
 			{
-				char buffer[64];
-				sprintf_s(buffer, "Player: ^3%s", T6SDK::Addresses::cg->client[T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client)].szName);
-				UIControls::UI_DemoClient.Text = buffer;
-				UIControls::UI_DemoClient.Draw();
+				WeaponAnimationChangerMenu::Draw();
+			}
+			else
+			{
+				UIControls::DrawTabs();
+				MainMenu::Draw();
+				CameraMenu::Draw();
+				BoneCameraMenu::Draw();
+				SsaoMenu::Draw();
+				DofMenu::Draw();
+				SunMenu::Draw();
+				MiscMenu::Draw();
+				LightsMenu::Draw();
+				StreamsMenu::Draw();
+				WeaponMenu::Draw();
+				UIControls::MenuBlurCheckBox.Draw();
+				UIControls::CloseMenuButton.Draw();
+				if (*UIControls::MainCameraTabButton.isChecked || *UIControls::MiscTabButton.isChecked || *UIControls::SsaoTabButton.isChecked || *UIControls::DofTabButton.isChecked || *UIControls::SunSkyTabButton.isChecked || *UIControls::StreamsTabButton.isChecked || *UIControls::WeaponTabButton.isChecked)
+					UIControls::AddToCFGButton.Draw();
+	
+				if (*UIControls::MainTabButton.isChecked || *UIControls::BoneCameraTabButton.isChecked)
+				{
+					char buffer[64];
+					sprintf_s(buffer, "Player: ^3%s", T6SDK::Addresses::cg->client[T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client)].szName);
+					UIControls::UI_DemoClient.Text = buffer;
+					UIControls::UI_DemoClient.Draw();
+				}
 			}
 		}
 		if (!T6SDK::Theater::IsInTheater() && !T6SDK::Input::BlankMenuOpened)
@@ -137,6 +180,11 @@ namespace UIBase
 		{
 			Streams::ShowProgressOnScreen();
 		}
+		if (CustomDvars::dvar_uiGridDebug->current.enabled)
+			DrawUIGrid();
+
+		((T6SDK::Drawing::UI_Notification*)(T6SDK::MAIN::GetNotificationControl()))->Draw();
+
 	}
 	void OnSunInited()
 	{
@@ -149,6 +197,7 @@ namespace UIBase
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnDemoPlaybackInited, (uintptr_t)&OnSunInited);
 		//Init buttons and sliders here
 		UIControls::Init();
+		MainMenu::Init();
 		CameraMenu::Init();
 		MiscMenu::Init();
 		BoneCameraMenu::Init();
@@ -157,6 +206,7 @@ namespace UIBase
 		LightsMenu::Init();
 		StreamsMenu::Init();
 		WeaponMenu::Init();
+		WeaponAnimationChangerMenu::Init();
 		UIControls::CloseMenuButton = T6SDK::Drawing::UI_ClickableButton("^3TAB ^7Back", 2, 35, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&UIBase::CloseMenu);
 		UIControls::CloseMenuButton.ToolTip = "Press ^3TAB ^7or ^3ESC ^7 or just click here to close the menu.";
 
@@ -164,6 +214,8 @@ namespace UIBase
 		UIControls::AddToCFGButton.ToolTip = "^7Copy the current settings to clipboard as ^5CFG ^7commands.";
 
 		UIControls::UI_TimelineSlider = UI_TimelineNS::UI_Timeline(99999, 8, 28, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopCenter);
-		UIControls::UI_DemoClient = T6SDK::Drawing::UI_EnumButton("Demo client", 0, 32, &(*T6SDK::Dvars::DvarList::demo_client)->current.integer, 8, 33, T6SDK::AnchorPoint::TopCenter, 0x00);
+		UIControls::UI_TimelineSlider.ToolTip = "Jump to any tick you want!";
+		UIControls::UI_DemoClient = T6SDK::Drawing::UI_EnumButton("Demo client", 0, 32, &(*T6SDK::Dvars::DvarList::demo_client)->current.integer, 8, 35, T6SDK::AnchorPoint::TopCenter, 0x00);
+		UIControls::UI_DemoClient.ToolTip = "Switch between players.";
 	}
 }
