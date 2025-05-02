@@ -12,6 +12,22 @@ namespace Camera
 				T6SDK::Theater::SetFreeRoamCameraSpeed(CustomDvars::dvar_freeRoamSpeed->current.value);
 				CustomDvars::dvar_freeRoamSpeed->modified = false;
 			}
+			if (CustomDvars::dvar_cameraFov->modified)
+			{
+				(*T6SDK::Dvars::DvarList::cg_fov)->current.value = T6SDK::Dvars::GetFloat(CustomDvars::dvar_cameraFov);
+				T6SDK::Addresses::DemoPlayback.Value()->fov = (*T6SDK::Dvars::DvarList::cg_fov)->current.value;
+
+				if (T6SDK::Addresses::DemoPlayback.Value()->HighlightedDollyCamMarker != -1 && T6SDK::Addresses::DemoPlayback.Value()->RepositioningDollyCamMarker)
+					T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[T6SDK::Addresses::DemoPlayback.Value()->HighlightedDollyCamMarker].Fov = T6SDK::Addresses::DemoPlayback.Value()->fov;
+				CustomDvars::dvar_cameraFov->modified = false;
+			}
+			if (CustomDvars::dvar_cameraRoll->modified)
+			{
+				T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.z = T6SDK::Dvars::GetFloat(CustomDvars::dvar_cameraRoll);
+				if (T6SDK::Addresses::DemoPlayback.Value()->HighlightedDollyCamMarker != -1 && T6SDK::Addresses::DemoPlayback.Value()->RepositioningDollyCamMarker)
+					T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[T6SDK::Addresses::DemoPlayback.Value()->HighlightedDollyCamMarker].Roll = T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.z;
+				CustomDvars::dvar_cameraRoll->modified = false;
+			}
 		}
 		void HandleRollAndFov(float mouseWheelDelta)
 		{

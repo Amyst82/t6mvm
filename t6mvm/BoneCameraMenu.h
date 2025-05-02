@@ -19,7 +19,17 @@ namespace BoneCameraMenu
 		vec3_t pos{};
 		Matrix33_s rot{};
 		int playerindex = T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client);
-
+		if (T6SDK::InternalFunctions::CG_GetEntity(playerindex)->pose.physUserBody == 0)
+		{
+			for (int i = 0; i < 48; i++)
+			{
+				if (T6SDK::InternalFunctions::CG_GetEntity(i)->nextState.clientNum == playerindex && T6SDK::InternalFunctions::CG_GetEntity(i)->pose.eType == (BYTE)T6SDK::EntityType::PLAYERCORPSEENTITY && i != playerindex)
+				{
+					playerindex = i;
+					break;
+				}
+			}
+		}
 		for (int i = 0; i < BoneCamera::Bones.size(); i++)
 		{
 			if (T6SDK::InternalFunctions::CG_DObjGetWorldTagMatrix(T6SDK::InternalFunctions::CG_GetEntity(playerindex), BoneCamera::Bones[i].Index, &rot, &pos))

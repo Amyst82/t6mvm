@@ -28,8 +28,10 @@ namespace StreamsMenu
 	{
 		if (T6SDK::Addresses::Tick.Value() > T6SDK::Addresses::cg->Tick)
 		{
-			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, true, "STREAMS", "Tick mismatch. Unable to turn frozen camera mode on.");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, true, "STREAMS", "Tick mismatch. Unable start tick.");
+			T6SDK::Input::CloseBlankMenu();
 			T6SDK::Theater::Demo_Error("TICK MISMATCH", "Seems some internal ticks do not match. Please skip back once and try again.");
+			(*T6SDK::Dvars::DvarList::r_blur)->current.value = 0.0f;
 			return;
 		}
 		int startTick = T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart);
@@ -37,7 +39,7 @@ namespace StreamsMenu
 		{
 			if (T6SDK::Addresses::cg->Tick > T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) && T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) != -1)
 			{
-				T6SDK::Theater::Demo_Error("Unable to set start tick.", "We can't record backwards yet.");
+				//T6SDK::Theater::Demo_Error("Unable to set start tick.", "We can't record backwards yet.");
 				return;
 			}
 			T6SDK::Dvars::SetInt(CustomDvars::dvar_streams_tickStart, T6SDK::Addresses::cg->Tick);
@@ -59,7 +61,7 @@ namespace StreamsMenu
 		{
 			if (T6SDK::Addresses::cg->Tick < T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) && T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) != -1)
 			{
-				T6SDK::Theater::Demo_Error("Unable to set end tick.", "We can't record backwards yet.");
+				//T6SDK::Theater::Demo_Error("Unable to set end tick.", "We can't record backwards yet.");
 				return;
 			}
 			T6SDK::Dvars::SetInt(CustomDvars::dvar_streams_tickEnd, T6SDK::Addresses::cg->Tick);
@@ -78,13 +80,50 @@ namespace StreamsMenu
 	std::string selectedFolder{};
 	void SetStreamsDirectory()
 	{
-
-
 		// Open the folder dialog
 		if (T6SDK::InternalFunctions::OpenFolderDialog(selectedFolder)) 
 		{
 			CustomDvars::dvar_streams_directory->current.string = selectedFolder.c_str();
-			std::cout << "Selected folder: " << CustomDvars::dvar_streams_directory->current.string << std::endl;
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", "Selected folder: %s", CustomDvars::dvar_streams_directory->current.string);
+			//Saving directory to settings
+			std::string settingsPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\t6mvm.json";
+			if (!std::filesystem::exists(settingsPath))
+			{
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "STREAMS", "Unable to save output directory. Settings JSON not found.");
+			}
+			else
+			{
+				try
+				{
+					// 1. Read JSON file
+					std::ifstream input_file(settingsPath);
+					if (!input_file.is_open())
+					{
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Could not open settings file.");
+						return;
+					}
+					json data;
+					input_file >> data;
+					input_file.close();
+					// 2. Modify JSON data
+					data["StreamsDirectory"] = selectedFolder.c_str();
+					// 3. Write modified JSON back to file
+					std::ofstream output_file(settingsPath);
+					if (!output_file.is_open())
+					{
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Could not write to settings file.");
+					}
+					// Write with pretty printing (indentation = 4)
+					output_file << data.dump(4);
+					output_file.close();
+
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams output directory updated in t6mvm.json.");
+				}
+				catch (const std::exception& e)
+				{
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", e.what());
+				}
+			}
 		}
 		else 
 		{
@@ -99,7 +138,7 @@ namespace StreamsMenu
 		bool streamsEnabled = T6SDK::Dvars::GetBool(CustomDvars::dvar_streams);
 		UIControls::UI_ToggleStreamsCheckBox.Draw();
 
-		if(strlen(CustomDvars::dvar_streams_directory->current.string) < 2)
+		if(std::string(CustomDvars::dvar_streams_directory->current.string).empty())
 			UIControls::UI_StreamsDirectoryButton.Text = "Output directory is not set";
 		else
 			UIControls::UI_StreamsDirectoryButton.Text = (std::string("^3Output: ^7") + std::string(CustomDvars::dvar_streams_directory->current.string)).c_str();
@@ -156,7 +195,7 @@ namespace StreamsMenu
 		UIControls::UI_StreamsFPSEnum.Text = buffer;
 		UIControls::UI_StreamsFPSEnum.Draw(streamsEnabled);
 
-		UIControls::UI_StreamsAVICheckBox.Draw(false);
+		UIControls::UI_StreamsAVICheckBox.Draw(streamsEnabled);
 		UIControls::UI_StreamsNoFlashCheckBox.Draw(streamsEnabled);
 		UIControls::UI_RecordCamCheckBox.Draw(streamsEnabled);
 

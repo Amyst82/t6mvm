@@ -85,7 +85,7 @@ namespace CameraMenu
 		UIControls::UI_DollyCamRotationOffsetZ = T6SDK::Drawing::UI_Slider("DOLLYCAM OFFSET ROLL", &CustomDvars::dvar_dollyCamOffsetRot->current.vector[2], 0.0f, -360.0f, 360.0f, 12, 11, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_DollyCamRotationOffsetZ.ToolTip = "Rotation offset to be applied to moving dolly camera.";
 
-		UIControls::UI_FreeRoamSpeed = T6SDK::Drawing::UI_Slider("FREE ROAM SPEED", &CustomDvars::dvar_freeRoamSpeed->current.value, 0.0f, 0.0f, 2.0f, 4, 16, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_FreeRoamSpeed = T6SDK::Drawing::UI_Slider("FREE ROAM SPEED", &CustomDvars::dvar_freeRoamSpeed->current.value, 1.0f, 0.0f, 2.0f, 4, 16, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_FreeRoamSpeed.ToolTip = "Free camera speed.";
 		UIControls::UI_FreeRoamAcceleration = T6SDK::Drawing::UI_Slider("FREE ROAM ACCELERATE TO", &CustomDvars::dvar_accelerationFactor->current.value, 2.0f, 0.0f, 10.0f, 8, 16, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_FreeRoamAcceleration.ToolTip = "Free camera speed to be set while pressing ^5SHIFT.";

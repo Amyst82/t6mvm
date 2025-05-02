@@ -9,9 +9,11 @@
 #include "StreamsMenu.h"
 #include "SunMenu.h"
 #include "SsaoMenu.h"
+#include "FogMenu.h"
 #include "DofMenu.h"
 #include "WeaponAnimationChangerMenu.h"
 #include "MainMenu.h"
+
 namespace UIBase
 {
 	static void CopyCFGtoClipboard()
@@ -23,6 +25,8 @@ namespace UIBase
 			result = T6SDK::InternalFunctions::SetClipboardText(MiscMenu::GetCFG());
 		else if (*UIControls::SsaoTabButton.isChecked)
 			result = T6SDK::InternalFunctions::SetClipboardText(SsaoMenu::GetCFG());
+		else if (*UIControls::FogTabButton.isChecked)
+			result = T6SDK::InternalFunctions::SetClipboardText(FogMenu::GetCFG());
 		else if (*UIControls::DofTabButton.isChecked)
 			result = T6SDK::InternalFunctions::SetClipboardText(DofMenu::GetCFG());
 		else if (*UIControls::SunSkyTabButton.isChecked)
@@ -63,7 +67,6 @@ namespace UIBase
 	}
 	void OnKeyPressed(BYTE keyCode)
 	{
-
 		if (!T6SDK::Theater::IsInTheater())
 			return;
 		if (keyCode == T6SDK::Input::Keys::TAB.KeyCode)
@@ -89,6 +92,7 @@ namespace UIBase
 		{
 			CloseMenu();
 		}
+		Common::UI_BookmarkDialog.OnInputKey(keyCode);
 	}
 
 	void DrawUIGrid()
@@ -120,75 +124,80 @@ namespace UIBase
 
 	void OnEndFrameDrawn()
 	{
-
-		if (T6SDK::MAIN::DevConsoleOpened == true)
-			return;
-		if (gameUnpaused)
+		if (!T6SDK::Input::InputLockedByTextBoxDialog)
 		{
-			T6SDK::Addresses::IsDemoPaused.SetValueSafe(1);
-			gameUnpaused = false;
-		}
-		if (!T6SDK::Theater::IsInTheater() || T6SDK::Input::BlankMenuOpened)
-		{
-			T6SDK::Drawing::DrawTextAbsolute("T6MVM v1.0.0 build 1337", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.2f }, T6SDK::AnchorPoint::TopLeft, 0x00);
-		}
-		//Draw tabs here
-		if (T6SDK::Input::BlankMenuOpened)
-		{
-			//bg blur
-			(*T6SDK::Dvars::DvarList::r_blur)->current.value = CustomDvars::dvar_menuBlur->current.enabled ? 9.0f : 0.0f;
-			//bg color
-			T6SDK::Drawing::DrawRectRelative(0.0f, 0.0f, 1.0f, 1.0f, CustomDvars::dvar_menuBlur->current.enabled ? T6SDK::Drawing::T_BLACKCOLOR : tColor{ 0.0f, 0.0f, 0.0f, 0.0f }, T6SDK::AnchorPoint::TopLeft, 0x00);
-			
-			if (*UIControls::UI_WeaponAnimChanging.isChecked)
+			if (T6SDK::MAIN::DevConsoleOpened == true)
+				return;
+			if (gameUnpaused)
 			{
-				WeaponAnimationChangerMenu::Draw();
+				T6SDK::Addresses::IsDemoPaused.SetValueSafe(1);
+				gameUnpaused = false;
 			}
-			else
+			if (!T6SDK::Theater::IsInTheater() || T6SDK::Input::BlankMenuOpened)
 			{
-				UIControls::DrawTabs();
-				MainMenu::Draw();
-				CameraMenu::Draw();
-				BoneCameraMenu::Draw();
-				SsaoMenu::Draw();
-				DofMenu::Draw();
-				SunMenu::Draw();
-				MiscMenu::Draw();
-				LightsMenu::Draw();
-				StreamsMenu::Draw();
-				WeaponMenu::Draw();
-				UIControls::MenuBlurCheckBox.Draw();
-				UIControls::CloseMenuButton.Draw();
-				if (*UIControls::MainCameraTabButton.isChecked || *UIControls::MiscTabButton.isChecked || *UIControls::SsaoTabButton.isChecked || *UIControls::DofTabButton.isChecked || *UIControls::SunSkyTabButton.isChecked || *UIControls::StreamsTabButton.isChecked || *UIControls::WeaponTabButton.isChecked)
-					UIControls::AddToCFGButton.Draw();
-	
-				if (*UIControls::MainTabButton.isChecked || *UIControls::BoneCameraTabButton.isChecked)
+				T6SDK::Drawing::DrawTextAbsolute("T6MVM v1.0.0 build 1337", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.2f }, T6SDK::AnchorPoint::TopLeft, 0x00);
+			}
+			//Draw tabs here
+			if (T6SDK::Input::BlankMenuOpened)
+			{
+				//bg blur
+				(*T6SDK::Dvars::DvarList::r_blur)->current.value = CustomDvars::dvar_menuBlur->current.enabled ? 9.0f : 0.0f;
+				//bg color
+				T6SDK::Drawing::DrawRectRelative(0.0f, 0.0f, 1.0f, 1.0f, CustomDvars::dvar_menuBlur->current.enabled ? T6SDK::Drawing::T_BLACKCOLOR : tColor{ 0.0f, 0.0f, 0.0f, 0.0f }, T6SDK::AnchorPoint::TopLeft, 0x00);
+
+				if (*UIControls::UI_WeaponAnimChanging.isChecked)
 				{
-					char buffer[64];
-					sprintf_s(buffer, "Player: ^3%s", T6SDK::Addresses::cg->client[T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client)].szName);
-					UIControls::UI_DemoClient.Text = buffer;
-					UIControls::UI_DemoClient.Draw();
+					WeaponAnimationChangerMenu::Draw();
+				}
+				else
+				{
+					UIControls::DrawTabs();
+					MainMenu::Draw();
+					CameraMenu::Draw();
+					BoneCameraMenu::Draw();
+					SsaoMenu::Draw();
+					FogMenu::Draw();
+					DofMenu::Draw();
+					SunMenu::Draw();
+					MiscMenu::Draw();
+					LightsMenu::Draw();
+					StreamsMenu::Draw();
+					WeaponMenu::Draw();
+					UIControls::MenuBlurCheckBox.Draw();
+					UIControls::CloseMenuButton.Draw();
+					if (*UIControls::MainCameraTabButton.isChecked || *UIControls::MiscTabButton.isChecked || *UIControls::SsaoTabButton.isChecked || *UIControls::FogTabButton.isChecked || *UIControls::DofTabButton.isChecked || *UIControls::SunSkyTabButton.isChecked || *UIControls::StreamsTabButton.isChecked || *UIControls::WeaponTabButton.isChecked)
+						UIControls::AddToCFGButton.Draw();
+
+					if (*UIControls::MainTabButton.isChecked || *UIControls::BoneCameraTabButton.isChecked)
+					{
+						char buffer[64];
+						sprintf_s(buffer, "Player: ^3%s", T6SDK::Addresses::cg->client[T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client)].szName);
+						UIControls::UI_DemoClient.Text = buffer;
+						UIControls::UI_DemoClient.Draw();
+					}
 				}
 			}
+			if (!T6SDK::Theater::IsInTheater() && !T6SDK::Input::BlankMenuOpened)
+			{
+				if (T6SDK::MAIN::ENABLED && T6SDK::Addresses::GameMode.Value() == 32)
+					UIControls::UI_DemoBrowseCheckButton.Draw();
+			}
+			if (!Streams::ScreenshotRequested && !Streams::IsAnyOtherStream && Streams::IsStreamsRunning)
+			{
+				Streams::ShowProgressOnScreen();
+			}
+			if (CustomDvars::dvar_uiGridDebug->current.enabled)
+				DrawUIGrid();
 		}
-		if (!T6SDK::Theater::IsInTheater() && !T6SDK::Input::BlankMenuOpened)
-		{
-			if (T6SDK::MAIN::ENABLED && T6SDK::Addresses::GameMode.Value() == 32)
-				UIControls::UI_DemoBrowseCheckButton.Draw();
-		}
-		if (!Streams::ScreenshotRequested && !Streams::IsAnyOtherStream && Streams::IsStreamsRunning)
-		{
-			Streams::ShowProgressOnScreen();
-		}
-		if (CustomDvars::dvar_uiGridDebug->current.enabled)
-			DrawUIGrid();
-
+		Common::UI_BookmarkDialog.Draw();
 		((T6SDK::Drawing::UI_Notification*)(T6SDK::MAIN::GetNotificationControl()))->Draw();
 
 	}
 	void OnSunInited()
 	{
 		SunMenu::Init();
+		FogMenu::Init();
+		Common::CustomBookmarks.clear();
 	}
 	inline static void Init()
 	{
@@ -210,7 +219,7 @@ namespace UIBase
 		UIControls::CloseMenuButton = T6SDK::Drawing::UI_ClickableButton("^3TAB ^7Back", 2, 35, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&UIBase::CloseMenu);
 		UIControls::CloseMenuButton.ToolTip = "Press ^3TAB ^7or ^3ESC ^7 or just click here to close the menu.";
 
-		UIControls::AddToCFGButton = T6SDK::Drawing::UI_ClickableButton("Copy CFG to clipboard", 8, 35, T6SDK::AnchorPoint::TopCenter, (uintptr_t)&UIBase::CopyCFGtoClipboard);
+		UIControls::AddToCFGButton = T6SDK::Drawing::UI_ClickableButton("Copy CFG to clipboard", 8, 35, T6SDK::AnchorPoint::TopCenter, (uintptr_t)&UIBase::CopyCFGtoClipboard, true);
 		UIControls::AddToCFGButton.ToolTip = "^7Copy the current settings to clipboard as ^5CFG ^7commands.";
 
 		UIControls::UI_TimelineSlider = UI_TimelineNS::UI_Timeline(99999, 8, 28, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopCenter);

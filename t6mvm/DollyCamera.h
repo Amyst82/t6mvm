@@ -60,7 +60,9 @@ namespace Camera
 					if (T6SDK::Addresses::Tick.Value() > T6SDK::Addresses::cg->Tick)
 					{
 						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, true, "FROZENCAMERA", "Tick mismatch. Unable to turn frozen camera mode on.");
+						T6SDK::Input::CloseBlankMenu();
 						T6SDK::Theater::Demo_Error("TICK MISMATCH", "Seems some internal ticks do not match. Please skip back once and try again.");
+						(*T6SDK::Dvars::DvarList::r_blur)->current.value = 0.0f;
 						CustomDvars::dvar_frozenCam->modified = false;
 						T6SDK::Dvars::SetBool(CustomDvars::dvar_frozenCam, false);
 						return;
@@ -612,8 +614,8 @@ namespace Camera
 			T6SDK::Dvars::Cmd_AddCommandInternal("mvm_exportCam", ExportCampath, &cmd_exportCam_VAR);
 			T6SDK::Dvars::Cmd_AddCommandInternal("mvm_importCam", ImportCampath, &cmd_importCam_VAR);
 
-			UIControls::UI_ExportCampathButton = T6SDK::Drawing::UI_ClickableButton("Export campath", 12, 30, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Camera::DollyCamera::ExportCampath);
-			UIControls::UI_ImportCampathButton = T6SDK::Drawing::UI_ClickableButton("Import campath", 12, 32, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Camera::DollyCamera::ImportCampath);
+			UIControls::UI_ExportCampathButton = T6SDK::Drawing::UI_ClickableButton("EXPORT CAMPATH", 12, 30, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Camera::DollyCamera::ExportCampath);
+			UIControls::UI_ImportCampathButton = T6SDK::Drawing::UI_ClickableButton("IMPORT CAMPATH", 12, 32, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Camera::DollyCamera::ImportCampath);
 		}
 	}
 }

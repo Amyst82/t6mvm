@@ -54,7 +54,7 @@ namespace WeaponMenu
 	static string GetCFG()
 	{
 		std::string cfg =
-			"//WEAPON\n" + 
+			"//WEAPON\n" +
 			std::string("cg_gun_x ") + std::to_string(T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::cg_gun_x)) + ";\n" +
 			std::string("cg_gun_y ") + std::to_string(T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::cg_gun_y)) + ";\n" +
 			std::string("cg_gun_z ") + std::to_string(T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::cg_gun_z)) + ";\n" +
@@ -66,7 +66,9 @@ namespace WeaponMenu
 			std::string("mvm_primaryCamo ") + std::to_string(T6SDK::Dvars::GetInt(CustomDvars::dvar_primaryCamo)) + ";\n" +
 			std::string("mvm_secondaryCamo ") + std::to_string(T6SDK::Dvars::GetInt(CustomDvars::dvar_secondaryCamo)) + ";\n" +
 			std::string("mvm_cameraSway ") + std::to_string(T6SDK::Dvars::GetBool(CustomDvars::dvar_cameraSway) ? 1 : 0) + ";\n" +
-			std::string("mvm_cameraSwayMaxAngle ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_cameraSwayMaxAngle)) + ";\n";
+			std::string("mvm_cameraSwayMaxAngle ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_cameraSwayMaxAngle)) + ";\n" +
+			std::string("mvm_holdgun ") + std::to_string(T6SDK::Dvars::GetBool(CustomDvars::dvar_holdgun) ? 1 : 0) + ";\n" +
+			std::string("mvm_holdgunWrist ") + std::to_string(T6SDK::Dvars::GetBool(CustomDvars::dvar_holdgunWrist) ? 1 : 0) + ";\n";
 		return cfg;
 	}
 
@@ -101,8 +103,12 @@ namespace WeaponMenu
 		vec2_t coords3 = T6SDK::Drawing::GetGridCellCoords(8, 21);
 		T6SDK::Drawing::DrawTextAbsolute("^9MISC", coords3.x, coords3.y, 1.0f, T6SDK::Drawing::T_WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 		UIControls::UI_CameraSway.Draw();
-		UIControls::UI_CameraSwayMaxAngle.Draw();
+		UIControls::UI_CameraSwayMaxAngle.Draw(*UIControls::UI_CameraSway.isChecked);
 
+		UIControls::UI_Holdgun.Draw();
+		UIControls::UI_HoldgunWrist.Draw(*UIControls::UI_Holdgun.isChecked);
+
+		T6SDK::Drawing::DrawTextAbsolute("^9ANIMATIONS", T6SDK::Drawing::GetGridCellCoords(8, 28).x, T6SDK::Drawing::GetGridCellCoords(8, 28).y, 1.0f, T6SDK::Drawing::T_WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 		UIControls::UI_WeaponAnimChanging.Draw();
 	}
 
@@ -138,7 +144,13 @@ namespace WeaponMenu
 		UIControls::UI_CameraSwayMaxAngle = T6SDK::Drawing::UI_Slider("Camera sway max angle", &CustomDvars::dvar_cameraSwayMaxAngle->current.value, 20.0f, 00.0f, 50.0f, 4, 24, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_CameraSwayMaxAngle.ToolTip = "POV camera sway max angle.";
 
-		UIControls::UI_WeaponAnimChanging = T6SDK::Drawing::UI_CheckBoxButton("OPEN ANIMATIONS MENU", "CHANGING SOME ANIMS OWO", 8, 22, T6SDK::AnchorPoint::TopLeft, &WeaponAnimationChangerMenu::MenuOpened, 0x00);
+		UIControls::UI_Holdgun = T6SDK::Drawing::UI_CheckBoxButton("HOLDGUN OFF", "HOLDGUN ON", 8, 22, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_holdgun->current.enabled, 0x00);
+		UIControls::UI_Holdgun.ToolTip = "Make corpses hold their gun.";
+
+		UIControls::UI_HoldgunWrist = T6SDK::Drawing::UI_CheckBoxButton("HOLDGUN IN WRIST OFF", "HOLDGUN IN WRIST ON", 8, 24, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_holdgunWrist->current.enabled, 0x00);
+		UIControls::UI_HoldgunWrist.ToolTip = "Attach gun in ^3HOLDGUN ^7mode to corpses' wrist.";
+
+		UIControls::UI_WeaponAnimChanging = T6SDK::Drawing::UI_CheckBoxButton("OPEN ANIMATIONS MENU", "CHANGING SOME ANIMS OWO", 1.5f, 8, 30, T6SDK::AnchorPoint::Center, &WeaponAnimationChangerMenu::MenuOpened, 0x00, true);
 		UIControls::UI_WeaponAnimChanging.ToolTip = "Change any weapon animation with any other.";
 	}
 }

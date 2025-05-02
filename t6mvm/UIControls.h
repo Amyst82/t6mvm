@@ -69,6 +69,30 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_Slider UI_SsaoIntensity{};
 	inline static T6SDK::Drawing::UI_Slider UI_Znear{};
 
+	//FOG controls
+	inline static T6SDK::Drawing::UI_Slider UI_FogStart{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogFade{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogHeightStart{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogHeightFade{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogOpacity{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogSunHazeOuterRadius{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogSunHazeInnerRadius{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogSunHazeOpacity{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogSunHazeYaw{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogSunHazePitch{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogColorR{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogColorG{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogColorB{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_SyncFogColors{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogSunHazeColorR{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogSunHazeColorG{};
+	inline static T6SDK::Drawing::UI_Slider UI_FogSunHazeColorB{};
+	inline static T6SDK::Drawing::UI_EnumButton UI_FogDefaultPreset{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_FogSavePreset{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_FogLoadPreset{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_FogReset{};
+
+
 	//DOF controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_DofToggle{};
 	inline static T6SDK::Drawing::UI_Slider			UI_DofFarBlur{};
@@ -144,6 +168,8 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_EnumButton UI_SecondaryCamo{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_CameraSway{};
 	inline static T6SDK::Drawing::UI_Slider UI_CameraSwayMaxAngle{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_Holdgun{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_HoldgunWrist{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_WeaponAnimChanging{};
 	//WEAPON ANIMATION MENU controls
 	inline static T6SDK::Drawing::UI_ClickableButton UI_ReplaceWeaponAnim{};
@@ -168,6 +194,7 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_ClickableButton UI_SaveAllAsCFGButton{};
 
 
+
 	inline static void Init()
 	{
 		//MainTabButton.SetChecked();
@@ -186,6 +213,7 @@ namespace UIControls
 		MenuBlurCheckBox.ToolTip = "Turn on/off menu background blur.";
 		UI_DemoBrowseCheckButton = UIDemoBrowseButtonNS::UI_DemoBrowseButton(13, 4, T6SDK::AnchorPoint::TopLeft);
 		UI_DemoBrowseCheckButton.ToolTip = "Load a demo from file.";
+		Common::UI_BookmarkDialog = T6SDK::Drawing::UI_TextBoxDialog("Provide bookmark description (may be empty)");
 	}
 	inline static void DrawTabs()
 	{

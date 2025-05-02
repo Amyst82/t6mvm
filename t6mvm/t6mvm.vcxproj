@@ -142,7 +142,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\Users\Amyst Amyst\source\repos\T6SDK\T6SDK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Amyst Amyst\source\repos\T6SDK\T6SDK;$(SolutionDir)libgmavi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DebugInformationFormat>None</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -154,8 +154,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>C:\Users\Amyst Amyst\source\repos\T6SDK\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dxguid.lib;T6SDK.lib;vfw32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\Amyst Amyst\source\repos\T6SDK\Release;$(SolutionDir)libgmavi;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>dxguid.lib;T6SDK.lib;libgmavi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Message>
@@ -262,15 +262,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Downloads\json.hpp" />
-    <ClInclude Include="AviFile.h" />
+    <ClInclude Include="..\libgmavi\libgmavi.h" />
     <ClInclude Include="CameraMenu.h" />
+    <ClInclude Include="Common.h" />
     <ClInclude Include="Default.h" />
     <ClInclude Include="Depth.h" />
     <ClInclude Include="DepthWithGun.h" />
     <ClInclude Include="DofMenu.h" />
     <ClInclude Include="DollyCamera.h" />
+    <ClInclude Include="Fog.h" />
+    <ClInclude Include="FogMenu.h" />
     <ClInclude Include="FxOnly.h" />
     <ClInclude Include="GreenSky.h" />
+    <ClInclude Include="HoldGun.h" />
     <ClInclude Include="LightsListBoxControl.h" />
     <ClInclude Include="LocalAddresses.h" />
     <ClInclude Include="BoneCamera.h" />
@@ -307,7 +311,6 @@
     <ClInclude Include="WeapsListBoxControl.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AviFile.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -154,7 +154,7 @@ namespace BoneCamera
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin = T6SDK::InternalFunctions::GetOriginFromMatrix44(&resultMatrix);
 			
 			entity_t* corpseEntity = T6SDK::InternalFunctions::CG_GetEntity(playerindex);
-			T6SDK::ConsoleLog::LogSameLineFormatted("ent pos: %.3f %.3f %3f", corpseEntity->pose.origin.x, corpseEntity->pose.origin.y, corpseEntity->pose.origin.z);
+			//T6SDK::ConsoleLog::LogSameLineFormatted("ent pos: %.3f %.3f %3f", corpseEntity->pose.origin.x, corpseEntity->pose.origin.y, corpseEntity->pose.origin.z);
 
 			//T6SDK::InternalFunctions::AxisToAngles(&T6SDK::Addresses::cg->RefDef.viewAxis, &T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles);
 		}
@@ -174,6 +174,17 @@ namespace BoneCamera
 		vec3_t pos{};
 		Matrix33_s rot{};
 		int playerindex = T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client);
+		if (T6SDK::InternalFunctions::CG_GetEntity(playerindex)->pose.physUserBody == 0)
+		{
+			for (int i = 0; i < 48; i++)
+			{
+				if (T6SDK::InternalFunctions::CG_GetEntity(i)->nextState.clientNum == playerindex && T6SDK::InternalFunctions::CG_GetEntity(i)->pose.eType == (BYTE)T6SDK::EntityType::PLAYERCORPSEENTITY && i != playerindex)
+				{
+					playerindex = i;
+					break;
+				}
+			}
+		}
 		if (T6SDK::InternalFunctions::CG_DObjGetWorldTagMatrix(T6SDK::InternalFunctions::CG_GetEntity(playerindex), Bones[SelectedBone].Index, &rot, &pos))
 		{
 			vec2_t screenPos{};

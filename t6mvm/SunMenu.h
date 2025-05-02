@@ -92,9 +92,9 @@ namespace SunMenu
 		float defX = T6SDK::Addresses::SunPosition.Value().x;
 		float defY = T6SDK::Addresses::SunPosition.Value().y;
 		float defZ = T6SDK::Addresses::SunPosition.Value().z;
-		UIControls::UI_SunX = T6SDK::Drawing::UI_Slider("SUN X", (float*)(T6SDK::Addresses::SunPosition.EndPointerAddress() + 0x00), defX, 0.0f, 1.0f, 7, 6, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
-		UIControls::UI_SunY = T6SDK::Drawing::UI_Slider("SUN Y", (float*)(T6SDK::Addresses::SunPosition.EndPointerAddress() + 0x04), defY, 0.0f, 1.0f, 7, 9, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
-		UIControls::UI_SunZ = T6SDK::Drawing::UI_Slider("SUN Z", (float*)(T6SDK::Addresses::SunPosition.EndPointerAddress() + 0x08), defZ, 0.0f, 1.0f, 7, 12, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_SunX = T6SDK::Drawing::UI_Slider("SUN X", (float*)(T6SDK::Addresses::SunPosition.EndPointerAddress() + 0x00), defX, -1.0f, 1.0f, 7, 6, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_SunY = T6SDK::Drawing::UI_Slider("SUN Y", (float*)(T6SDK::Addresses::SunPosition.EndPointerAddress() + 0x04), defY, -1.0f, 1.0f, 7, 9, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_SunZ = T6SDK::Drawing::UI_Slider("SUN Z", (float*)(T6SDK::Addresses::SunPosition.EndPointerAddress() + 0x08), defZ, -1.0f, 1.0f, 7, 12, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 		UIControls::UI_SkyTemp = T6SDK::Drawing::UI_Slider("SKY TEMP", &(*T6SDK::Dvars::DvarList::r_skyColorTemp)->current.value, 6500.0f, 1650.0f, 25000.0f, 10, 6, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_SkyBrightness = T6SDK::Drawing::UI_Slider("SKY BRIGHTNESS", &(*T6SDK::Dvars::DvarList::r_sky_intensity_factor0)->current.value, 1.0f, 0.0f, 10.0f, 10, 9, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);

@@ -1,7 +1,7 @@
 #pragma once
 #include "StdInclude.h"
 #include <ocidl.h>
-#include <ocidl.h>
+
 namespace UIDemoBrowseButtonNS
 {
 	static bool DemoBrowserChecked = false;
@@ -9,6 +9,9 @@ namespace UIDemoBrowseButtonNS
 	{
 		typedef void func(UI_DemoBrowseButton*);
 	private:
+		float fadingX = 0.0f;
+		bool hoverSoundPlayed = false;
+
 		bool Hovered = false;
 		bool Pressed = false;
 		bool Clicked = false;
@@ -79,7 +82,7 @@ namespace UIDemoBrowseButtonNS
 			this->anchorPoint = anchorPoint;
 			isChecked = &DemoBrowserChecked;
 		}
-		void* allocatedMemory = 0;
+
 		void LoadDemoFromFile()
 		{
 			char openedFileName[MAX_PATH];
@@ -118,57 +121,7 @@ namespace UIDemoBrowseButtonNS
 						if (successStatus)
 						{
 							fileopen.close();
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "DEMO", "Demo file loaded!");
-
-							std::vector<std::string> a = T6SDK::InternalFunctions::splitString(std::filesystem::path(str).filename().string(), '_');
-							std::string mapName = a[1] + "_" + a[2];
-							if(strcmp(mapName.c_str(), "mp_nuketown") == 0)
-								mapName = "mp_nuketown_2020";
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Parsed mad name: %s", mapName.c_str());
-							std::string cmd = "ui_mapname " + mapName;
-							T6SDK::Dvars::cbuf_AddText(cmd.c_str());
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "ui_mapname command sent!");
-							//Loading demo data
-
-							vector<char> demoData = T6SDK::InternalFunctions::readBytesSimple(str);
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Demo data read!");
-							allocatedMemory = malloc(demoData.size());
-							T6SDK::Memory::MemoryCopySafe(allocatedMemory, demoData.data(), demoData.size());
-
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Demo data size: %i.", demoData.size());
-							T6SDK::Addresses::DemoAddress1.Value() = (int)allocatedMemory;
-							T6SDK::Addresses::DemoAddress2.Value() = (int)allocatedMemory;
-							*(int*)(T6SDK::Addresses::DemoAddress1.EndPointerAddress() + 0x04) = demoData.size();
-							*(int*)(T6SDK::Addresses::DemoAddress2.EndPointerAddress() + 0x04) = demoData.size();
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Demo address set: 0x%X", (int)allocatedMemory);
-							//Loading thumbnail
-							std::string thumbnailPath = str + ".thumbnail";
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Demo thumbnail path: %s", thumbnailPath.c_str());
-							if (std::filesystem::exists(thumbnailPath))
-							{
-								T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Demo thumbnail file exists!");
-								vector<char> thumbnailData = T6SDK::InternalFunctions::readBytesSimple(thumbnailPath);
-								T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Thumbnail size: %i", thumbnailData.size());
-								T6SDK::Memory::MemoryCopySafe((void*)T6SDK::Addresses::DemoThumbnailAddress, thumbnailData.data(), thumbnailData.size());
-								T6SDK::Memory::MemoryCopySafe((void*)T6SDK::Addresses::DemoThumbnailAddress2, thumbnailData.data(), thumbnailData.size());
-								T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Demo thumbnails set!");
-							}
-							else
-							{
-								T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DEMO", "Demo thumbnail file does not exist!");
-								*isChecked = false;
-								return;
-							}
-
-							//TODO: add summary
-
-							//Bypass errors
-							T6SDK::Addresses::DemoLoadPatch.Value() = (BYTE)0xEB;
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Demo load patch applied!");
-							//Start demo
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Attempting to start demo!");
-							T6SDK::Dvars::cbuf_AddText("demo_play demo;");
-							T6SDK::Dvars::cbuf_AddText("demo_play demo;");
+							T6SDK::DemoHandler::LoadDemoFromFile(str.c_str());
 							*isChecked = false;
 						}
 					}
@@ -176,6 +129,18 @@ namespace UIDemoBrowseButtonNS
 			}
 			else
 				*isChecked = false;
+		}
+		float* GetFadingColor(tColor color)
+		{
+			float A = 0.5f;
+			float k = 1.6f;
+			float w = 0.8f;
+			float R = color[0];
+			float G = color[1];
+			float B = color[2];
+			float coef = (A * tanh(k * sin(w * fadingX)) / tanh(k)) + 0.5f;
+			float Alpha = 0.5f + (0.5f * coef);
+			return tColor{ R, G, B, Alpha };
 		}
 		bool skipFrame = false;
 		void Draw()
@@ -220,18 +185,25 @@ namespace UIDemoBrowseButtonNS
 				//Drawing text
 				float textX = (float)iconRect.right + (((float)baseRect.right - (float)iconRect.right)/2.0f);
 				float textY = (float)baseRect.top + (((float)baseRect.bottom - (float)baseRect.top)/2.0f);
-				T6SDK::Drawing::DrawTextAbsolute(*isChecked ? CheckedText : UnCheckedText, textX, textY, 1.2f, !IsEnabled ? T6SDK::Drawing::GRAYCOLOR : *isChecked ? T6SDK::Drawing::ORANGECOLOR : Hovered ? T6SDK::Drawing::YELLOWCOLOR : T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center , 0x00);
+				T6SDK::Drawing::DrawTextAbsolute(*isChecked ? CheckedText : UnCheckedText, textX, textY, 1.2f, !IsEnabled ? T6SDK::Drawing::GRAYCOLOR : *isChecked ? T6SDK::Drawing::ORANGECOLOR : Hovered ? T6SDK::Drawing::YELLOWCOLOR : GetFadingColor(T6SDK::Drawing::WHITECOLOR), T6SDK::AnchorPoint::Center , 0x00);
 				//If mouse pointer is inside the whole button
 				if (T6SDK::Input::MousePosX() > (float)baseRect.left && T6SDK::Input::MousePosX() < (float)baseRect.right && T6SDK::Input::MousePosY() > (float)baseRect.top && T6SDK::Input::MousePosY() < (float)baseRect.bottom)
 				{
 					//T6SDK::ConsoleLog::Log("Hovered");
 					Hovered = true;
+					if (hoverSoundPlayed == false)
+					{
+						T6SDK::InternalFunctions::PlaySound("uin_unlock_window");
+						//T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "CHECKBOX", "Hover sound played!");
+						hoverSoundPlayed = true;
+					}
 					if (T6SDK::Input::Keys::LMB.IsAnyPressState())
 					{
 						Pressed = true;
 						if (Clicked == false)
 						{
 							//T6SDK::ConsoleLog::Log("Clicked!");
+							T6SDK::InternalFunctions::PlaySound("uin_main_pause");
 							Clicked = true;
 							*isChecked = true;
 							return;
@@ -249,6 +221,7 @@ namespace UIDemoBrowseButtonNS
 				}
 				else
 				{
+					hoverSoundPlayed = false;
 					Hovered = false;
 					Pressed = false;
 					Clicked = false;
@@ -263,6 +236,9 @@ namespace UIDemoBrowseButtonNS
 					LoadDemoFromFile();
 					skipFrame = false;
 				}
+				fadingX += 0.05f;
+				if (fadingX > 8.0f)
+					fadingX = 0.0f;
 			}
 		}
 		void Draw(bool isEnabled)

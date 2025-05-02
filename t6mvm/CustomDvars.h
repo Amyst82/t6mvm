@@ -1,5 +1,6 @@
 #pragma once
 #include <StdInclude.h>
+
 namespace CustomDvars
 {
 	//CAMERA DVARS
@@ -19,6 +20,8 @@ namespace CustomDvars
 	static dvar_s* dvar_freeRoamSpeed;
 	static dvar_s* dvar_accelerationFactor;
 	static dvar_s* dvar_slowingFactor;
+	static dvar_s* dvar_cameraFov;
+	static dvar_s* dvar_cameraRoll;
 
 
 	//MISC DVARS
@@ -60,14 +63,16 @@ namespace CustomDvars
 	static dvar_s* dvar_streams_tickEnd;
 	static dvar_s* dvar_streams_recordCam;
 
-
-
 	//WEAPONS DVARS
 	static dvar_s* dvar_camoChanging;
 	static dvar_s* dvar_primaryCamo;
 	static dvar_s* dvar_secondaryCamo;
 	static dvar_s* dvar_cameraSway;
 	static dvar_s* dvar_cameraSwayMaxAngle;
+	//HOLDGUN DVARS
+	static dvar_s* dvar_holdgun;
+	static dvar_s* dvar_holdgunWrist;
+	static dvar_s* dvar_holdgunSearchRadius;
 
 	//MENU DVARS
 	static dvar_s* dvar_menuBlur;
@@ -75,9 +80,12 @@ namespace CustomDvars
 	static dvar_s* dvar_tick;
 	static dvar_s* dvar_uiGridDebug;
 
+	//DEMO DVARS
+	static dvar_s* dvar_demos_directory;
+
 	void CheckDvars()
 	{
-		
+
 	}
 	inline static void Init()
 	{
@@ -98,7 +106,8 @@ namespace CustomDvars
 		dvar_freeRoamSpeed = T6SDK::Dvars::RegisterFloat("mvm_freeRoamSpeed", 1.0f, 0.0f, 10.0f, "Free camera speed.");
 		dvar_accelerationFactor = T6SDK::Dvars::RegisterFloat("mvm_accelerationFactor", 2.0f, 0.0f, 10.0f, "Free camera acceleration factor.");
 		dvar_slowingFactor = T6SDK::Dvars::RegisterFloat("mvm_slowingFactor", 0.25f, 0.0f, 10.0f, "Free camera slowing factor.");
-
+		dvar_cameraFov = T6SDK::Dvars::RegisterFloat("mvm_cameraFov", 90.0f, 1.0f, 180.0f, "Free camera fov.");
+		dvar_cameraRoll = T6SDK::Dvars::RegisterFloat("mvm_cameraRoll", 0.0f, -180.0f, 180.0f, "Free camera roll.");
 
 		//Register misc dvars
 		dvar_greenScreen = T6SDK::Dvars::RegisterBool("mvm_greenScreen", false, "Green screen.");
@@ -108,6 +117,19 @@ namespace CustomDvars
 		dvar_zdepth = T6SDK::Dvars::RegisterBool("mvm_zdepth", false, "Z depth.");
 		dvar_zdepthDistance = T6SDK::Dvars::RegisterFloat("mvm_zdepthDistance", 1000.0f, 0.0f, 5000.0f, "Z depth distance.");
 
+		//Register fog dvars
+		dvar_fogStartDist = T6SDK::Dvars::RegisterFloat("z_fogstartdist", 0.0f, -200.0f, 5000.0f, "");
+		dvar_fogFadeDist = T6SDK::Dvars::RegisterFloat("z_fogfadedist", 36000.0f, -200.0f, 37000.0f, "");
+		dvar_fogStartHeight = T6SDK::Dvars::RegisterFloat("z_fogstartheight", 2000.0f, -200.0f, 37000.0f, "");
+		dvar_fogFadeHeight = T6SDK::Dvars::RegisterFloat("z_fogfadeheight", 18070.0f, -200.0f, 50000.0f, "");
+		dvar_fogOpacity = T6SDK::Dvars::RegisterFloat("z_fogopacity", 0.8f, -10.0f, 10.0f, "");
+		dvar_fogSunPitch = T6SDK::Dvars::RegisterFloat("z_fogsunpitch", 0.0f, 0.0f, 360.0f, "");
+		dvar_fogSunYaw = T6SDK::Dvars::RegisterFloat("z_fogsunyaw", 0.0f, 0.0f, 360.0f, "");
+		dvar_fogSunInner = T6SDK::Dvars::RegisterFloat("z_fogsuninner", 0.0f, 0.0f, 30.0f, "");
+		dvar_fogSunOuter = T6SDK::Dvars::RegisterFloat("z_fogsunouter", 30.0f, 0.0f, 60.0f, "");
+		dvar_fogColor = T6SDK::Dvars::RegisterVec3("z_fogcolor", 255.0f, 255.0f, 255.0f, 0.0f, 255.0f, "");
+		dvar_fogSunOpacity = T6SDK::Dvars::RegisterFloat("z_fogsunopacity", 0.8f, -10.0f, 10.0f, "");
+		dvar_fogSunColor = T6SDK::Dvars::RegisterVec3("z_fogsuncolor", 255.0f, 255.0f, 255.0f, 0.0f, 255.0f, "");
 
 		//Register lights dvars
 		dvar_lightRadiusLimit = T6SDK::Dvars::RegisterFloat("mvm_lightRadiusLimit", 1000.0f, 0.0f, 10000.0f, "Light radius limit.");
@@ -131,13 +153,17 @@ namespace CustomDvars
 		dvar_secondaryCamo = T6SDK::Dvars::RegisterInt("mvm_secondaryCamo", -1, -1, 44, "Secondary weapon camo index.");
 		dvar_cameraSway = T6SDK::Dvars::RegisterBool("mvm_cameraSway", false, "Enable camera sway.");
 		dvar_cameraSwayMaxAngle = T6SDK::Dvars::RegisterFloat("mvm_cameraSwayMaxAngle", 20.0f, 0.0f, 90.0f, "Camera sway max angle.");
-
+		//Register holdgun dvars
+		dvar_holdgun = T6SDK::Dvars::RegisterBool("mvm_holdgun", false, "Make corpses hold gun.");
+		dvar_holdgunWrist = T6SDK::Dvars::RegisterBool("mvm_holdgunWrist", false, "Attach weapon in holdgun mode to wrist, not to tag_weapon_right.");
+		dvar_holdgunSearchRadius = T6SDK::Dvars::RegisterFloat("mvm_holdgunSearchRadius", 100.0f, 0.0f, 255.0f, "Radius near corpse that T6MVM will search dropped weapon in.");
 		//Register menu dvars
 		dvar_menuBlur = T6SDK::Dvars::RegisterBool("mvm_menuBlur", true, "Menu blur.");
 		dvar_showBone = T6SDK::Dvars::RegisterBool("mvm_showBone", true, "Show selected bone.");
 		dvar_tick = T6SDK::Dvars::RegisterInt("mvm_tick", 0, 11000, 99999999, "Go to desired tick.");
-		dvar_uiGridDebug = T6SDK::Dvars::RegisterBool("mvm_ui_grid", true, "Show UI grid.");
-
+		dvar_uiGridDebug = T6SDK::Dvars::RegisterBool("mvm_ui_grid", false, "Show UI grid.");
+		//Register demo dvars
+		dvar_demos_directory = T6SDK::Dvars::RegisterString("mvm_demosDirectory", "", "Folder with all the demos you want to see in your theater.");
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&CheckDvars);
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "DVARS", "Custom dvars and commands initialized!");
 	}

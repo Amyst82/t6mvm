@@ -7,6 +7,8 @@
 #include "FreeCamera.h"
 #include "DollyCamera.h"
 #include "Weapon.h"
+#include "Fog.h"
+#include "HoldGun.h"
 
 namespace TheaterBase
 {
@@ -63,6 +65,7 @@ namespace TheaterBase
 			CustomDvars::dvar_frozenCam->modified = true;
 			Camera::DollyCamera::PreventChangingRotation(false);
 			Camera::DollyCamera::PreventChangingPosition(false);
+			Common::LoadedDemoTagsPath = "";
 		}
 	}
 	inline static void Init()
@@ -82,10 +85,13 @@ namespace TheaterBase
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnCameraModeChanged, (uintptr_t)&CameraModeChanged);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&BoneCamera::Update);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&Lights::Update);
+		T6SDK::Events::RegisterListener(T6SDK::EventType::OnActiveFrameDrawn, (uintptr_t)&Fog::Update);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnKeyPressed, (uintptr_t)&OnKeyPressed);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnSafeStringTranslated, (uintptr_t)&HandleSafeStringTranslate);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnGameModeChanged, (uintptr_t)&HandleGameModeChanged);
 		T6SDK::Addresses::Patches::JumpToDollyCamMarkerPatch.Patch();
+
+		T6SDK::Events::RegisterListener(T6SDK::EventType::OnCgItemDrawn, (uintptr_t)&HoldGun::Update);
 		//T6SDK::Theater::SetFreeRoamCameraSpeed(0.2f);
 
 		//T6SDK::Dvars::Cmd_AddCommandInternal("mvm_removeTimelineBookmarks", UIControls::UI_TimelineSlider.RemoveAllBookmarks, &UIControls::UI_TimelineSlider.cmd_removeBookmarks_VAR);

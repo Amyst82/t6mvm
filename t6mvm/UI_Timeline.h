@@ -1,6 +1,7 @@
 #pragma once
 #include "StdInclude.h"
 #include "LocalAddresses.h"
+#include "Common.h"
 namespace UI_TimelineNS
 {
 	class UI_Timeline
@@ -52,12 +53,12 @@ namespace UI_TimelineNS
 			*value = internalDefaultValue;
 			defaultValue = GetCoordByValue(internalDefaultValue, X, Y, WIDTH, Min, Max);
 		}
-		inline static vector<int> CustomBookmarks{};
+
 
 	public:
 		static void RemoveAllBookmarks()
 		{
-			CustomBookmarks.clear();
+			Common::CustomBookmarks.clear();
 			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, true, "UI_Timeline", "All bookmarks removed");
 		}
 		UI_Timeline()
@@ -120,36 +121,7 @@ namespace UI_TimelineNS
 			this->GridRow = GridRow;
 		}
 
-		void AddBookmark(int tick)
-		{
-			if (CustomBookmarks.size() == 0)
-			{
-				CustomBookmarks.push_back(tick);
-				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "UI_Timeline", "Custom bookmark added at %02i:%02i (%i)", tick / 60000, tick % 60000 / 1000, tick);
-				T6SDK::MAIN::UI_ShowNotification("Timeline", "Custom bookmark added", 200);
-			}
-			else
-			{
-				bool found = false;
-				for (int i = 0; i < CustomBookmarks.size(); i++)
-				{
-					if (CustomBookmarks[i] == tick)
-					{
-						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, true, "UI_Timeline", "Bookmark already exists at %02i:%02i (%i)", tick / 60000, tick % 60000 / 1000, tick);
-						T6SDK::MAIN::UI_ShowNotification("Timeline", "^3Bookmark already exists at this tick.", 200);
-						found = true;
-						break;
-					}
-				}
-				if (!found)
-				{
-					CustomBookmarks.push_back(tick);
-					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "UI_Timeline", "Custom bookmark added at %02i:%02i (%i)", tick / 60000, tick % 60000 / 1000, tick);
-					T6SDK::MAIN::UI_ShowNotification("Timeline", "Custom bookmark added", 200);
-					found = false;
-				}
-			}
-		}
+		
 
 		bool gameUnpaused = false;
 		void Draw()
@@ -214,7 +186,7 @@ namespace UI_TimelineNS
 							if (Clicked == false)
 							{
 								Clicked = true;
-								AddBookmark(*value);
+								Common::AddBookmark(*value);
 							}
 						}
 						else
@@ -261,6 +233,15 @@ namespace UI_TimelineNS
 					{
 						if (MouseHold == true && IsEnabled)
 						{
+							if (T6SDK::Addresses::Tick.Value() > T6SDK::Addresses::cg->Tick)
+							{
+								T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, true, "Timeline", "Tick mismatch.");
+								T6SDK::Input::CloseBlankMenu();
+								T6SDK::Theater::Demo_Error("TICK MISMATCH", "Seems some internal ticks do not match. Please skip back once and try again.");
+								MouseHold == false;
+								(*T6SDK::Dvars::DvarList::r_blur)->current.value = 0.0f;
+								return;
+							}
 							//RELEASED
 							defaultValue = moveto;
 							float coef = ((float)Max - (float)Min) / (WIDTH * scale2);
@@ -308,23 +289,25 @@ namespace UI_TimelineNS
 					T6SDK::Drawing::DrawRectAbsolute((float)sliderRect.left, (float)sliderRect.top, defaultValue - (float)sliderRect.left, HEIGHT, !IsEnabled ? T6SDK::Drawing::GRAYCOLOR : T6SDK::Drawing::GRAYCOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 					//Drawing custom bookmarks
-					for (int i = 0; i < CustomBookmarks.size(); i++)
+					for (int i = 0; i < Common::CustomBookmarks.size(); i++)
 					{
 						RECT bookmarkRect{};
-						bool tickNearBookmark = *value > (CustomBookmarks[i] - 100) && *value < (CustomBookmarks[i] + 100);
-						if (T6SDK::Drawing::DrawRectAbsolute(GetCoordByValue(CustomBookmarks[i], (float)sliderRect.left, (float)sliderRect.top, WIDTH * scale2, Min, Max), (float)sliderRect.top - 50.0f, 10.0f, 10.0f, 45.0f, tickNearBookmark ? T6SDK::Drawing::YELLOWCOLOR : T6SDK::Drawing::REDCOLOR, T6SDK::AnchorPoint::TopCenter, &bookmarkRect))
+						bool tickNearBookmark = *value > (Common::CustomBookmarks[i].tick - 100) && *value < (Common::CustomBookmarks[i].tick + 100);
+						if (T6SDK::Drawing::DrawRectAbsolute(GetCoordByValue(Common::CustomBookmarks[i].tick, (float)sliderRect.left, (float)sliderRect.top, WIDTH * scale2, Min, Max), (float)sliderRect.top - 50.0f, 10.0f, 10.0f, 45.0f, tickNearBookmark ? T6SDK::Drawing::YELLOWCOLOR : T6SDK::Drawing::REDCOLOR, T6SDK::AnchorPoint::TopCenter, &bookmarkRect))
 						{
-							if (T6SDK::Input::MousePosX() > (float)bookmarkRect.left && T6SDK::Input::MousePosX() < (float)bookmarkRect.right && T6SDK::Input::MousePosY() > (float)bookmarkRect.top && T6SDK::Input::MousePosY() < (float)bookmarkRect.bottom)
+							float margin = 5.0f;
+							if (T6SDK::Input::MousePosX() > (float)bookmarkRect.left - margin && T6SDK::Input::MousePosX() < (float)bookmarkRect.right + margin && T6SDK::Input::MousePosY() > (float)bookmarkRect.top - margin && T6SDK::Input::MousePosY() < (float)bookmarkRect.bottom + margin)
 							{
-								char buffer[64];
-								sprintf(buffer, "Time: %02i:%02i, tick: %i", CustomBookmarks[i] / 60000, CustomBookmarks[i] % 60000 / 1000, CustomBookmarks[i]);
-								T6SDK::Drawing::DrawTextAbsolute(buffer, T6SDK::Input::MousePosX() + 25.0f, T6SDK::Input::MousePosY() + 10.0f, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+								char buffer[512];
+								sprintf(buffer, "^9Player: ^7%s\n^9Desc: ^7%s\nTime: %02i:%02i, tick: %i", T6SDK::Addresses::cg->client[Common::CustomBookmarks[i].playerNum].szName, Common::CustomBookmarks[i].description.c_str(), Common::CustomBookmarks[i].tick / 60000, Common::CustomBookmarks[i].tick % 60000 / 1000, Common::CustomBookmarks[i].tick);
+								T6SDK::Drawing::DrawTextAbsolute(buffer, T6SDK::Input::MousePosX() + 35.0f, T6SDK::Input::MousePosY() - 40.0f, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 								if (T6SDK::Input::Keys::LMB.IsAnyPressState())
 								{
 									if (BookmarkClicked == false)
 									{
 										BookmarkClicked = true;
-										T6SDK::Theater::GoToTick(CustomBookmarks[i]);
+										T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::demo_client, Common::CustomBookmarks[i].playerNum);
+										T6SDK::Theater::GoToTick(Common::CustomBookmarks[i].tick);
 										T6SDK::Addresses::IsDemoPaused.SetValueSafe(0);
 										gameUnpaused = true;
 

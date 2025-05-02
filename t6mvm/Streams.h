@@ -19,12 +19,85 @@
 #include "..\MinHook\MinHook.h"
 #pragma comment(lib, "libMinHook.x86.lib")
 #include <sstream>
+#include <libgmavi.h>
 using json = nlohmann::json;
 
 #pragma comment(lib, "d3d11.lib")
 
 namespace Streams
 {
+	void* gmav = 0x00;
+#pragma region AviFile methods
+	// Function to capture the back buffer and write it to an AVI file
+	static bool CaptureBackBufferAndWriteToAVI(ID3D11DeviceContext* pDeviceContext, ID3D11Device* pDevice, ID3D11Texture2D* pBackBuffer)
+	{
+		// Create a staging texture to copy the back buffer
+		D3D11_TEXTURE2D_DESC desc;
+		pBackBuffer->GetDesc(&desc);
+		desc.Usage = D3D11_USAGE_STAGING;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		desc.BindFlags = 0;
+
+		ID3D11Texture2D* pStagingTexture = nullptr;
+		HRESULT hr = pDevice->CreateTexture2D(&desc, nullptr, &pStagingTexture);
+		if (FAILED(hr))
+		{
+			MessageBox(NULL, "Failed to create staging texture!", "Error", MB_OK);
+			return false;
+		}
+
+		// Copy the back buffer to the staging texture
+		pDeviceContext->CopyResource(pStagingTexture, pBackBuffer);
+
+		// Map the staging texture to access its data
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		hr = pDeviceContext->Map(pStagingTexture, 0, D3D11_MAP_READ, 0, &mappedResource);
+		if (FAILED(hr))
+		{
+			MessageBox(NULL, "Failed to map staging texture!", "Error", MB_OK);
+			pStagingTexture->Release();
+			return false;
+		}
+
+		// Allocate a buffer for the RGB frame
+		const UINT width = desc.Width;
+		const UINT height = desc.Height;
+		const UINT frameSize = width * height * 3; // 3 bytes per pixel (RGB)
+		BYTE* pFrameData = new BYTE[frameSize];
+
+		// Convert the back buffer data (BGRA) to RGB (bottom first)
+		BYTE* pSource = static_cast<BYTE*>(mappedResource.pData);
+
+		for (int y = 0; y < height; y++)
+		{
+			int src_y = height - 1 - y;  // Start from the bottom row
+			for (int x = 0; x < width; x++)
+			{
+				int src_idx = (src_y * width + x) * 4;  // RGBA source index
+				int dst_idx = (y * width + x) * 3;      // RGB destination index
+
+				pFrameData[dst_idx + 0] = pSource[src_idx + 2];  // R
+				pFrameData[dst_idx + 1] = pSource[src_idx + 1];  // G
+				pFrameData[dst_idx + 2] = pSource[src_idx + 0];  // B
+			}
+		}
+
+		// Unmap the staging texture
+		pDeviceContext->Unmap(pStagingTexture, 0);
+		pStagingTexture->Release();
+
+		if (!gmav_add(gmav, pFrameData))
+		{
+			if(gmav != NULL)
+				gmav_finish(gmav);
+
+		}
+
+		// Clean up
+		delete[] pFrameData;
+		return true;
+	}
+#pragma endregion
 #pragma region Streams defs
 	int frameCount = 0;
 	inline static bool IsStreamsStarted = false;
@@ -173,28 +246,39 @@ namespace Streams
 
 		if (ScreenshotRequested)
 		{
-			//T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Screenshot requested!");
-			REFGUID GUID_ContainerFormatJpeg{ 0x19e4a5aa, 0x5662, 0x4fc5, 0xa0, 0xc0, 0x17, 0x58, 0x2, 0x8e, 0x10, 0x57 };
-			REFGUID GUID_ContainerFormatPng{ 0x1b7cfaf4, 0x713f, 0x473c, 0xbb, 0xcd, 0x61, 0x37, 0x42, 0x5f, 0xae, 0xaf };
-			
-
-			ID3D11Texture2D* backBuffer;
-			HRESULT hr = p_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&backBuffer));
-
-			if (texture_to_save == NULL)
+			if (T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_avi))
 			{
-				D3D11_TEXTURE2D_DESC td;
-				backBuffer->GetDesc(&td);
-				p_device->CreateTexture2D(&td, NULL, &texture_to_save);
+				ID3D11Texture2D* backBuffer;
+				HRESULT hr = p_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&backBuffer));
+				CaptureBackBufferAndWriteToAVI(p_context, p_device, backBuffer);
+				ScreenshotRequested = false;
+				backBuffer->Release();
 			}
+			else
+			{
+				//T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Screenshot requested!");
+				REFGUID GUID_ContainerFormatJpeg{ 0x19e4a5aa, 0x5662, 0x4fc5, 0xa0, 0xc0, 0x17, 0x58, 0x2, 0x8e, 0x10, 0x57 };
+				REFGUID GUID_ContainerFormatPng{ 0x1b7cfaf4, 0x713f, 0x473c, 0xbb, 0xcd, 0x61, 0x37, 0x42, 0x5f, 0xae, 0xaf };
 
-			p_context->CopyResource(texture_to_save, backBuffer);
 
-			DirectX::SaveWICTextureToFile(p_context, texture_to_save, T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_JPG) ? GUID_ContainerFormatJpeg : GUID_ContainerFormatPng, std::wstring(filename.begin(), filename.end()).c_str(), NULL, NULL, true);
-			ScreenshotRequested = false;
-			backBuffer->Release();
-			texture_to_save->Release();
-			texture_to_save = NULL;
+				ID3D11Texture2D* backBuffer;
+				HRESULT hr = p_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&backBuffer));
+
+				if (texture_to_save == NULL)
+				{
+					D3D11_TEXTURE2D_DESC td;
+					backBuffer->GetDesc(&td);
+					p_device->CreateTexture2D(&td, NULL, &texture_to_save);
+				}
+
+				p_context->CopyResource(texture_to_save, backBuffer);
+
+				DirectX::SaveWICTextureToFile(p_context, texture_to_save, T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_JPG) ? GUID_ContainerFormatJpeg : GUID_ContainerFormatPng, std::wstring(filename.begin(), filename.end()).c_str(), NULL, NULL, true);
+				ScreenshotRequested = false;
+				backBuffer->Release();
+				texture_to_save->Release();
+				texture_to_save = NULL;
+			}
 		}
 
 		if (!IsAnyOtherStream)
@@ -311,6 +395,55 @@ namespace Streams
 		T6SDK::InternalFunctions::SCR_UpdateScreen(2);
 	}
 	bool abortingStreams = false;
+	void NotifyOnStreamsFinished()
+	{
+		if (abortingStreams == false)
+		{
+			std::string settingsPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\t6mvm.json";
+			if (!std::filesystem::exists(settingsPath))
+			{
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "STREAMS", "Settings JSON not found.");
+			}
+			else
+			{
+				std::ifstream file(settingsPath);
+				json data = json::parse(file);
+
+				std::string accountKey = data.value("AlertzyKey", "");
+				bool notification = data["PostStreamsActions"].value("Notification", false);
+				bool openStreamsFolder = data["PostStreamsActions"].value("OpenStreamsFolder", false);
+				if (notification && lstrcmp(accountKey.c_str(), "") > 0)
+				{
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Sending notification via Alertzy.");
+					try
+					{
+						// Get the current time
+						auto now = std::chrono::system_clock::now();
+						auto in_time_t = std::chrono::system_clock::to_time_t(now);
+
+						// Format the time as a string (e.g., "2023-10-05_14-30-45")
+						std::stringstream ss{};
+						ss << std::put_time(std::localtime(&in_time_t), "%B %d %Y at %I:%M %p");
+						std::string message = "Streams recording finished on " + ss.str();
+						std::string script = "curl -s -X POST https://alertzy.app/send \\ -d \"accountKey=" + accountKey + "\" \\ -d \"title=T6MVM\" \\ -d \"message=" + message + "\"";
+						std::system(script.c_str());
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "Notification sent.");
+					}
+					catch (const char* error)
+					{
+						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Notification was not sent dut to an error.");
+					}
+				}
+				if (openStreamsFolder)
+				{
+					//Open folder when streams are done
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Attempting to open the streams folder...");
+					std::string cmd = "explorer " + folderToDeleteWhenAborted;
+					std::system(cmd.c_str());
+				}
+			}
+		}
+	}
 	inline static void StopStreams()
 	{
 		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
@@ -322,59 +455,27 @@ namespace Streams
 		IsStreamsRunning = false;
 		if (frameCount > 0)
 		{
-			if (abortingStreams == false)
-			{
-				std::string settingsPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\t6mvm.json";
-				if (!std::filesystem::exists(settingsPath))
-				{
-					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "STREAMS", "Settings JSON not found.");
-				}
-				else
-				{
-					std::ifstream file(settingsPath);
-					json data = json::parse(file);
-
-					std::string accountKey = data.value("AlertzyKey", "");
-					bool notification = data["PostStreamsActions"].value("Notification", false);
-					bool openStreamsFolder = data["PostStreamsActions"].value("OpenStreamsFolder", false);
-					if (notification && lstrcmp(accountKey.c_str(), "") > 0)
-					{
-						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Sending notification via Alertzy.");
-						try
-						{
-							// Get the current time
-							auto now = std::chrono::system_clock::now();
-							auto in_time_t = std::chrono::system_clock::to_time_t(now);
-
-							// Format the time as a string (e.g., "2023-10-05_14-30-45")
-							std::stringstream ss{};
-							ss << std::put_time(std::localtime(&in_time_t), "%B %d %Y at %I:%M %p");
-							std::string message = "Streams recording finished on " + ss.str();
-							std::string script = "curl -s -X POST https://alertzy.app/send \\ -d \"accountKey=" + accountKey + "\" \\ -d \"title=T6MVM\" \\ -d \"message=" + message + "\"";
-							std::system(script.c_str());
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "Notification sent.");
-						}
-						catch (const char* error)
-						{
-							T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Notification was not sent dut to an error.");
-						}
-					}
-					if (openStreamsFolder)
-					{
-						//Open folder when streams are done
-						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Attempting to open the streams folder...");
-						std::string cmd = "explorer " + folderToDeleteWhenAborted;
-						std::system(cmd.c_str());
-					}
-				}
-			}
+			CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)NotifyOnStreamsFinished, nullptr, 0, nullptr);
 		}
 		frameCount = 0;
 		T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden = false;
 		IsStreamsStarted = false;
 		/*if(T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam))
 			T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::timescale, 1.0f);*/
-
+		if (CustomDvars::dvar_streams_avi->current.enabled)
+		{
+			for (auto& stream : Streams)
+			{
+				if (stream->toggle->current.enabled)
+				{
+					if (stream->gmav)
+					{
+						gmav_finish(stream->gmav);
+						stream->gmav = 0x00;
+					}
+				}
+			}
+		}
 		if (ExportCameraFile.is_open())
 		{
 			ExportCameraFile.close();
@@ -410,6 +511,7 @@ namespace Streams
 					if(T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_noFlash))
 						IsAnyOtherStream = true; //NOFLASH
 					stream->Enable();
+					gmav = stream->gmav;
 					CaptureScreenshot(stream);
 					stream->Disable();
 				}
@@ -507,17 +609,28 @@ namespace Streams
 			T6SDK::Theater::Demo_JumpToTick(T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart));
 		T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden = true;
 		CustomDvars::dvar_greenScreen->current.enabled = false;
+		//Create directories for screenshots or avi files for each enabled pass
 		for (auto& stream : Streams)
 		{
 			stream->Disable();
 			if (stream->toggle->current.enabled)
 			{
-				char buffer[256];
-				sprintf(buffer, "%s\\%s", newStreamFolder, stream->Name);
-				T6SDK::InternalFunctions::CreateNewDirectory(buffer);
-				//strcpy(stream->Dir, buffer);
-				stream->Dir = buffer;
-				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "New stream directory for %s", stream->Dir.c_str());
+				if (CustomDvars::dvar_streams_avi->current.enabled)
+				{
+					char buffer[256];
+					sprintf(buffer, "%s\\%s.avi", newStreamFolder, stream->Name);
+					std::string aviPath(buffer);
+					stream->gmav = gmav_open(aviPath.c_str(), T6SDK::Addresses::ScreenWidth.Value(), T6SDK::Addresses::ScreenHeight.Value(), T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_fps));
+				}
+				else
+				{
+					char buffer[256];
+					sprintf(buffer, "%s\\%s", newStreamFolder, stream->Name);
+					T6SDK::InternalFunctions::CreateNewDirectory(buffer);
+					//strcpy(stream->Dir, buffer);
+					stream->Dir = buffer;
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "New stream directory for %s", stream->Dir.c_str());
+				}
 			}
 		}
 

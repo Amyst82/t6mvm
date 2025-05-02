@@ -7,7 +7,7 @@ namespace MainMenu
 	{
 		std::string cfgData{};
 		char openedFileName[MAX_PATH];
-		const TCHAR* FilterSpec = (const TCHAR*)"Config file(.cfg)\0*.cfg*\0";
+		const TCHAR* FilterSpec = (const TCHAR*)"Config Files\0*.cfg\0All Files\0*.*\0";
 		const TCHAR* Title = (const TCHAR*)"Load CFG file";
 		if (T6SDK::InternalFunctions::OpenFileDialog((TCHAR*)openedFileName, false, FilterSpec, Title))
 		{
@@ -54,6 +54,7 @@ namespace MainMenu
 		cfgData += CameraMenu::GetCFG();
 		cfgData += MiscMenu::GetCFG();
 		cfgData += SsaoMenu::GetCFG();
+		cfgData += FogMenu::GetCFG();
 		cfgData += DofMenu::GetCFG();
 		cfgData += SunMenu::GetCFG();
 		cfgData += StreamsMenu::GetCFG();
@@ -82,7 +83,7 @@ namespace MainMenu
 		if(!*UIControls::MainTabButton.isChecked)
 			return;
 		UIControls::UI_TimelineSlider.Draw();
-		if (UIControls::UI_TimelineSlider.CustomBookmarks.size() > 0)
+		if (Common::CustomBookmarks.size() > 0)
 			UIControls::UI_RemoveCustomBookmarks.Draw();
 		UIControls::UI_LoadCFGButton.Draw();
 		UIControls::UI_SaveAllAsCFGButton.Draw();

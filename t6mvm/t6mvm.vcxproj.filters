@@ -43,9 +43,6 @@
     <Filter Include="DX11">
       <UniqueIdentifier>{b506e845-c22c-489b-b4cf-62c062f77b6e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Components\Streams\CAviFile">
-      <UniqueIdentifier>{02a84438-a704-4998-ba9a-112ad333bc7c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Components\Theater\Weapon">
       <UniqueIdentifier>{22275652-fb2a-4396-a58c-fc6eee35bd57}</UniqueIdentifier>
     </Filter>
@@ -63,6 +60,12 @@
     </Filter>
     <Filter Include="Components\Theater\Main">
       <UniqueIdentifier>{1fa5b30c-49d8-4452-8baf-68f7a115780e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Streams\AVI">
+      <UniqueIdentifier>{5e066c85-61fc-4b5d-a024-801864ac4dee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Theater\FOG">
+      <UniqueIdentifier>{e88de5d5-70ad-4300-8f1b-ea88b4ba4db7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -132,9 +135,6 @@
     <ClInclude Include="FxOnly.h">
       <Filter>Components\Streams</Filter>
     </ClInclude>
-    <ClInclude Include="AviFile.h">
-      <Filter>Components\Streams\CAviFile</Filter>
-    </ClInclude>
     <ClInclude Include="Weapon.h">
       <Filter>Components\Theater\Weapon</Filter>
     </ClInclude>
@@ -198,6 +198,21 @@
     <ClInclude Include="MainMenu.h">
       <Filter>Components\Theater\Main</Filter>
     </ClInclude>
+    <ClInclude Include="..\libgmavi\libgmavi.h">
+      <Filter>Components\Streams\AVI</Filter>
+    </ClInclude>
+    <ClInclude Include="Fog.h">
+      <Filter>Components\Theater\FOG</Filter>
+    </ClInclude>
+    <ClInclude Include="FogMenu.h">
+      <Filter>Components\Theater\FOG</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>Components\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="HoldGun.h">
+      <Filter>Components\Theater\Weapon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -208,9 +223,6 @@
     </ClCompile>
     <ClCompile Include="ScreenGrab.cpp">
       <Filter>DX11</Filter>
-    </ClCompile>
-    <ClCompile Include="AviFile.cpp">
-      <Filter>Components\Streams\CAviFile</Filter>
     </ClCompile>
     <ClCompile Include="Shake.cpp">
       <Filter>Components\Common</Filter>

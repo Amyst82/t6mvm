@@ -144,7 +144,7 @@ namespace Misc
 		if (CustomDvars::dvar_tick->modified)
 		{
 			T6SDK::Theater::GoToTick(T6SDK::Dvars::GetInt(CustomDvars::dvar_tick));
-			UIControls::UI_TimelineSlider.AddBookmark(T6SDK::Dvars::GetInt(CustomDvars::dvar_tick));
+			//UIControls::UI_TimelineSlider.AddBookmark(T6SDK::Dvars::GetInt(CustomDvars::dvar_tick));
 			T6SDK::Dvars::SetInt(CustomDvars::dvar_tick, 0);
 			CustomDvars::dvar_tick->modified = false;
 		}
