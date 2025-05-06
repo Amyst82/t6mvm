@@ -121,7 +121,17 @@ namespace UIDemoBrowseButtonNS
 						if (successStatus)
 						{
 							fileopen.close();
-							T6SDK::DemoHandler::LoadDemoFromFile(str.c_str());
+							if (T6SDK::DemoHandler::TryGetDemoBriefData(str.c_str(), &Common::CurrentLoadedDemo))
+							{
+								T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "BriefData obtained! GameMode: %s", Common::CurrentLoadedDemo.GameMode.c_str());
+							}
+							T6SDK::DemoHandler::LoadDemoFromFile(str.c_str(), &Common::CurrentLoadedDemo);
+							Common::CustomBookmarks.clear();
+							if (Common::CurrentLoadedDemo.HasMetadata)
+							{
+								T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMO", "Trying to add bookmark from metadata...");
+								Common::AddBookmarkFromJson(Common::CurrentLoadedDemo.Metadata);
+							}
 							*isChecked = false;
 						}
 					}

@@ -13,6 +13,7 @@
 #include "DofMenu.h"
 #include "WeaponAnimationChangerMenu.h"
 #include "MainMenu.h"
+#include "DemoBrowserMenu.h"
 
 namespace UIBase
 {
@@ -180,7 +181,16 @@ namespace UIBase
 			if (!T6SDK::Theater::IsInTheater() && !T6SDK::Input::BlankMenuOpened)
 			{
 				if (T6SDK::MAIN::ENABLED && T6SDK::Addresses::GameMode.Value() == 32)
+				{
 					UIControls::UI_DemoBrowseCheckButton.Draw();
+					UIControls::UI_OpenDemoBrowserButton.Draw();
+					if (CustomDvars::dvar_demos_directory->modified)
+					{
+						DemoBrowserMenu::Init();
+						CustomDvars::dvar_demos_directory->modified = false;
+					}
+					DemoBrowserMenu::Draw();
+				}
 			}
 			if (!Streams::ScreenshotRequested && !Streams::IsAnyOtherStream && Streams::IsStreamsRunning)
 			{
@@ -197,7 +207,6 @@ namespace UIBase
 	{
 		SunMenu::Init();
 		FogMenu::Init();
-		Common::CustomBookmarks.clear();
 	}
 	inline static void Init()
 	{
@@ -216,6 +225,7 @@ namespace UIBase
 		StreamsMenu::Init();
 		WeaponMenu::Init();
 		WeaponAnimationChangerMenu::Init();
+
 		UIControls::CloseMenuButton = T6SDK::Drawing::UI_ClickableButton("^3TAB ^7Back", 2, 35, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&UIBase::CloseMenu);
 		UIControls::CloseMenuButton.ToolTip = "Press ^3TAB ^7or ^3ESC ^7 or just click here to close the menu.";
 
@@ -226,5 +236,9 @@ namespace UIBase
 		UIControls::UI_TimelineSlider.ToolTip = "Jump to any tick you want!";
 		UIControls::UI_DemoClient = T6SDK::Drawing::UI_EnumButton("Demo client", 0, 32, &(*T6SDK::Dvars::DvarList::demo_client)->current.integer, 8, 35, T6SDK::AnchorPoint::TopCenter, 0x00);
 		UIControls::UI_DemoClient.ToolTip = "Switch between players.";
+		UIControls::UI_OpenDemoBrowserButton = T6SDK::Drawing::UI_IconClickableButton("BROWSE DEMOS", "menu_mp_lobby_icon_clip", 13, 7, T6SDK::AnchorPoint::TopLeft, false, []()
+		{
+			DemoBrowserMenu::Show();
+		});
 	}
 }

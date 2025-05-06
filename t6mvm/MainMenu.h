@@ -84,7 +84,10 @@ namespace MainMenu
 			return;
 		UIControls::UI_TimelineSlider.Draw();
 		if (Common::CustomBookmarks.size() > 0)
+		{
 			UIControls::UI_RemoveCustomBookmarks.Draw();
+			UIControls::UI_SaveCustomBookmarks.Draw();
+		}
 		UIControls::UI_LoadCFGButton.Draw();
 		UIControls::UI_SaveAllAsCFGButton.Draw();
 	}
@@ -96,5 +99,8 @@ namespace MainMenu
 		UIControls::UI_LoadCFGButton.ToolTip = "Load and apply you cfg!";
 		UIControls::UI_SaveAllAsCFGButton	= T6SDK::Drawing::UI_ClickableButton("SAVE ALL AS CFG", 8, 21, T6SDK::AnchorPoint::Center, (uintptr_t)&SaveAllAsCFG);
 		UIControls::UI_SaveAllAsCFGButton.ToolTip = "Save everything from T6MVM as ^3CFG file!";
+
+		UIControls::UI_SaveCustomBookmarks = T6SDK::Drawing::UI_ClickableButton("Export bookmarks", 12, 32, T6SDK::AnchorPoint::TopCenter, (uintptr_t)&Common::ExportBookmarksToJson);
+		UIControls::UI_SaveCustomBookmarks.ToolTip = "Write all custom bookmarks as metadata to ^3.tags ^7file.";
 	}
 }

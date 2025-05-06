@@ -185,15 +185,25 @@ namespace UIControls
 	//MENU controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton MenuBlurCheckBox{};
 	inline static T6SDK::Drawing::UI_ClickableButton CloseMenuButton{};
-	inline static T6SDK::Drawing::UI_ClickableButton AddToCFGButton{};
+
+
+	//MAIN MENU controls
 	inline static UI_TimelineNS::UI_Timeline UI_TimelineSlider{};
-	inline static T6SDK::Drawing::UI_EnumButton UI_DemoClient{};
-	inline static UIDemoBrowseButtonNS::UI_DemoBrowseButton UI_DemoBrowseCheckButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton AddToCFGButton{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_RemoveCustomBookmarks{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_LoadCFGButton{};
+	inline static T6SDK::Drawing::UI_EnumButton UI_DemoClient{};
+	inline static UIDemoBrowseButtonNS::UI_DemoBrowseButton UI_DemoBrowseCheckButton{};
+	inline static T6SDK::Drawing::UI_IconClickableButton UI_OpenDemoBrowserButton{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_SaveAllAsCFGButton{};
-
-
+	inline static T6SDK::Drawing::UI_ClickableButton UI_SaveCustomBookmarks{};
+	
+	//DEMO SELECT MENU controls
+	inline static T6SDK::Drawing::UI_EnumButton					UI_SelectedDemoNumber{};
+	inline static T6SDK::Drawing::UI_RectangleClickableButton	UI_PlayDemoButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton			UI_CloseDemoSelectMenu{};
+	inline static T6SDK::Drawing::UI_ClickableButton	UI_NavigateToDemoFile{};
+	inline static T6SDK::Drawing::UI_ClickableButton			UI_DemosDirectoryButton{};
 
 	inline static void Init()
 	{
@@ -214,6 +224,7 @@ namespace UIControls
 		UI_DemoBrowseCheckButton = UIDemoBrowseButtonNS::UI_DemoBrowseButton(13, 4, T6SDK::AnchorPoint::TopLeft);
 		UI_DemoBrowseCheckButton.ToolTip = "Load a demo from file.";
 		Common::UI_BookmarkDialog = T6SDK::Drawing::UI_TextBoxDialog("Provide bookmark description (may be empty)");
+		
 	}
 	inline static void DrawTabs()
 	{

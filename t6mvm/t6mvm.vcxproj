@@ -266,6 +266,7 @@
     <ClInclude Include="CameraMenu.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="Default.h" />
+    <ClInclude Include="DemoBrowserMenu.h" />
     <ClInclude Include="Depth.h" />
     <ClInclude Include="DepthWithGun.h" />
     <ClInclude Include="DofMenu.h" />

@@ -67,6 +67,9 @@
     <Filter Include="Components\Theater\FOG">
       <UniqueIdentifier>{e88de5d5-70ad-4300-8f1b-ea88b4ba4db7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Components\Theater\DemoBrowser">
+      <UniqueIdentifier>{33f97d62-a8ae-4b31-b02e-d8759e8ebf71}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -212,6 +215,9 @@
     </ClInclude>
     <ClInclude Include="HoldGun.h">
       <Filter>Components\Theater\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoBrowserMenu.h">
+      <Filter>Components\Theater\DemoBrowser</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

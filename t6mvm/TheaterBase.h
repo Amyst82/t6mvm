@@ -65,9 +65,18 @@ namespace TheaterBase
 			CustomDvars::dvar_frozenCam->modified = true;
 			Camera::DollyCamera::PreventChangingRotation(false);
 			Camera::DollyCamera::PreventChangingPosition(false);
-			Common::LoadedDemoTagsPath = "";
+			Common::CurrentLoadedDemo.Clear();
+		}
+		else
+		{
+			Common::CurrentLoadedDemo.Clear();
+			if (T6SDK::Addresses::DemoEndTick.Value() > 0)
+			{
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMO", "Demo recording ended.");
+			}
 		}
 	}
+
 	inline static void Init()
 	{
 		T6SDK::Theater::SetDemoTimescaleCustomStep(true, &CustomDvars::dvar_demoTimescaleStep->current.value);
@@ -90,8 +99,8 @@ namespace TheaterBase
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnSafeStringTranslated, (uintptr_t)&HandleSafeStringTranslate);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnGameModeChanged, (uintptr_t)&HandleGameModeChanged);
 		T6SDK::Addresses::Patches::JumpToDollyCamMarkerPatch.Patch();
-
-		T6SDK::Events::RegisterListener(T6SDK::EventType::OnCgItemDrawn, (uintptr_t)&HoldGun::Update);
+		T6SDK::Events::RegisterListener(T6SDK::EventType::OnProcessEntity, (uintptr_t)&HoldGun::Update);
+		T6SDK::Events::RegisterListener(T6SDK::EventType::OnCgItemDrawn, (uintptr_t)&HoldGun::UpdateItem);
 		//T6SDK::Theater::SetFreeRoamCameraSpeed(0.2f);
 
 		//T6SDK::Dvars::Cmd_AddCommandInternal("mvm_removeTimelineBookmarks", UIControls::UI_TimelineSlider.RemoveAllBookmarks, &UIControls::UI_TimelineSlider.cmd_removeBookmarks_VAR);

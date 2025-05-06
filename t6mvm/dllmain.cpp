@@ -5,17 +5,56 @@
 #include "TheaterBase.h"
 #include "WeaponAnimations.h"
 
+void SetDemoDirectoryDvar()
+{
+    if (T6SDK::CrossVersion::GetGameVersion() == T6SDK::CrossVersion::GameVersion::V43)
+    {
+        std::string redactedPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\OpenNetStorage\\Cloud\\FILM_MP\\";
+        CustomDvars::dvar_demos_directory->current.string = redactedPath.c_str();
+        T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "T6MVM", "Demos directory was restored from redacted mp game path.");
+    }
+    else if (T6SDK::CrossVersion::GetGameVersion() == T6SDK::CrossVersion::GameVersion::V41)
+    {
+        std::string redactedPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\OpenNetStorage\\Cloud\\FILM_ZM\\";
+        CustomDvars::dvar_demos_directory->current.string = redactedPath.c_str();
+        T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "T6MVM", "Demos directory was restored from redacted zm game path.");
+    }
+    std::string settingsPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\t6mvm.json";
+    // 1. Read JSON file
+    std::ifstream input_file(settingsPath);
+    if (!input_file.is_open())
+    {
+        T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "T6MVM", "Could not open settings file.");
+        return;
+    }
+    json data;
+    input_file >> data;
+    input_file.close();
+    // 2. Modify JSON data
+    data["DemosDirectory"] = CustomDvars::dvar_demos_directory->current.string;
+    // 3. Write modified JSON back to file
+    std::ofstream output_file(settingsPath);
+    if (!output_file.is_open())
+    {
+        T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "T6MVM", "Could not write to settings file.");
+    }
+    // Write with pretty printing (indentation = 4)
+    output_file << data.dump(4);
+    output_file.close();
+}
+
 void OnGameLoaded()
 {
     CustomDvars::Init();
     UIBase::Init();
     TheaterBase::Init();
     if (T6SDK::Typedefs::UI_OpenToastPopup)
-        T6SDK::InternalFunctions::UI_OpenToastPopup("^5T6MVM loaded!", "Please wait for a few seconds til its completed.", 10000);
+        T6SDK::InternalFunctions::UI_OpenToastPopup("^5T6MVM loaded!", "Have fun editing!", 10000);
     Streams::InitStreams();
     T6SDK::MAIN::InitializeDevConsole();
     WeaponAnimations::Init();
     //Read settings
+    SetDemoDirectoryDvar();
     std::string settingsPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\t6mvm.json";
     if (!std::filesystem::exists(settingsPath))
     {
@@ -46,7 +85,9 @@ void OnGameLoaded()
         //Getting demos folder
         std::string DemosDir = data.value("DemosDirectory", "");
         if (DemosDir.empty())
-            CustomDvars::dvar_demos_directory->current.string = "";
+        {
+            SetDemoDirectoryDvar();
+        }
         else
         {
             if (std::filesystem::exists(DemosDir) && std::filesystem::is_directory(DemosDir))
@@ -61,6 +102,7 @@ void OnGameLoaded()
             }
         }
     }
+    Common::LoadAllDemos();
 }
 
 void Init()
