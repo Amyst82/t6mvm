@@ -141,7 +141,7 @@ namespace WeaponMenu
 		UIControls::UI_CameraSway = T6SDK::Drawing::UI_CheckBoxButton("POV CAMERA SWAY OFF", "POV CAMERA SWAY ON", 4, 22, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_cameraSway->current.enabled, 0x00);
 		UIControls::UI_CameraSway.ToolTip = "POV camera sway (lowkey bodycam mode).";
 
-		UIControls::UI_CameraSwayMaxAngle = T6SDK::Drawing::UI_Slider("Camera sway max angle", &CustomDvars::dvar_cameraSwayMaxAngle->current.value, 20.0f, 00.0f, 50.0f, 4, 24, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_CameraSwayMaxAngle = T6SDK::Drawing::UI_Slider("Camera sway max angle", &CustomDvars::dvar_cameraSwayMaxAngle->current.value, -10.0f, -50.0f, 50.0f, 4, 24, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_CameraSwayMaxAngle.ToolTip = "POV camera sway max angle.";
 
 		UIControls::UI_Holdgun = T6SDK::Drawing::UI_CheckBoxButton("HOLDGUN OFF", "HOLDGUN ON", 8, 22, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_holdgun->current.enabled, 0x00);

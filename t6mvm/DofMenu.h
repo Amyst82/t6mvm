@@ -46,7 +46,7 @@ namespace DofMenu
 		UIControls::UI_DofNearStart = T6SDK::Drawing::UI_Slider("NEAR START", &(*T6SDK::Dvars::DvarList::r_dof_nearStart)->current.value, 10.0f, 0.0f, 1000.0f, 7, 12, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_DofNearStart.ToolTip = "Depth of field near start distance, in inches.";
 
-		UIControls::UI_DofNearEnd = T6SDK::Drawing::UI_Slider("NEAR END", &(*T6SDK::Dvars::DvarList::r_dof_nearEnd)->current.value, 60.0f, 0.0f, 1000.0f, 10, 12, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_DofNearEnd = T6SDK::Drawing::UI_Slider("NEAR END", &(*T6SDK::Dvars::DvarList::r_dof_nearEnd)->current.value, 60.0f, 0.0f, 2000.0f, 10, 12, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_DofNearEnd.ToolTip = "Depth of field near end distance, in inches.";
 
 		UIControls::UI_DofViewmodelStart = T6SDK::Drawing::UI_Slider("VIEWMODEL START", &(*T6SDK::Dvars::DvarList::r_dof_viewModelStart)->current.value, 2.0f, 0.0f, 50.0f, 4, 16, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
@@ -69,15 +69,15 @@ namespace DofMenu
 			return;
 
 		UIControls::UI_DofToggle.Draw();
-		UIControls::UI_DofFarBlur.Draw();
-		UIControls::UI_DofFarStart.Draw();
-		UIControls::UI_DofFarEnd.Draw();
-		UIControls::UI_DofNearBlur.Draw();
-		UIControls::UI_DofNearStart.Draw();
-		UIControls::UI_DofNearEnd.Draw();
-		UIControls::UI_DofViewmodelStart.Draw();
-		UIControls::UI_DofViewmodelEnd.Draw();
-		UIControls::UI_DofBias.Draw();
+		UIControls::UI_DofFarBlur.Draw(*UIControls::UI_DofToggle.isChecked);
+		UIControls::UI_DofFarStart.Draw(*UIControls::UI_DofToggle.isChecked);
+		UIControls::UI_DofFarEnd.Draw(*UIControls::UI_DofToggle.isChecked);
+		UIControls::UI_DofNearBlur.Draw(*UIControls::UI_DofToggle.isChecked);
+		UIControls::UI_DofNearStart.Draw(*UIControls::UI_DofToggle.isChecked);
+		UIControls::UI_DofNearEnd.Draw(*UIControls::UI_DofToggle.isChecked);
+		UIControls::UI_DofViewmodelStart.Draw(*UIControls::UI_DofToggle.isChecked);
+		UIControls::UI_DofViewmodelEnd.Draw(*UIControls::UI_DofToggle.isChecked);
+		UIControls::UI_DofBias.Draw(*UIControls::UI_DofToggle.isChecked);
 
 		switch (T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::r_dofHDR))
 		{

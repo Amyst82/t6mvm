@@ -101,6 +101,7 @@ namespace TheaterBase
 		T6SDK::Addresses::Patches::JumpToDollyCamMarkerPatch.Patch();
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnProcessEntity, (uintptr_t)&HoldGun::Update);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnCgItemDrawn, (uintptr_t)&HoldGun::UpdateItem);
+		//T6SDK::Events::RegisterListener(T6SDK::EventType::OnEndFrameDrawn, (uintptr_t)&HoldGun::OnEndScene); //Used for debugging Holdgun in dollycamera
 		//T6SDK::Theater::SetFreeRoamCameraSpeed(0.2f);
 
 		//T6SDK::Dvars::Cmd_AddCommandInternal("mvm_removeTimelineBookmarks", UIControls::UI_TimelineSlider.RemoveAllBookmarks, &UIControls::UI_TimelineSlider.cmd_removeBookmarks_VAR);

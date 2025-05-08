@@ -94,13 +94,13 @@ namespace HoldGun
 				Matrix33_s newRotationMatrix{};
 				newRotationMatrix = reflectRotationMatrix(rot, 'Z');
 				//Had to reflect wrist bone rotation by Z axis since it's has wrong direction
-				T6SDK::InternalFunctions::AxisToAngles(&newRotationMatrix, &angles);
+				T6SDK::InternalFunctions::AxisToAnglesCustom(&newRotationMatrix, &angles);
 				itemIndices[clientNumindex]->pose.angles = angles;
 			}
 			else //attach to tag_weapon_right to allow weapon move as deveropers wanted tag_weapon_right to move
 			{
 				itemIndices[clientNumindex]->pose.origin = pos;
-				T6SDK::InternalFunctions::AxisToAngles(&rot, &angles);
+				T6SDK::InternalFunctions::AxisToAnglesCustom(&rot, &angles);
 				itemIndices[clientNumindex]->pose.angles = angles;
 
 			}
@@ -158,5 +158,59 @@ namespace HoldGun
 				}
 			}
 		}	
+	}
+
+	//DEBUG PURPOSES ONLY
+	inline static void OnEndScene()
+	{
+		if (!T6SDK::Theater::IsInTheater())
+			return;
+		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_holdgun))
+			return;
+		//Item->clientnum equals 18 somehow so find corpse and its item by ourself. Usually happens when a weapon should be already on the ground.
+		for (int i = 0; i < 18; i++)
+		{
+			if (static_cast<std::size_t>(i) < itemIndices.size() && itemIndices[i] != 0 && static_cast<std::size_t>(i) < corpseIndices.size() && corpseIndices[i] != 0)
+			{
+				vec3_t pos{};
+				Matrix33_s rot{};
+				if (T6SDK::InternalFunctions::CG_DObjGetWorldTagMatrix(corpseIndices[i], T6SDK::Dvars::GetBool(CustomDvars::dvar_holdgunWrist) ? 204 : 212, &rot, &pos)) //right wrist
+				{
+					vec2_t screenPos{};
+					if (T6SDK::InternalFunctions::WorldPosToScreenPos(&pos, &screenPos))
+					{
+						RECT rect{};
+						if (T6SDK::Drawing::DrawRectAbsolute(screenPos.x, screenPos.y, 20.0f, 20.0f, T6SDK::Drawing::YELLOWCOLOR, T6SDK::AnchorPoint::Center, &rect))
+						{
+							vec3_t angles{};
+							T6SDK::InternalFunctions::AxisToAngles(&rot, &angles);
+
+							vec3_t angles2{};
+							T6SDK::InternalFunctions::AxisToAnglesCustom(&rot, &angles2);
+							char buffer[512];
+							//sprintf(buffer, "%i) Corpse: 0x%X; Item: 0x%X;\nx: %.3f; y: %.3f; z: %.3f\nP: %.3f; Y: %.3f; R: %.3f;\nbX: %.3f; bY: %.3f; bZ: %.3f;\nbP: %.3f; bY: %.3f; bR: %.3f;\n[%.3f] [%.3f] [%.3f]\n[%.3f] [%.3f] [%.3f]\n[%.3f] [%.3f] [%.3f]\n", i, corpseIndices[i], itemIndices[i],
+							//	itemIndices[i]->pose.origin.x, itemIndices[i]->pose.origin.y, itemIndices[i]->pose.origin.z,
+							//	itemIndices[i]->pose.angles.x, itemIndices[i]->pose.angles.y, itemIndices[i]->pose.angles.z,
+							//	pos.x, pos.y, pos.z,
+							//	rot.m[0][0], rot.m[0][1], rot.m[0][2], 
+							//	rot.m[1][0], rot.m[1][1], rot.m[1][2], 
+							//	rot.m[2][0], rot.m[2][1], rot.m[2][2]);
+							sprintf(buffer, "^3Expected: ^7[%.3f] [%.3f] [%.3f];\n^3Yours: ^7[%.3f] [%.3f] [%.3f];\n^3Matrix was:\n^7[%.3f] [%.3f] [%.3f]\n[%.3f] [%.3f] [%.3f]\n[%.3f] [%.3f] [%.3f]",
+								angles.x, angles.y, angles.z, angles2.x, angles2.y, angles2.z,
+								rot.m[0][0], rot.m[0][1], rot.m[0][2],
+								rot.m[1][0], rot.m[1][1], rot.m[1][2],
+								rot.m[2][0], rot.m[2][1], rot.m[2][2]);
+
+							T6SDK::Drawing::DrawTextAbsolute(buffer, screenPos.x+50.0f, screenPos.y - 200.0f, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+							if (T6SDK::Input::MousePosX() > (float)rect.left && T6SDK::Input::MousePosX() < (float)rect.right && T6SDK::Input::MousePosY() > (float)rect.top && T6SDK::Input::MousePosY() < (float)rect.bottom)
+							{
+								
+							}
+						}
+					}
+				}
+			}
+		}
+		
 	}
 }

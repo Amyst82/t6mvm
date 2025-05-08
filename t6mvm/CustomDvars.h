@@ -111,7 +111,7 @@ namespace CustomDvars
 
 		//Register misc dvars
 		dvar_greenScreen = T6SDK::Dvars::RegisterBool("mvm_greenScreen", false, "Green screen.");
-		dvar_greenScreenPlayers = T6SDK::Dvars::RegisterEnum("mvm_greenScreenPlayers", gsPlayersEnum, 1, "Green screen players.");
+		dvar_greenScreenPlayers = T6SDK::Dvars::RegisterInt("mvm_greenScreenPlayers", 1, 0, 3, "Green screen players.");
 		dvar_greenScreenPlayersThreshold = T6SDK::Dvars::RegisterFloat("mvm_greenScreenPlayersThreshold", 500.0f, 0.0f, 5000.0f, "Green screen players threshold.");
 		dvar_greenScreenColor = T6SDK::Dvars::RegisterVec3("mvm_greenScreenColor", 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, "Green screen color");
 		dvar_zdepth = T6SDK::Dvars::RegisterBool("mvm_zdepth", false, "Z depth.");

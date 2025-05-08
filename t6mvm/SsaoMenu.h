@@ -38,10 +38,10 @@ namespace SsaoMenu
 			return;
 
 		UIControls::UI_SsaoToggle.Draw();
-		UIControls::UI_SsaoScale.Draw();
-		UIControls::UI_SsaoRadius.Draw();
-		UIControls::UI_SsaoBias.Draw();
-		UIControls::UI_SsaoIntensity.Draw();
-		UIControls::UI_Znear.Draw();
+		UIControls::UI_SsaoScale.Draw(*UIControls::UI_SsaoToggle.isChecked);
+		UIControls::UI_SsaoRadius.Draw(*UIControls::UI_SsaoToggle.isChecked);
+		UIControls::UI_SsaoBias.Draw(*UIControls::UI_SsaoToggle.isChecked);
+		UIControls::UI_SsaoIntensity.Draw(*UIControls::UI_SsaoToggle.isChecked);
+		UIControls::UI_Znear.Draw(*UIControls::UI_SsaoToggle.isChecked);
 	}
 }
