@@ -19,6 +19,7 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_RadioButton LightsTabButton("^7LIGHTS", 0, 2, 21, T6SDK::AnchorPoint::TopLeft, 0x00);
 	inline static T6SDK::Drawing::UI_RadioButton StreamsTabButton("^7STREAMS", 0, 2, 23, T6SDK::AnchorPoint::TopLeft, 0x00);
 	inline static T6SDK::Drawing::UI_RadioButton WeaponTabButton("^7WEAPON", 0, 2, 25, T6SDK::AnchorPoint::TopLeft, 0x00);
+	inline static T6SDK::Drawing::UI_RadioButton SlidersTabButton("^7SLIDERS", 0, 2, 27, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 	//CAMERA controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_FrozenCamera{};
@@ -32,14 +33,20 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_Slider UI_FreeRoamSpeed{};
 	inline static T6SDK::Drawing::UI_Slider UI_FreeRoamAcceleration{};
 	inline static T6SDK::Drawing::UI_Slider UI_FreeRoamSlowing{};
+
+	//SHAKE controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_Shake{};
 	inline static T6SDK::Drawing::UI_Slider UI_ShakeSpeed{};
 	inline static T6SDK::Drawing::UI_Slider UI_ShakeAmount{};
-	inline static T6SDK::Drawing::UI_Slider UI_ShakePositionAmount{};
-	inline static T6SDK::Drawing::UI_Slider UI_ShakeRotationAmount{};
+	inline static T6SDK::Drawing::UI_Slider UI_ShakeX{};
+	inline static T6SDK::Drawing::UI_Slider UI_ShakeY{};
+	inline static T6SDK::Drawing::UI_Slider UI_ShakeZ{};
+	inline static T6SDK::Drawing::UI_Slider UI_ShakePitch{};
+	inline static T6SDK::Drawing::UI_Slider UI_ShakeYaw{};
+	inline static T6SDK::Drawing::UI_Slider UI_ShakeRoll{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_ShakePreview{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_ExportCampathButton{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_ImportCampathButton{};
-
 
 	//MISC controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_GreenScreen{};
@@ -68,6 +75,7 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_Slider UI_SsaoBias{};
 	inline static T6SDK::Drawing::UI_Slider UI_SsaoIntensity{};
 	inline static T6SDK::Drawing::UI_Slider UI_Znear{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_SsaoReset{};
 
 	//FOG controls
 	inline static T6SDK::Drawing::UI_Slider UI_FogStart{};
@@ -92,7 +100,6 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_ClickableButton UI_FogLoadPreset{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_FogReset{};
 
-
 	//DOF controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_DofToggle{};
 	inline static T6SDK::Drawing::UI_Slider			UI_DofFarBlur{};
@@ -105,6 +112,7 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_Slider			UI_DofViewmodelEnd{};
 	inline static T6SDK::Drawing::UI_Slider			UI_DofBias{};
 	inline static T6SDK::Drawing::UI_EnumButton		UI_DofHDR{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_DofReset{};
 
 	//SUN controls
 	inline static T6SDK::Drawing::UI_Slider UI_SunColorR{};
@@ -127,6 +135,7 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_Slider UI_LightColorB{};
 	inline static T6SDK::Drawing::UI_Slider UI_LightBrightness{};
 	inline static T6SDK::Drawing::UI_Slider UI_LightRadius{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_LightFlicker{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_DeleteLightButton{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_DeleteAllLightsButton{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_RepositionLightButton{};
@@ -155,7 +164,6 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass9CheckBox{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass10CheckBox{};
 
-
 	//WEAPON controls
 	inline static T6SDK::Drawing::UI_Slider UI_GunXOffset{};
 	inline static T6SDK::Drawing::UI_Slider UI_GunYOffset{};
@@ -181,11 +189,9 @@ namespace UIControls
 	inline static Weapon::UI_WeapAnimListBox UI_WeapAnimsLB1{};
 	inline static Weapon::UI_WeapAnimListBox UI_WeapAnimsLB2{};
 
-
 	//MENU controls
 	inline static T6SDK::Drawing::UI_CheckBoxButton MenuBlurCheckBox{};
 	inline static T6SDK::Drawing::UI_ClickableButton CloseMenuButton{};
-
 
 	//MAIN MENU controls
 	inline static UI_TimelineNS::UI_Timeline UI_TimelineSlider{};
@@ -200,10 +206,15 @@ namespace UIControls
 	
 	//DEMO SELECT MENU controls
 	inline static T6SDK::Drawing::UI_EnumButton					UI_SelectedDemoNumber{};
-	inline static T6SDK::Drawing::UI_RectangleClickableButton	UI_PlayDemoButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton	UI_PlayDemoButton{};
 	inline static T6SDK::Drawing::UI_ClickableButton			UI_CloseDemoSelectMenu{};
 	inline static T6SDK::Drawing::UI_ClickableButton	UI_NavigateToDemoFile{};
 	inline static T6SDK::Drawing::UI_ClickableButton			UI_DemosDirectoryButton{};
+
+	//CUSTOM SLIDER controls
+	inline static T6SDK::Drawing::UI_ClickableButton UI_SlidersAddSliderButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton UI_SlidersRefreshButton{};
+
 
 	inline static void Init()
 	{
@@ -224,7 +235,8 @@ namespace UIControls
 		UI_DemoBrowseCheckButton = UIDemoBrowseButtonNS::UI_DemoBrowseButton(13, 4, T6SDK::AnchorPoint::TopLeft);
 		UI_DemoBrowseCheckButton.ToolTip = "Load a demo from file.";
 		Common::UI_BookmarkDialog = T6SDK::Drawing::UI_TextBoxDialog("Provide bookmark description (may be empty)");
-		
+		SlidersTabButton.ToolTip = "Create and manage custom sliders!";
+	
 	}
 	inline static void DrawTabs()
 	{
@@ -239,5 +251,6 @@ namespace UIControls
 		LightsTabButton.Draw();
 		StreamsTabButton.Draw();
 		WeaponTabButton.Draw();
+		SlidersTabButton.Draw();
 	}
 }

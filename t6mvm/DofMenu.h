@@ -22,6 +22,19 @@ namespace DofMenu
 			std::string("r_dofHDR ") + std::to_string(T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::r_dofHDR)) + ";\n";
 		return cfg;
 	}
+	void ResetDof()
+	{
+		UIControls::UI_DofFarBlur.Reset();
+		UIControls::UI_DofFarStart.Reset();
+		UIControls::UI_DofFarEnd.Reset();
+		UIControls::UI_DofNearBlur.Reset();
+		UIControls::UI_DofNearStart.Reset();
+		UIControls::UI_DofNearEnd.Reset();
+		UIControls::UI_DofViewmodelStart.Reset();
+		UIControls::UI_DofViewmodelEnd.Reset();
+		UIControls::UI_DofBias.Reset();
+		*UIControls::UI_DofHDR.SelectedValue = 2;
+	}
 	void ToggleDOF(T6SDK::Drawing::UI_CheckBoxButton* control)
 	{
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_dof_enable, T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_dof_tweak));
@@ -60,6 +73,9 @@ namespace DofMenu
 
 		UIControls::UI_DofHDR = T6SDK::Drawing::UI_EnumButton("QUIALITY", 0, 2, &(*T6SDK::Dvars::DvarList::r_dofHDR)->current.integer, 4, 19, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_DofHDR.ToolTip = "DOF mode, 0 = legacy 1 = HDR low, 2 = HDR high.";
+
+		UIControls::UI_DofReset = T6SDK::Drawing::UI_ClickableButton("RESET DOF", 8, 32, T6SDK::AnchorPoint::Center, (uintptr_t)&ResetDof);
+		UIControls::UI_DofReset.ToolTip = "Reset depth of field settings.";
 	}
 	static void Draw()
 	{
@@ -94,6 +110,7 @@ namespace DofMenu
 			UIControls::UI_DofHDR.Text = "QUIALITY: LEGACY";
 			break;
 		}
-		UIControls::UI_DofHDR.Draw();
+		UIControls::UI_DofHDR.Draw(*UIControls::UI_DofToggle.isChecked);
+		UIControls::UI_DofReset.Draw(*UIControls::UI_DofToggle.isChecked);
 	}
 }

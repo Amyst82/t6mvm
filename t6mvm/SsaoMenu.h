@@ -15,6 +15,14 @@ namespace SsaoMenu
 			std::string("r_znear ") + std::to_string(T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::r_znear)) + ";\n";
 		return cfg;
 	}
+	void ResetSsao()
+	{
+		UIControls::UI_SsaoScale.Reset();
+		UIControls::UI_SsaoRadius.Reset();
+		UIControls::UI_SsaoBias.Reset();
+		UIControls::UI_SsaoIntensity.Reset();
+		UIControls::UI_Znear.Reset();
+	}
 	static void Init()
 	{
 		UIControls::UI_SsaoToggle = T6SDK::Drawing::UI_CheckBoxButton("SSAO OFF", "SSAO ON", 4, 5, T6SDK::AnchorPoint::TopLeft, &(*T6SDK::Dvars::DvarList::r_ssao)->current.enabled, 0x00);
@@ -29,6 +37,9 @@ namespace SsaoMenu
 		UIControls::UI_SsaoIntensity.ToolTip = "SSAO intensity.";
 		UIControls::UI_Znear = T6SDK::Drawing::UI_Slider("SSAO DISTANCE", &(*T6SDK::Dvars::DvarList::r_znear)->current.value, 4.0f, 0.5f, 9.0f, 7, 12, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_Znear.ToolTip = "Distance of SSAO. Formerly ^5r_znear^7 dvar.";
+
+		UIControls::UI_SsaoReset = T6SDK::Drawing::UI_ClickableButton("RESET SSAO", 8, 32, T6SDK::AnchorPoint::Center, (uintptr_t)&ResetSsao);
+		UIControls::UI_SsaoReset.ToolTip = "^7Reset ^3SSAO ^7settings.";
 	}
 	static void Draw()
 	{
@@ -43,5 +54,6 @@ namespace SsaoMenu
 		UIControls::UI_SsaoBias.Draw(*UIControls::UI_SsaoToggle.isChecked);
 		UIControls::UI_SsaoIntensity.Draw(*UIControls::UI_SsaoToggle.isChecked);
 		UIControls::UI_Znear.Draw(*UIControls::UI_SsaoToggle.isChecked);
+		UIControls::UI_SsaoReset.Draw(*UIControls::UI_SsaoToggle.isChecked);
 	}
 }

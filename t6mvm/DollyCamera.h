@@ -9,9 +9,13 @@ namespace Camera
 		inline static vector<CameraWayPoint_s> InterpoldatedValues{};
 		float PI = 3.1415926535f;
 		inline static int t = 0;
-		Shake shake0(69.0f);
-		Shake shake1(420.0f);
-		Shake shake2(1337.0f);
+		Shake shakeX(69.0f);
+		Shake shakeY(420.0f);
+		Shake shakeZ(1337.0f);
+
+		Shake shakePitch(1322.0f);
+		Shake shakeYaw(805.0f);
+		Shake shakeRoll(2025.0f);
 
 		cmd_function_s cmd_exportCam_VAR{};
 		cmd_function_s cmd_importCam_VAR{};
@@ -147,11 +151,12 @@ namespace Camera
 			{
 				if (CustomDvars::dvar_cameraSway->current.enabled)
 				{
-					T6SDK::Addresses::cg->RefDefViewAngles.z = min(CustomDvars::dvar_cameraSwayMaxAngle->current.value * T6SDK::Addresses::cg->swayAngles.x, CustomDvars::dvar_cameraSwayMaxAngle->current.value);
+					T6SDK::Addresses::cg->RefDefViewAngles.z = -min(CustomDvars::dvar_cameraSwayMaxAngle->current.value * T6SDK::Addresses::cg->swayAngles.x, CustomDvars::dvar_cameraSwayMaxAngle->current.value);
 				}
 
 			}
 		}
+		float previewShakeIncrement = 0.0f;
 		static void Update()
 		{
 			if (!T6SDK::Theater::IsInTheater())
@@ -161,14 +166,24 @@ namespace Camera
 			{
 				return;
 			}
-			
+
+			if (T6SDK::Dvars::GetBool(CustomDvars::dvar_shakePreview) && T6SDK::Addresses::IsDemoPaused.Value() == 1)
+			{
+				float _timescale = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::timescale) * T6SDK::Addresses::Demo_timescale.Value();
+				previewShakeIncrement += T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeSpeed)/25.0f * 0.5f * _timescale;
+			}
+			else
+			{
+				previewShakeIncrement = 0.0f;
+				T6SDK::Dvars::SetBool(CustomDvars::dvar_shakePreview, false);
+			}
 
 			bool frozenCam = T6SDK::Dvars::GetBool(CustomDvars::dvar_frozenCam);
 			bool shakeEnabled = T6SDK::Dvars::GetBool(CustomDvars::dvar_shake);
 			float shakeAmount = T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeAmount);
 			float posShakeAmount = T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakePosition);
 			float rotShakeAmount = T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeRotation);
-			float shakeSpeed = T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeSpeed);
+			float shakeSpeed = T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeSpeed)/5.0f;
 			vec3_t camPosOffset = T6SDK::Dvars::GetVec3(CustomDvars::dvar_dollyCamOffsetPos);
 			vec3_t camRotOffset = T6SDK::Dvars::GetVec3(CustomDvars::dvar_dollyCamOffsetRot);
 
@@ -208,21 +223,22 @@ namespace Camera
 			{
 				increment = InterpoldatedValues.size() - 1;
 			}
-			float shake_time = shakeSpeed * ((float)t / (float)T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[MarkersCount - 1].Tick) * 10.0f;
+			float shake_time = shakeSpeed * ((float)t / (float)T6SDK::Addresses::DemoPlayback.Value()->DollyCameraMarkers[MarkersCount - 1].Tick) * 1000.0f;
 
+			bool IsPreviewingShake = T6SDK::Dvars::GetBool(CustomDvars::dvar_shakePreview);
 			//Writing position
-			float ShakedX = shake2.GetShakeOutput(shake_time) * (posShakeAmount * shakeAmount);
-			float ShakedY = shake1.GetShakeOutput(shake_time) * (posShakeAmount * shakeAmount);
-			float ShakedZ = shake0.GetShakeOutput(shake_time) * (posShakeAmount * shakeAmount);
+			float ShakedX = shakeX.GetShakeOutput(IsPreviewingShake ? previewShakeIncrement : shake_time) * (T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeX) * posShakeAmount * shakeAmount);
+			float ShakedY = shakeY.GetShakeOutput(IsPreviewingShake ? previewShakeIncrement :shake_time) * (T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeY) * posShakeAmount * shakeAmount);
+			float ShakedZ = shakeZ.GetShakeOutput(IsPreviewingShake ? previewShakeIncrement :shake_time) * (T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeZ) * posShakeAmount * shakeAmount);
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin.x = InterpoldatedValues[increment].src.x + (shakeEnabled == true ? ShakedX : 0.0f) + camPosOffset.x;
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin.y = InterpoldatedValues[increment].src.y + (shakeEnabled == true ? ShakedY : 0.0f) + camPosOffset.y;
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Origin.z = InterpoldatedValues[increment].src.z + (shakeEnabled == true ? ShakedZ : 0.0f) + camPosOffset.z;
 
 			//Calculating yaw and pitch
 			vec3_t angles = CalculateYawPitch(InterpoldatedValues[increment].src, InterpoldatedValues[increment].dst);
-			float ShakedYaw = shake0.GetShakeOutput(shake_time) * (rotShakeAmount * shakeAmount);
-			float ShakedPitch = shake1.GetShakeOutput(shake_time) * (rotShakeAmount * shakeAmount);
-			float ShakedRoll = shake2.GetShakeOutput(shake_time) * (rotShakeAmount * shakeAmount);
+			float ShakedYaw =	shakeYaw.GetShakeOutput(IsPreviewingShake ? previewShakeIncrement : shake_time) * (T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeYaw) * rotShakeAmount * shakeAmount);
+			float ShakedPitch = shakePitch.GetShakeOutput(IsPreviewingShake ? previewShakeIncrement : shake_time) * (T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakePitch) * rotShakeAmount * shakeAmount);
+			float ShakedRoll =	shakeRoll.GetShakeOutput(IsPreviewingShake ? previewShakeIncrement : shake_time) * (T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeRoll) * rotShakeAmount * shakeAmount);
 			
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.x = angles.x + (shakeEnabled == true ? ShakedYaw : 0.0f) + camRotOffset.x;
 			T6SDK::Addresses::DemoPlayback.Value()->FreeRoamCamera.Angles.y = angles.y + (shakeEnabled == true ? ShakedPitch : 0.0f) + camRotOffset.y;

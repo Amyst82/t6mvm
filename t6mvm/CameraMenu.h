@@ -19,8 +19,12 @@ namespace CameraMenu
 			std::string("mvm_shake ") + std::to_string(T6SDK::Dvars::GetBool(CustomDvars::dvar_shake) ? 1 : 0) + ";\n" +
 			std::string("mvm_shakeSpeed ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeSpeed)) + ";\n" +
 			std::string("mvm_shakeAmount ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeAmount)) + ";\n" +
-			std::string("mvm_shakePosition ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakePosition)) + ";\n" +
-			std::string("mvm_shakeRotation ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeRotation)) + ";\n";
+			std::string("mvm_shakeX ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeX)) + ";\n" +
+			std::string("mvm_shakeY ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeY)) + ";\n" +
+			std::string("mvm_shakeZ ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeZ)) + ";\n" +
+			std::string("mvm_shakePitch ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakePitch)) + ";\n" +
+			std::string("mvm_shakeYaw ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeYaw)) + ";\n" +
+			std::string("mvm_shakeRoll ") + std::to_string(T6SDK::Dvars::GetFloat(CustomDvars::dvar_shakeRoll)) + ";\n";
 		return cfg;
 	}
 	static void Draw()
@@ -47,14 +51,20 @@ namespace CameraMenu
 		UIControls::UI_FreeRoamAcceleration.Draw();
 		UIControls::UI_FreeRoamSlowing.Draw();
 
-		vec2_t coords2 = T6SDK::Drawing::GetGridCellCoords(8, 21);
+		vec2_t coords2 = T6SDK::Drawing::GetGridCellCoords(8, 20);
 		T6SDK::Drawing::DrawTextAbsolute("^9T6SHAKE", coords2.x, coords2.y, 1.0f, T6SDK::Drawing::T_WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 
+		//Drawing shake controls
 		UIControls::UI_Shake.Draw();
 		UIControls::UI_ShakeSpeed.Draw(CustomDvars::dvar_shake->current.enabled);
 		UIControls::UI_ShakeAmount.Draw(CustomDvars::dvar_shake->current.enabled);
-		UIControls::UI_ShakePositionAmount.Draw(CustomDvars::dvar_shake->current.enabled);
-		UIControls::UI_ShakeRotationAmount.Draw(CustomDvars::dvar_shake->current.enabled);
+		UIControls::UI_ShakeX.Draw(CustomDvars::dvar_shake->current.enabled);
+		UIControls::UI_ShakeY.Draw(CustomDvars::dvar_shake->current.enabled);
+		UIControls::UI_ShakeZ.Draw(CustomDvars::dvar_shake->current.enabled);
+		UIControls::UI_ShakePitch.Draw(CustomDvars::dvar_shake->current.enabled);
+		UIControls::UI_ShakeYaw.Draw(CustomDvars::dvar_shake->current.enabled);
+		UIControls::UI_ShakeRoll.Draw(CustomDvars::dvar_shake->current.enabled);
+		UIControls::UI_ShakePreview.Draw(CustomDvars::dvar_shake->current.enabled);
 
 		UIControls::UI_ExportCampathButton.Draw(T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount > 0);
 		UIControls::UI_ImportCampathButton.Draw();
@@ -92,21 +102,31 @@ namespace CameraMenu
 		UIControls::UI_FreeRoamSlowing = T6SDK::Drawing::UI_Slider("FREE ROAM SLOW DOWN TO", &CustomDvars::dvar_slowingFactor->current.value, 0.25f, 0.0f, 10.0f, 12, 16, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_FreeRoamSlowing.ToolTip = "Free camera speed to be set while pressing ^5CTRL.";
 
-		UIControls::UI_Shake = T6SDK::Drawing::UI_CheckBoxButton("CAMERA SHAKE OFF", "CAMERA SHAKE ON", 4, 21, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_shake->current.enabled, 0x00);
+
+		UIControls::UI_Shake = T6SDK::Drawing::UI_CheckBoxButton("CAMERA SHAKE OFF", "CAMERA SHAKE ON", 4, 20, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_shake->current.enabled, 0x00);
 		UIControls::UI_Shake.ToolTip = "Dolly camera shake that was made for Dmitriy Norton but he used it only once or maybe twice :(";
 
-		UIControls::UI_ShakeSpeed = T6SDK::Drawing::UI_Slider("CAMERA SHAKE SPEED", &CustomDvars::dvar_shakeSpeed->current.value, 1.0f, 0.0f, 10.0f, 4, 24, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_ShakeSpeed = T6SDK::Drawing::UI_Slider("SHAKE SPEED", &CustomDvars::dvar_shakeSpeed->current.value, 1.0f, 0.0f, 10.0f, 4, 23, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_ShakeSpeed.ToolTip = "Dolly camera shake speed.";
 
-		UIControls::UI_ShakeAmount = T6SDK::Drawing::UI_Slider("CAMERA SHAKE AMOUNT", &CustomDvars::dvar_shakeAmount->current.value, 1.0f, 0.0f, 10.0f, 8, 24, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_ShakeAmount = T6SDK::Drawing::UI_Slider("SHAKE AMOUNT", &CustomDvars::dvar_shakeAmount->current.value, 1.0f, 0.0f, 10.0f, 8, 23, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_ShakeAmount.ToolTip = "Dolly camera overall shake amount.";
 
-		UIControls::UI_ShakePositionAmount = T6SDK::Drawing::UI_Slider("CAMERA SHAKE POSITION AMOUNT", &CustomDvars::dvar_shakePosition->current.value, 1.0f, 0.0f, 10.0f, 4, 27, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
-		UIControls::UI_ShakePositionAmount.ToolTip = "Dolly camera position shake intensity.";
 
-		UIControls::UI_ShakeRotationAmount = T6SDK::Drawing::UI_Slider("CAMERA SHAKE ROTATION AMOUNT", &CustomDvars::dvar_shakeRotation->current.value, 1.0f, 0.0f, 10.0f, 8, 27, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
-		UIControls::UI_ShakeRotationAmount.ToolTip = "Dolly camera rotation shake intensity.";
-
+		UIControls::UI_ShakeX =		T6SDK::Drawing::UI_Slider("SHAKE X AMOUNT", &CustomDvars::dvar_shakeX->current.value, 1.0f, 0.0f, 10.0f, 4, 26, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_ShakeX.ToolTip = "Dolly camera X axis shake amount.";
+		UIControls::UI_ShakeY =		T6SDK::Drawing::UI_Slider("SHAKE Y AMOUNT", &CustomDvars::dvar_shakeY->current.value, 1.0f, 0.0f, 10.0f, 4, 29, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_ShakeY.ToolTip = "Dolly camera Y axis shake amount.";
+		UIControls::UI_ShakeZ =		T6SDK::Drawing::UI_Slider("SHAKE Z AMOUNT", &CustomDvars::dvar_shakeZ->current.value, 1.0f, 0.0f, 10.0f, 4, 32, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_ShakeZ.ToolTip = "Dolly camera Z axis shake amount.";
+		UIControls::UI_ShakePitch = T6SDK::Drawing::UI_Slider("SHAKE PITCH AMOUNT", &CustomDvars::dvar_shakePitch->current.value, 1.0f, 0.0f, 10.0f, 8, 26, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_ShakePitch.ToolTip = "Dolly camera pitch angle shake amount.";
+		UIControls::UI_ShakeYaw =	T6SDK::Drawing::UI_Slider("SHAKE YAW AMOUNT", &CustomDvars::dvar_shakeYaw->current.value, 1.0f, 0.0f, 10.0f, 8, 29, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_ShakeYaw.ToolTip = "Dolly camera yaw angle shake amount.";
+		UIControls::UI_ShakeRoll =	T6SDK::Drawing::UI_Slider("SHAKE ROLL AMOUNT", &CustomDvars::dvar_shakeRoll->current.value, 1.0f, 0.0f, 10.0f, 8, 32, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+		UIControls::UI_ShakeRoll.ToolTip = "Dolly camera roll angle shake amount.";
+		UIControls::UI_ShakePreview = T6SDK::Drawing::UI_CheckBoxButton("PREVIEW SHAKE", "STOP PREVIEWING", 11, 23, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_shakePreview->current.enabled, 0x00);
+		UIControls::UI_ShakePreview.ToolTip = "Preview the dolly camera shake at current timescale.";
 
 	}
 }

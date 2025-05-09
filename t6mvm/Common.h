@@ -26,7 +26,7 @@ namespace Common
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Escapd quuotes: %s", input.c_str());
 		return input;
 	}
-	std::string repairJson(const std::string& badJson) 
+	static std::string repairJson(const std::string& badJson) 
 	{
 		try 
 		{
@@ -97,31 +97,31 @@ namespace Common
 			if (data.contains("start_tick"))
 			{
 				std::string tick = data.at("start_tick").get<std::string>();		
-				//T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Metadata from V4. tick = %s int -> %i", tick.c_str(), std::stoi(tick));
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Metadata from V4. tick = %s int -> %i", tick.c_str(), std::stoi(tick));
 				int player_index = 0;
 				std::string desc = "^1N/A";
 				if (data.contains("player_index"))
 				{
 					std::string string_player_index = data.at("player_index").get<std::string>();
-					//T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Metadata from V4. pIndex = %s int -> %i", string_player_index.c_str(), std::stoi(string_player_index));
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Metadata from V4. pIndex = %s int -> %i", string_player_index.c_str(), std::stoi(string_player_index));
 					player_index = std::stoi(string_player_index);
 				}
 				if (data.contains("description"))
 				{
 					desc = data.at("description").get<std::string>();
-					//T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Metadata from V4. desc = %s", desc.c_str());
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Metadata from V4. desc = %s", desc.c_str());
 				}
 				if (std::stoi(tick) > 0)
 				{
-					//T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Start tick above 0. Adding a bookmark...");
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Start tick above 0. Adding a bookmark...");
 					Common::CustomDemoBookmark bkmrk{};
-					//T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "1) Empty bookmark created");
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "1) Empty bookmark created");
 					bkmrk.tick = std::stoi(tick);
-					//T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "2) Tick set");
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "2) Tick set");
 					bkmrk.playerNum = player_index;
-					//T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "3) Player index set");
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "3) Player index set");
 					bkmrk.description = std::string(desc);
-					//T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "4) Desc set! Pushing back...");
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "4) Desc set! Pushing back...");
 					Common::CustomBookmarks.push_back(bkmrk);
 					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Bookmark added! Bookmarks : %i; tick: %i, pNum: %i, desc: %s", Common::CustomBookmarks.size(), bkmrk.tick, bkmrk.playerNum, bkmrk.description.c_str());
 				}

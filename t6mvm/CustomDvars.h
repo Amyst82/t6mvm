@@ -7,8 +7,15 @@ namespace CustomDvars
 	static dvar_s* dvar_shake;
 	static dvar_s* dvar_shakeSpeed;
 	static dvar_s* dvar_shakeAmount;
-	static dvar_s* dvar_shakePosition;
-	static dvar_s* dvar_shakeRotation;
+	static dvar_s* dvar_shakePosition; //do we still need it?
+	static dvar_s* dvar_shakeRotation; //do we still need it?
+	static dvar_s* dvar_shakeX;
+	static dvar_s* dvar_shakeY;	
+	static dvar_s* dvar_shakeZ;
+	static dvar_s* dvar_shakePitch;
+	static dvar_s* dvar_shakeYaw;
+	static dvar_s* dvar_shakeRoll;
+	static dvar_s* dvar_shakePreview;
 
 	static dvar_s* dvar_rollStep;
 	static dvar_s* dvar_showMarkerInfo;
@@ -85,7 +92,11 @@ namespace CustomDvars
 
 	void CheckDvars()
 	{
-
+		if ((*T6SDK::Dvars::DvarList::r_aspectRatio)->modified == true)
+		{
+			T6SDK::Addresses::AspectRatio.SetValueSafe(T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::r_aspectRatio));
+			(*T6SDK::Dvars::DvarList::r_aspectRatio)->modified = false;
+		}
 	}
 	inline static void Init()
 	{
@@ -94,6 +105,14 @@ namespace CustomDvars
 		dvar_shakeAmount = T6SDK::Dvars::RegisterFloat("mvm_shakeAmount", 1.0f, 0.0f, 10.0f, "Dolly camera overall shake amount.");
 		dvar_shakePosition = T6SDK::Dvars::RegisterFloat("mvm_shakePosition", 1.0f, 0.0f, 10.0f, "Dolly camera position shake intensity.");
 		dvar_shakeRotation = T6SDK::Dvars::RegisterFloat("mvm_shakeRotation", 1.0f, 0.0f, 10.0f, "Dolly camera rotation shake intensity.");
+
+		dvar_shakeX = T6SDK::Dvars::RegisterFloat("mvm_shakeX", 1.0f, 0.0f, 10.0f, "Dolly camera X position shake intensity.");
+		dvar_shakeY = T6SDK::Dvars::RegisterFloat("mvm_shakeY", 1.0f, 0.0f, 10.0f, "Dolly camera Y position shake intensity.");
+		dvar_shakeZ = T6SDK::Dvars::RegisterFloat("mvm_shakeZ", 1.0f, 0.0f, 10.0f, "Dolly camera Z position shake intensity.");
+		dvar_shakePitch = T6SDK::Dvars::RegisterFloat("mvm_shakePitch", 1.0f, 0.0f, 10.0f, "Dolly camera Pitch angle shake intensity.");
+		dvar_shakeYaw = T6SDK::Dvars::RegisterFloat("mvm_shakeYaw", 1.0f, 0.0f, 10.0f, "Dolly camera Yaw angle shake intensity.");
+		dvar_shakeRoll = T6SDK::Dvars::RegisterFloat("mvm_shakeRoll", 1.0f, 0.0f, 10.0f, "Dolly camera Roll angle shake intensity.");
+		dvar_shakePreview = T6SDK::Dvars::RegisterBool("mvm_shakePreview", false, "Preview dolly camera shake.");
 
 		dvar_rollStep = T6SDK::Dvars::RegisterFloat("mvm_rollStep", 5.0f, 1.0f, 90.0f, "Amount that camera roll angle will be changed at during mouse wheel scrolling.");
 		dvar_showMarkerInfo = T6SDK::Dvars::RegisterBool("mvm_showMarkerInfo", true, "Show dolly camera markers information (fov, roll).");
@@ -152,7 +171,7 @@ namespace CustomDvars
 		dvar_primaryCamo = T6SDK::Dvars::RegisterInt("mvm_primaryCamo", -1, -1, 44, "Primary weapon camo index.");
 		dvar_secondaryCamo = T6SDK::Dvars::RegisterInt("mvm_secondaryCamo", -1, -1, 44, "Secondary weapon camo index.");
 		dvar_cameraSway = T6SDK::Dvars::RegisterBool("mvm_cameraSway", false, "Enable camera sway.");
-		dvar_cameraSwayMaxAngle = T6SDK::Dvars::RegisterFloat("mvm_cameraSwayMaxAngle", 20.0f, 0.0f, 90.0f, "Camera sway max angle.");
+		dvar_cameraSwayMaxAngle = T6SDK::Dvars::RegisterFloat("mvm_cameraSwayMaxAngle", 10.0f, 0.0f, 50.0f, "Camera sway max angle.");
 		//Register holdgun dvars
 		dvar_holdgun = T6SDK::Dvars::RegisterBool("mvm_holdgun", false, "Make corpses hold gun.");
 		dvar_holdgunWrist = T6SDK::Dvars::RegisterBool("mvm_holdgunWrist", false, "Attach weapon in holdgun mode to wrist, not to tag_weapon_right.");

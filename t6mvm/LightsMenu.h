@@ -23,7 +23,7 @@ namespace LightsMenu
 		UIControls::UI_LightColorB = T6SDK::Drawing::UI_Slider("B", &Lights::LightsList[Lights::SelectedLight].b, 1.0f, 0.0f, CustomDvars::dvar_lightColorLimit->current.value, 12, 13, T6SDK::Drawing::BLUECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_LightBrightness = T6SDK::Drawing::UI_Slider("Brightness", &Lights::LightsList[Lights::SelectedLight].a, 1.0f, 0.0f, 10.0f, 12, 16, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_LightRadius = T6SDK::Drawing::UI_Slider("Radius", &Lights::LightsList[Lights::SelectedLight].radius, 255.0f, 0.0f, CustomDvars::dvar_lightRadiusLimit->current.value, 12, 19, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
-
+		UIControls::UI_LightFlicker = T6SDK::Drawing::UI_CheckBoxButton("FLICKER OFF", "FLICKER ON", 12, 22,  T6SDK::AnchorPoint::TopLeft, &Lights::LightsList[Lights::SelectedLight].flicker, 0x00);
 		inited = true;
 	}
 
@@ -39,8 +39,8 @@ namespace LightsMenu
 		UI_LightsListBox = Lights::UI_ListBox("LIGHTS", 4, 5, 7, 28, &Lights::LightsList, &Lights::SelectedLight, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UI_LightsListBox.OnSelectedItemChanged = (uintptr_t)&OnSelectedItemChanged;
 
-		UIControls::UI_RepositionLightButton = T6SDK::Drawing::UI_ClickableButton("Reposition light", 12, 23, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Lights::RepositionLight);
-		UIControls::UI_DeleteLightButton = T6SDK::Drawing::UI_ClickableButton("Remove light", 12, 25, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Lights::RemoveLight);
+		UIControls::UI_RepositionLightButton = T6SDK::Drawing::UI_ClickableButton("Reposition light", 4, 29, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Lights::RepositionLight);
+		UIControls::UI_DeleteLightButton = T6SDK::Drawing::UI_ClickableButton("Remove light", 4, 31, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Lights::RemoveLight);
 		UIControls::UI_DeleteAllLightsButton = T6SDK::Drawing::UI_ClickableButton("Remove all lights", 12, 28, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Lights::RemoveAllLights);
 		Lights::OnSelectedLightChanged = (uintptr_t)&OnSelectedItemChanged;
 	}
@@ -65,6 +65,7 @@ namespace LightsMenu
 			UIControls::UI_LightColorB.Draw();
 			UIControls::UI_LightBrightness.Draw();
 			UIControls::UI_LightRadius.Draw();
+			UIControls::UI_LightFlicker.Draw();
 			UIControls::UI_RepositionLightButton.Draw();
 			UIControls::UI_DeleteLightButton.Draw();
 		}

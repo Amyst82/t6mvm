@@ -19,6 +19,7 @@ namespace Lights
 		float g = 0.0f;
 		float b = 0.0f;
 		float a = 1.0f;
+		bool flicker = false;
 	};
 	static T6SDK::Theater::CustomCameraMode LIGHTMODE("LIGHTS", { "OMNI", "SPOT"});
 	inline static T6SDK::Drawing::UI_KeyReactiveText SpawnLightButton{};
@@ -91,6 +92,37 @@ namespace Lights
 	}
 	int HeadLightSelectedHandle = 0;
 
+    float GetSHakeOutput(float x, float randomNumber)  
+    {  
+       // Fractional part of x  
+       auto fract = [](float val) -> float {  
+           return val - floor(val);  
+       };  
+
+       // Pseudo-random value from sine function  
+       auto rand = [fract](float val, float randomNumber) -> float {
+           return fract(randomNumber * sinf(val));
+       };  
+
+       // Random value at integer steps  
+       auto randStep = [rand](float val, float randomNumber) -> float {  // Capture 'rand' explicitly
+           return rand(floor(val), randomNumber);
+       };  
+
+       // Smoothstep function (cubic interpolation)  
+       auto smoothstep = [](float val) -> float {  
+           return val * val * (1.0f - 50.0f * (val-1.0f));  
+       };  
+
+       // Smooth interpolation between random values  
+       float fractional = fract(x);  
+       float smooth = smoothstep(fractional);  
+
+       // Interpolate between current and next random value  
+       return randStep(x, randomNumber) * smooth + randStep(x + 1.0f, randomNumber) * (1.0f - smooth) + 10.0f;
+    }
+	float shakex = 0.0f;
+
 	static void Update()
 	{
 		if(!T6SDK::Theater::IsInTheater())
@@ -101,15 +133,32 @@ namespace Lights
 		for (int i = 0; i < LightsList.size(); i++)
 		{
 			LightDef light = LightsList[i];
+			float rnd = 1.0;
+			if (light.flicker)
+			{
+				int x = 999;
+				int y = 1010;
+				rnd = GetSHakeOutput(shakex, i+1)/10.0f;
+			}
+			if (shakex < 120.0f)
+			{
+				float _timescale = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::timescale) * T6SDK::Addresses::Demo_timescale.Value();
+				shakex += _timescale * 0.0025f;
+			}
+			else
+				shakex = 0.0f;
+
 			if(light.spotLight)
 			{
 				int lightDef = (int)T6SDK::InternalFunctions::DB_FindXAssetHeader(T6SDK::XAssetType::LIGHT_DEF, "light_dynamic");
-				T6SDK::InternalFunctions::R_AddSpotLightToScene(light.org, light.dir, light.radius, light.fovInnerFraction, light.startRadius, light.endRadius, light.r, light.g, light.b, light.a, lightDef);
+				T6SDK::InternalFunctions::R_AddSpotLightToScene(light.org, light.dir, light.radius, light.fovInnerFraction, light.startRadius, light.endRadius, light.r, light.g, light.b, light.a *= rnd, lightDef);
 			}
 			else if(!light.spotLight)
 			{
-				T6SDK::InternalFunctions::R_AddOmniLightToScene(light.org, light.radius, light.r, light.g, light.b, light.a);
+				T6SDK::InternalFunctions::R_AddOmniLightToScene(light.org, light.radius, light.r, light.g, light.b, light.a *= rnd);
 			}
+			if (T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden)
+				return;
 			//Draw light bulbs
 			FxSprite_t sprite{};
 			sprite.Position.x = light.org.x;
@@ -235,10 +284,10 @@ namespace Lights
 					vec3_t dir{};
 					T6SDK::InternalFunctions::AxisToAngles(&LightsList[i].dir, &dir);
 					//TYPE;X;Y;Z;DIRX;DIRY;DIRZ;RADIUS;R;G;B;A
-					sprintf(exportStringline, "%i;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f",
+					sprintf(exportStringline, "%i;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%i",
 						LightsList[i].spotLight, LightsList[i].org.x, LightsList[i].org.y, LightsList[i].org.z,
 						dir.x, dir.y, dir.z,
-						LightsList[i].radius, LightsList[i].r, LightsList[i].g, LightsList[i].b, LightsList[i].a);
+						LightsList[i].radius, LightsList[i].r, LightsList[i].g, LightsList[i].b, LightsList[i].a, LightsList[i].flicker);
 
 					ExportFile << exportStringline << endl;
 				}
@@ -303,6 +352,24 @@ namespace Lights
 								tmpLight.g = stof(list[9].c_str());
 								tmpLight.b = stof(list[10].c_str());
 								tmpLight.a = stof(list[11].c_str());
+								tempLightsList.push_back(tmpLight);
+							}
+							else if (list.size() == 13)
+							{
+								LightDef tmpLight{};
+								tmpLight.spotLight = atoi(list[0].c_str()) == 1 ? true : false;
+								tmpLight.org.x = stof(list[1].c_str());
+								tmpLight.org.y = stof(list[2].c_str());
+								tmpLight.org.z = stof(list[3].c_str());
+								tmpLight.dir;
+								vec3_t lightrDir = { stof(list[4].c_str()) , stof(list[5].c_str()) , stof(list[6].c_str()) };
+								T6SDK::InternalFunctions::AnglesToAxis(&lightrDir, &tmpLight.dir);
+								tmpLight.radius = stof(list[7].c_str());
+								tmpLight.r = stof(list[8].c_str());
+								tmpLight.g = stof(list[9].c_str());
+								tmpLight.b = stof(list[10].c_str());
+								tmpLight.a = stof(list[11].c_str());
+								tmpLight.flicker = atoi(list[12].c_str()) == 1 ? true : false;
 								tempLightsList.push_back(tmpLight);
 							}
 							else

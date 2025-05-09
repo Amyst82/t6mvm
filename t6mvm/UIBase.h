@@ -14,6 +14,7 @@
 #include "WeaponAnimationChangerMenu.h"
 #include "MainMenu.h"
 #include "DemoBrowserMenu.h"
+#include "CustomSlidersMenu.h"
 
 namespace UIBase
 {
@@ -94,6 +95,7 @@ namespace UIBase
 			CloseMenu();
 		}
 		Common::UI_BookmarkDialog.OnInputKey(keyCode);
+		CustomSlidersMenu::UI_CustomSliderDvarNameDialog.OnInputKey(keyCode);
 	}
 
 	void DrawUIGrid()
@@ -136,7 +138,7 @@ namespace UIBase
 			}
 			if (!T6SDK::Theater::IsInTheater() || T6SDK::Input::BlankMenuOpened)
 			{
-				T6SDK::Drawing::DrawTextAbsolute("T6MVM v1.0.0 [HOLDGUN BUILD 1]", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.2f }, T6SDK::AnchorPoint::TopLeft, 0x00);
+				T6SDK::Drawing::DrawTextAbsolute("T6MVM v1.0.0 [SLIDERS BUILD 1471]", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.5f }, T6SDK::AnchorPoint::TopLeft, 0x00);
 			}
 			//Draw tabs here
 			if (T6SDK::Input::BlankMenuOpened)
@@ -164,6 +166,7 @@ namespace UIBase
 					LightsMenu::Draw();
 					StreamsMenu::Draw();
 					WeaponMenu::Draw();
+					CustomSlidersMenu::Draw();
 					UIControls::MenuBlurCheckBox.Draw();
 					UIControls::CloseMenuButton.Draw();
 					if (*UIControls::MainCameraTabButton.isChecked || *UIControls::MiscTabButton.isChecked || *UIControls::SsaoTabButton.isChecked || *UIControls::FogTabButton.isChecked || *UIControls::DofTabButton.isChecked || *UIControls::SunSkyTabButton.isChecked || *UIControls::StreamsTabButton.isChecked || *UIControls::WeaponTabButton.isChecked)
@@ -182,8 +185,11 @@ namespace UIBase
 			{
 				if (T6SDK::MAIN::ENABLED && T6SDK::Addresses::GameMode.Value() == 32)
 				{
-					UIControls::UI_DemoBrowseCheckButton.Draw();
-					UIControls::UI_OpenDemoBrowserButton.Draw();
+					if(!DemoBrowserMenu::isShown)
+					{
+						UIControls::UI_DemoBrowseCheckButton.Draw();
+						UIControls::UI_OpenDemoBrowserButton.Draw();
+					}
 					if (CustomDvars::dvar_demos_directory->modified)
 					{
 						DemoBrowserMenu::Init();
@@ -200,6 +206,7 @@ namespace UIBase
 				DrawUIGrid();
 		}
 		Common::UI_BookmarkDialog.Draw();
+		CustomSlidersMenu::UI_CustomSliderDvarNameDialog.Draw();
 		((T6SDK::Drawing::UI_Notification*)(T6SDK::MAIN::GetNotificationControl()))->Draw();
 
 	}
@@ -224,6 +231,7 @@ namespace UIBase
 		LightsMenu::Init();
 		StreamsMenu::Init();
 		WeaponMenu::Init();
+		CustomSlidersMenu::Init();
 		WeaponAnimationChangerMenu::Init();
 
 		UIControls::CloseMenuButton = T6SDK::Drawing::UI_ClickableButton("^3TAB ^7Back", 2, 35, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&UIBase::CloseMenu);
@@ -240,5 +248,8 @@ namespace UIBase
 		{
 			DemoBrowserMenu::Show();
 		});
+		T6SDK::Events::RegisterListener(T6SDK::EventType::OnMouseWheelDown, (uintptr_t)&DemoBrowserMenu::OnMouseWheelDown);
+		T6SDK::Events::RegisterListener(T6SDK::EventType::OnMouseWheelUp, (uintptr_t)&DemoBrowserMenu::OnMouseWheelUp);
+		T6SDK::Events::RegisterListener(T6SDK::EventType::OnKeyPressed, (uintptr_t)&DemoBrowserMenu::OnKeyPressed);
 	}
 }

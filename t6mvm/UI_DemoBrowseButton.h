@@ -161,6 +161,7 @@ namespace UIDemoBrowseButtonNS
 				Pressed = false;
 				Clicked = false;
 			}
+
 			bool successDraw = false;
 			if (DrawRelative)
 			{

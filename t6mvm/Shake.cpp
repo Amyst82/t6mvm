@@ -35,5 +35,5 @@ float Shake::Smoothsaw(float x)
 
 float Shake::GetShakeOutput(float x)
 {
-	return RandStep(x) * Smoothsaw(x) + RandStep(x - 1) * (1 - Smoothsaw(x - 1));
+	return RandStep(x) * Smoothsaw(x) + RandStep(x - 1) * (1 - Smoothsaw(x - 1)) - 0.5f;
 }

@@ -70,6 +70,9 @@
     <Filter Include="Components\Theater\DemoBrowser">
       <UniqueIdentifier>{33f97d62-a8ae-4b31-b02e-d8759e8ebf71}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Components\Theater\CustomSlidersMenu">
+      <UniqueIdentifier>{c26d853a-a88f-4da5-81c2-8942b91f7497}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -218,6 +221,9 @@
     </ClInclude>
     <ClInclude Include="DemoBrowserMenu.h">
       <Filter>Components\Theater\DemoBrowser</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomSlidersMenu.h">
+      <Filter>Components\Theater\CustomSlidersMenu</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
