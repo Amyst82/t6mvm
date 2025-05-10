@@ -66,6 +66,7 @@ namespace FogMenu
 
 	static void Init()
 	{
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "FOG", "Initializing fog...");
 		float defFogStart = T6SDK::Addresses::fog->startDist;
 		UIControls::UI_FogStart = T6SDK::Drawing::UI_Slider("FOG START", (float*)&T6SDK::Addresses::fog->startDist, defFogStart, -1000.0f, 5000.0f, 4, 5, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 
@@ -118,6 +119,7 @@ namespace FogMenu
 		UIControls::UI_FogLoadPreset = T6SDK::Drawing::UI_ClickableButton("LOAD PRESET", 12, 30, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Fog::LoadFogPresetFromFile);
 		UIControls::UI_FogSavePreset = T6SDK::Drawing::UI_ClickableButton("SAVE PRESET", 12, 32, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&Fog::SaveFogPresetToFile);
 		UIControls::UI_FogReset = T6SDK::Drawing::UI_ClickableButton("RESET FOG", 8, 32, T6SDK::AnchorPoint::Center, (uintptr_t)&ResetFog);
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "FOG", "Fog initialized!");
 	}
 	static void Draw()
 	{

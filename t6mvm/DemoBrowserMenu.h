@@ -72,7 +72,7 @@ namespace DemoBrowserMenu
 			sprintf_s(durationBuffer, "%02i:%02i", Common::LocalDemos[itemnumber].Duration / 60000, Common::LocalDemos[itemnumber].Duration % 60000 / 1000);
 			float durationTextWidth = T6SDK::InternalFunctions::R_TextWidth(durationBuffer, strlen(durationBuffer), T6SDK::Drawing::normalFont) * scale;
 			T6SDK::Drawing::DrawRectAbsolute(durationTextX, durationTextY, durationTextWidth + 4.0f, h + 4.0f, T6SDK::Drawing::BLACKCOLOR, T6SDK::AnchorPoint::TopRight, &durationtextRect);
-			T6SDK::Drawing::DrawTextAbsolute(durationBuffer, (float)durationtextRect.left + 2.0f, (float)durationtextRect.top + 2.0f, 0.8f, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+			T6SDK::Drawing::DrawTextAbsolute(durationBuffer, (float)durationtextRect.left + 2.0f, (float)durationtextRect.top + 2.0f, 0.8f, itemnumber == selectedDemoNumber ? T6SDK::Drawing::ORANGECOLOR : T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 			//Drawing name
 			RECT nametextRect{};
@@ -487,7 +487,7 @@ namespace DemoBrowserMenu
 			sprintf_s(durationBuffer, "%02i:%02i", Common::LocalDemos[selectedDemoNumber].Duration/60000, Common::LocalDemos[selectedDemoNumber].Duration%60000/1000);
 			float durationTextWidth = T6SDK::InternalFunctions::R_TextWidth(durationBuffer, strlen(durationBuffer), T6SDK::Drawing::normalFont) * scale;
 			T6SDK::Drawing::DrawRectAbsolute(durationTextX, durationTextY, durationTextWidth+4.0f, h+4.0f, T6SDK::Drawing::BLACKCOLOR, T6SDK::AnchorPoint::TopRight, &durationtextRect);
-			T6SDK::Drawing::DrawTextAbsolute(durationBuffer,(float)durationtextRect.left+2.0f, (float)durationtextRect.top+2.0f, 1.0f, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+			T6SDK::Drawing::DrawTextAbsolute(durationBuffer,(float)durationtextRect.left+2.0f, (float)durationtextRect.top+2.0f, 1.0f,  T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 			//Drawing name
 			RECT nametextRect{};

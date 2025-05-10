@@ -103,6 +103,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetExt>.Red32n</TargetExt>
     <LibraryPath>$(SolutionDir)MinHook;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">
     <TargetExt>.dll</TargetExt>
@@ -160,7 +161,7 @@
     <PostBuildEvent>
       <Message>
       </Message>
-      <Command>XCOPY "$(OutDirFullPath)t6mvm.Red32n" D:\Games\Redacted\Plugins /y</Command>
+      <Command>XCOPY "$(OutDirFullPath)t6mvm.Red32n" "D:\Games\Redacted 3\Plugins" /y</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>powershell -ExecutionPolicy Bypass -File "$(ProjectDir)BuildCounter.ps1"</Command>

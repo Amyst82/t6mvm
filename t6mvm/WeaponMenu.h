@@ -109,7 +109,7 @@ namespace WeaponMenu
 		UIControls::UI_HoldgunWrist.Draw(*UIControls::UI_Holdgun.isChecked);
 
 		T6SDK::Drawing::DrawTextAbsolute("^9ANIMATIONS", T6SDK::Drawing::GetGridCellCoords(8, 28).x, T6SDK::Drawing::GetGridCellCoords(8, 28).y, 1.0f, T6SDK::Drawing::T_WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
-		UIControls::UI_WeaponAnimChanging.Draw();
+		UIControls::UI_WeaponAnimChanging.Draw(T6SDK::CrossVersion::GAMEVERSION == T6SDK::CrossVersion::V43 || T6SDK::CrossVersion::GAMEVERSION == T6SDK::CrossVersion::MP);
 	}
 
 	static void Init()
