@@ -143,7 +143,7 @@ namespace Lights
 			if (shakex < 120.0f)
 			{
 				float _timescale = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::timescale) * T6SDK::Addresses::Demo_timescale.Value();
-				shakex += _timescale * 0.0025f;
+				shakex += _timescale * 0.00175f;
 			}
 			else
 				shakex = 0.0f;
@@ -158,7 +158,7 @@ namespace Lights
 				T6SDK::InternalFunctions::R_AddOmniLightToScene(light.org, light.radius, light.r, light.g, light.b, light.a *= rnd);
 			}
 			if (T6SDK::Addresses::DemoPlayback.Value()->DemoHudHidden)
-				return;
+				continue;
 			//Draw light bulbs
 			FxSprite_t sprite{};
 			sprite.Position.x = light.org.x;

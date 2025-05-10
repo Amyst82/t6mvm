@@ -138,7 +138,7 @@ namespace UIBase
 			}
 			if (!T6SDK::Theater::IsInTheater() || T6SDK::Input::BlankMenuOpened)
 			{
-				T6SDK::Drawing::DrawTextAbsolute("T6MVM v1.0.0 [SLIDERS BUILD 1471]", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.5f }, T6SDK::AnchorPoint::TopLeft, 0x00);
+				T6SDK::Drawing::DrawTextAbsolute("^5T6^7MVM v1.0.0 build 1515 May 10th 2025", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.2f }, T6SDK::AnchorPoint::TopLeft, 0x00);
 			}
 			//Draw tabs here
 			if (T6SDK::Input::BlankMenuOpened)
@@ -196,6 +196,7 @@ namespace UIBase
 						CustomDvars::dvar_demos_directory->modified = false;
 					}
 					DemoBrowserMenu::Draw();
+
 				}
 			}
 			if (!Streams::ScreenshotRequested && !Streams::IsAnyOtherStream && Streams::IsStreamsRunning)
@@ -206,6 +207,7 @@ namespace UIBase
 				DrawUIGrid();
 		}
 		Common::UI_BookmarkDialog.Draw();
+		DemoBrowserMenu::UI_DemoRenameDialog.Draw();
 		CustomSlidersMenu::UI_CustomSliderDvarNameDialog.Draw();
 		((T6SDK::Drawing::UI_Notification*)(T6SDK::MAIN::GetNotificationControl()))->Draw();
 
@@ -251,5 +253,7 @@ namespace UIBase
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnMouseWheelDown, (uintptr_t)&DemoBrowserMenu::OnMouseWheelDown);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnMouseWheelUp, (uintptr_t)&DemoBrowserMenu::OnMouseWheelUp);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnKeyPressed, (uintptr_t)&DemoBrowserMenu::OnKeyPressed);
+
+
 	}
 }

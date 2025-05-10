@@ -5,7 +5,7 @@ namespace DemoBrowserMenu
 {
 	int selectedDemoNumber = 0;
 	bool isShown = false;
-
+	inline static T6SDK::Drawing::UI_TextBoxDialog		UI_DemoRenameDialog{};
 	//Scrollable grid
 	// Constants
 	int ITEM_WIDTH = 200;
@@ -259,18 +259,21 @@ namespace DemoBrowserMenu
 	{
 		if (T6SDK::Theater::IsInTheater())
 			return;
+		UI_DemoRenameDialog.OnInputKey(key);
+		if(T6SDK::Input::InputLockedByTextBoxDialog)
+			return;
 		if(key == T6SDK::Input::Keys::ESCAPE.KeyCode)
 		{
 			Close();
 		}
-		if(key == T6SDK::Input::Keys::ENTER.KeyCode)
-			playDemo();
+		/*if(key == T6SDK::Input::Keys::ENTER.KeyCode)
+			playDemo();*/
 		else if (key == T6SDK::Input::Keys::UP.KeyCode)
 		{
 			if (selectedDemoNumber >= 3)
 			{
 				selectedDemoNumber -= 3;
-				handle_scroll(-50);
+				handle_scroll(-150);
 			}
 
 		}
@@ -280,7 +283,7 @@ namespace DemoBrowserMenu
 			if (selectedDemoNumber < allowedSize)
 			{
 				selectedDemoNumber += 3;
-				handle_scroll(50);
+				handle_scroll(150);
 			}
 
 		}
@@ -396,6 +399,26 @@ namespace DemoBrowserMenu
 		float Alpha = 0.5f + (0.5f * coef);
 		return tColor{ R, G, B, Alpha };
 	}
+	static void RenameDemo()
+	{
+		UI_DemoRenameDialog.Show([](std::string name) 
+			{ 
+				std::string _name = name;
+				if (_name.empty())
+				{
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "DEMOBROWSER", "Demo name cannot be empty.");
+					T6SDK::MAIN::UI_ShowNotification("DEMO", "Demo name cannot be empty!", 200);
+					return;
+				}
+				else
+				{
+					T6SDK::DemoHandler::SetDemoName(Common::LocalDemos[selectedDemoNumber].DemoPath, _name);
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "DEMOBROWSER", "Demo name was set! Go share it with your friends!");
+					T6SDK::MAIN::UI_ShowNotification("DEMO", "Demo name changed!", 200);
+					Common::LocalDemos[selectedDemoNumber].DemoName = _name;
+				}
+			});
+	}
 	void DrawSelectedDemoThumbnail()
 	{
 		float scale = 1.0f / 1080.0f * static_cast<float>(T6SDK::Addresses::ScreenHeight.Value()); //Assuming that initial size is in 1920x1080			
@@ -415,6 +438,13 @@ namespace DemoBrowserMenu
 		successDraw = T6SDK::Drawing::DrawRectAbsolute(coordsStart.x, coordsStart.y, WIDTH, HEIGHT, T6SDK::Drawing::T_BLACKCOLOR, T6SDK::AnchorPoint::TopLeft, &thumbnailRect);
 		if (successDraw)
 		{
+			//Drawing rename options if name is "^1Unknown"
+			if (Common::LocalDemos[selectedDemoNumber].DemoName == "^1Unknown")
+			{
+				vec2_t renamecoordsStart = T6SDK::Drawing::GetGridCellCoords(11, 4);
+				T6SDK::Drawing::DrawTextAbsolute("Why does it say ^1Unknown ^7?\nMore likely the demo is from custom games mode\nor it wasn't saved to codtv yet.\nDo you want to rename it?", renamecoordsStart.x, renamecoordsStart.y, 0.9f, T6SDK::Drawing::GRAYCOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+				UIControls::UI_DemoRename.Draw();
+			}
 			//Drawing map ui image
 			T6SDK::Typedefs::R_AddCmdDrawStretchPicRotateXYInternal(coordsStart.x, coordsStart.y, WIDTH, HEIGHT, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::InternalFunctions::DB_FindXAssetHeader(T6SDK::XAssetType::MATERIAL, Common::LocalDemos[selectedDemoNumber].MapUiSelect.c_str()));
 			
@@ -443,6 +473,7 @@ namespace DemoBrowserMenu
 			}
 			else
 			{
+				T6SDK::Drawing::DrawTextAbsolute("PLAY DEMO", coordsStart.x + WIDTH / 2.0f, coordsStart.y + HEIGHT / 2.0f, 1.5f, T6SDK::Drawing::T_BLACKCOLOR, T6SDK::AnchorPoint::Center, 0x00);
 				T6SDK::Drawing::DrawTextAbsolute("PLAY DEMO", coordsStart.x + WIDTH / 2.0f, coordsStart.y + HEIGHT / 2.0f, 1.5f, GetFadingColor(T6SDK::Drawing::WHITECOLOR), T6SDK::AnchorPoint::Center, 0x00);
 				thubmnailClicked = false;
 				thumbnailHoversoundPlayed = false;
@@ -471,7 +502,7 @@ namespace DemoBrowserMenu
 			T6SDK::Drawing::DrawTextAbsolute(descBuffer, coordsStart.x, coordsEnd.y + rowHeight, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 			//Drawing creation date
-			T6SDK::Drawing::DrawTextAbsolute(T6SDK::InternalFunctions::FormatUnixTime(Common::LocalDemos[selectedDemoNumber].CreateDate).c_str(), coordsStart.x, coordsEnd.y + rowHeight * 3.0f, 1.0f, T6SDK::Drawing::GRAYCOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+			T6SDK::Drawing::DrawTextAbsolute(T6SDK::InternalFunctions::FormatUnixTime(Common::LocalDemos[selectedDemoNumber].CreateDate).c_str(), coordsStart.x, coordsEnd.y + rowHeight * 2.0f, 1.0f, T6SDK::Drawing::GRAYCOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 			fadingX += 0.05f;
 			if (fadingX > 8.0f)
 				fadingX = 0.0f;
@@ -481,6 +512,7 @@ namespace DemoBrowserMenu
 	{
 		if(!isShown)
 			return;
+
 		//Drawing bg
 		//T6SDK::Typedefs::R_AddCmdDrawStretchPicRotateXYInternal(0.0f, 0.0f, T6SDK::Addresses::ScreenWidth.Value(), T6SDK::Addresses::ScreenHeight.Value(), 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, T6SDK::Drawing::WHITECOLOR, 
 			//T6SDK::InternalFunctions::DB_FindXAssetHeader(T6SDK::XAssetType::MATERIAL, "menu_mp_background_main2"));
@@ -536,17 +568,26 @@ namespace DemoBrowserMenu
 		UIControls::UI_NavigateToDemoFile.Draw();
 
 	}
-	
+	void ShowDemoInExplorer()
+	{
+		T6SDK::InternalFunctions::revealFileInExplorer(std::filesystem::path(Common::LocalDemos[selectedDemoNumber].DemoPath).wstring());
+	}
 	static void Init()
 	{
 		UIControls::UI_SelectedDemoNumber = T6SDK::Drawing::UI_EnumButton("Demo number", 0, Common::LocalDemos.size()-1, &selectedDemoNumber, 8, 37, T6SDK::AnchorPoint::Center, 0x00);
 		UIControls::UI_PlayDemoButton = T6SDK::Drawing::UI_ClickableButton("PLAY DEMO", 13, 14, T6SDK::AnchorPoint::Center, true, (uintptr_t)&playDemo);
 		UIControls::UI_CloseDemoSelectMenu = T6SDK::Drawing::UI_ClickableButton("^3ESC ^7Back", 3, 38, T6SDK::AnchorPoint::Center, (uintptr_t)&Close);
-		UIControls::UI_NavigateToDemoFile = T6SDK::Drawing::UI_ClickableButton("SHOW IN EXPLORER", 14, 37, T6SDK::AnchorPoint::TopLeft, false, 0x00);
+		UIControls::UI_NavigateToDemoFile = T6SDK::Drawing::UI_ClickableButton("SHOW IN EXPLORER", 14, 37, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&ShowDemoInExplorer);
 		UIControls::UI_NavigateToDemoFile.Size = 1.0f;
+		UIControls::UI_NavigateToDemoFile.ToolTip = "Reveal demo file in explere.";
 		UIControls::UI_DemosDirectoryButton = T6SDK::Drawing::UI_ClickableButton("CHANGE FOLDER", 14, 35, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&ChangeDemoDirectory);
 		UIControls::UI_DemosDirectoryButton.ToolTip = "Select the directory where demos are stored.";
 		UIControls::UI_DemosDirectoryButton.Size = 1.0f;
+
+		UIControls::UI_DemoRename = T6SDK::Drawing::UI_ClickableButton("RENAME DEMO", 13, 10, T6SDK::AnchorPoint::Center, (uintptr_t)&RenameDemo, true);
+		UIControls::UI_DemoRename.Size = 1.0f;
+		UIControls::UI_DemoRename.ToolTip = "^5NOTE: ^7Changes will be applied after ^3re-selecting ^7the demo directory.";
+		UI_DemoRenameDialog = T6SDK::Drawing::UI_TextBoxDialog("Enter a new demo name");
 	}
 	static void Show()
 	{

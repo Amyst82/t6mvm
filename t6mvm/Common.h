@@ -216,5 +216,9 @@ namespace Common
 			T6SDK::DemoBriefData data = T6SDK::DemoHandler::GetDemoBriefData(file.string().c_str());
 			Common::LocalDemos.push_back(data);
 		}
+		if(Common::LocalDemos.size() > 0)
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "T6MVM", "Cached demos: %i / %i", Common::LocalDemos.size(), list.size());
+		else
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "T6MVM", "No demos were cached!");
 	}
 }

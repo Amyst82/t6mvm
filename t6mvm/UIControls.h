@@ -205,11 +205,13 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_ClickableButton UI_SaveCustomBookmarks{};
 	
 	//DEMO SELECT MENU controls
-	inline static T6SDK::Drawing::UI_EnumButton					UI_SelectedDemoNumber{};
+	inline static T6SDK::Drawing::UI_EnumButton			UI_SelectedDemoNumber{};
 	inline static T6SDK::Drawing::UI_ClickableButton	UI_PlayDemoButton{};
-	inline static T6SDK::Drawing::UI_ClickableButton			UI_CloseDemoSelectMenu{};
+	inline static T6SDK::Drawing::UI_ClickableButton	UI_CloseDemoSelectMenu{};
 	inline static T6SDK::Drawing::UI_ClickableButton	UI_NavigateToDemoFile{};
-	inline static T6SDK::Drawing::UI_ClickableButton			UI_DemosDirectoryButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton	UI_DemosDirectoryButton{};
+	inline static T6SDK::Drawing::UI_ClickableButton	UI_DemoRename{};
+
 
 	//CUSTOM SLIDER controls
 	inline static T6SDK::Drawing::UI_ClickableButton UI_SlidersAddSliderButton{};
@@ -236,7 +238,7 @@ namespace UIControls
 		UI_DemoBrowseCheckButton.ToolTip = "Load a demo from file.";
 		Common::UI_BookmarkDialog = T6SDK::Drawing::UI_TextBoxDialog("Provide bookmark description (may be empty)");
 		SlidersTabButton.ToolTip = "Create and manage custom sliders!";
-	
+
 	}
 	inline static void DrawTabs()
 	{
