@@ -161,7 +161,7 @@
     <PostBuildEvent>
       <Message>
       </Message>
-      <Command>XCOPY "$(OutDirFullPath)t6mvm.Red32n" "D:\Games\Redacted 3\Plugins" /y</Command>
+      <Command>XCOPY "$(OutDirFullPath)t6mvm.Red32n" "D:\Games\Redacted\Plugins" /y</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>powershell -ExecutionPolicy Bypass -File "$(ProjectDir)BuildCounter.ps1"</Command>
@@ -299,6 +299,8 @@
     <ClInclude Include="NoPlayers.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ScreenGrab.h" />
+    <ClInclude Include="Settings.h" />
+    <ClInclude Include="SettingsMenu.h" />
     <ClInclude Include="Shake.h" />
     <ClInclude Include="SsaoMenu.h" />
     <ClInclude Include="Streams.h" />
@@ -327,6 +329,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ScreenGrab.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Shake.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

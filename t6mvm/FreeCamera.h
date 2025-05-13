@@ -113,17 +113,17 @@ namespace Camera
 			float PI = 3.1415926535f;
 			float freeRoamSpeed = T6SDK::Addresses::FreeRoamSpeed.Value();
 			float x = 0, y = 0, z = 0;
-			if (T6SDK::Input::Keys::W.Hold())
+			if (T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["CameraForward"])->Hold())
 				x = 1;
-			if (T6SDK::Input::Keys::A.Hold())
+			if (T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["CameraLeft"])->Hold())
 				y = 1;
-			if (T6SDK::Input::Keys::S.Hold())
+			if (T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["CameraBack"])->Hold())
 				x = -1;
-			if (T6SDK::Input::Keys::D.Hold())
+			if (T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["CameraRight"])->Hold())
 				y = -1;
-			if (T6SDK::Input::Keys::E.Hold())
+			if (T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["CameraUp"])->Hold())
 				z = 1;
-			if (T6SDK::Input::Keys::Q.Hold())
+			if (T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["CameraDown"])->Hold())
 				z = -1;
 
 			vec3_t v = (T6SDK::Addresses::CameraForwardVector.Value() * x + T6SDK::Addresses::CameraRightVector.Value() * y + T6SDK::Addresses::CameraUpVector.Value() * z) * freeRoamSpeed * 5.0f;

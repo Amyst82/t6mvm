@@ -330,51 +330,13 @@ namespace DemoBrowserMenu
 		// Open the folder dialog
 		if (T6SDK::InternalFunctions::OpenFolderDialog(selectedFolder))
 		{
+			Settings::Settings::SetDemosDirectory(selectedFolder);
 			T6SDK::Dvars::SetString(CustomDvars::dvar_demos_directory, selectedFolder.c_str());
 			CustomDvars::dvar_demos_directory->modified = true;
-			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMOBROWSER", "Selected folder: %s", CustomDvars::dvar_demos_directory->current.string);
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "DEMOBROWSER", "Selected folder: %s", Settings::Settings::GetDemosDirectory().c_str());
 			Common::LoadAllDemos();
 			*UIControls::UI_SelectedDemoNumber.SelectedValue = 0;
 			handle_scroll(-900);
-			//Saving directory to settings
-			std::string settingsPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\t6mvm.json";
-			if (!std::filesystem::exists(settingsPath))
-			{
-				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "DEMOBROWSER", "Unable to save output directory. Settings JSON not found.");
-			}
-			else
-			{
-				try
-				{
-					// 1. Read JSON file
-					std::ifstream input_file(settingsPath);
-					if (!input_file.is_open())
-					{
-						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DEMOBROWSER", "Could not open settings file.");
-						return;
-					}
-					json data;
-					input_file >> data;
-					input_file.close();
-					// 2. Modify JSON data
-					data["DemosDirectory"] = selectedFolder.c_str();
-					// 3. Write modified JSON back to file
-					std::ofstream output_file(settingsPath);
-					if (!output_file.is_open())
-					{
-						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DEMOBROWSER", "Could not write to settings file.");
-					}
-					// Write with pretty printing (indentation = 4)
-					output_file << data.dump(4);
-					output_file.close();
-
-					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "DEMOBROWSER", "Demo directory updated in t6mvm.json.");
-				}
-				catch (const std::exception& e)
-				{
-					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DEMOBROWSER", e.what());
-				}
-			}
 		}
 		else
 		{
@@ -419,6 +381,47 @@ namespace DemoBrowserMenu
 				}
 			});
 	}
+
+	void DrawCustomMetadata(float x, float y)
+	{
+		try
+		{
+			json data = json::parse(Common::repairJson(Common::LocalDemos[selectedDemoNumber].Metadata));
+			//Firstly check if it has metadata from BO2 Console V4
+			if (data.contains("start_tick"))
+			{
+				std::string tick = data.at("start_tick").get<std::string>();
+				std::string desc = "^1N/A";
+				if (data.contains("description"))
+				{
+					desc = data.at("description").get<std::string>();
+				}
+				if (std::stoi(tick) > 0)
+				{
+					char buffer[256];
+					sprintf_s(buffer, "^5Demo has custom metadata from V4^9\n%02i:%02i ^7%s", std::stoi(tick) /60000, (std::stoi(tick)%60000)/1000, desc.c_str());
+					T6SDK::Drawing::DrawTextAbsolute(buffer, x, y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+				}
+			}
+			//Now check if it has metadata from T6MVM
+			else if (data.contains("Bookmarks"))
+			{
+				auto CustomBookmarks = data["Bookmarks"].get<std::vector<Common::CustomDemoBookmark>>();
+				std::string text = "^5Demo has custom metadata from T6MVM^7\n";
+				for (int i = 0; i < CustomBookmarks.size(); i++)
+				{
+					char buffer[256];
+					sprintf_s(buffer, "^9%02i:%02i ^7%s\n", CustomBookmarks[i].tick / 60000, (CustomBookmarks[i].tick % 60000) / 1000, CustomBookmarks[i].description.c_str());
+					text += buffer;
+				}
+				T6SDK::Drawing::DrawTextAbsolute(text.c_str(), x, y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+			}
+		}
+		catch (const json::parse_error& e)
+		{
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, true, "DEMOBROWSER", "JSON parse metadata error: %s", e.what());
+		}
+	}
 	void DrawSelectedDemoThumbnail()
 	{
 		float scale = 1.0f / 1080.0f * static_cast<float>(T6SDK::Addresses::ScreenHeight.Value()); //Assuming that initial size is in 1920x1080			
@@ -439,7 +442,7 @@ namespace DemoBrowserMenu
 		if (successDraw)
 		{
 			//Drawing rename options if name is "^1Unknown"
-			if (Common::LocalDemos[selectedDemoNumber].DemoName == "^1Unknown")
+			if (Common::LocalDemos[selectedDemoNumber].DemoName == "^1Unknown^7")
 			{
 				vec2_t renamecoordsStart = T6SDK::Drawing::GetGridCellCoords(11, 4);
 				T6SDK::Drawing::DrawTextAbsolute("Why does it say ^1Unknown ^7?\nMore likely the demo is from custom games mode\nor it wasn't saved to codtv yet.\nDo you want to rename it?", renamecoordsStart.x, renamecoordsStart.y, 0.9f, T6SDK::Drawing::GRAYCOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
@@ -496,13 +499,24 @@ namespace DemoBrowserMenu
 			sprintf_s(demoNameBuffer, "%s ^9by ^7%s", Common::LocalDemos[selectedDemoNumber].DemoName.c_str(), Common::LocalDemos[selectedDemoNumber].Author.c_str());
 			T6SDK::Drawing::DrawTextAbsolute(demoNameBuffer, (float)nametextRect.left+2.0f, (float)nametextRect.top+2.0f, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 			
-			//Drawing description
+			//Drawing game mode and map
 			char descBuffer[256];
-			sprintf_s(descBuffer, "^5> ^9%s on %s", Common::LocalDemos[selectedDemoNumber].GameMode.c_str(), Common::LocalDemos[selectedDemoNumber].MapFriendlyName.c_str());
+			sprintf_s(descBuffer, "^5> ^7%s ^9on ^7%s", Common::LocalDemos[selectedDemoNumber].GameMode.c_str(), Common::LocalDemos[selectedDemoNumber].MapFriendlyName.c_str());
 			T6SDK::Drawing::DrawTextAbsolute(descBuffer, coordsStart.x, coordsEnd.y + rowHeight, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+			
+			//Drawing description
+			char actualDescBuffer[256];
+			sprintf_s(actualDescBuffer, "^5> ^9%s", Common::LocalDemos[selectedDemoNumber].Description.c_str());
+			T6SDK::Drawing::DrawTextAbsolute(actualDescBuffer, coordsStart.x, coordsEnd.y + rowHeight * 2.0f, 1.0f, T6SDK::Drawing::GRAYCOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 
 			//Drawing creation date
-			T6SDK::Drawing::DrawTextAbsolute(T6SDK::InternalFunctions::FormatUnixTime(Common::LocalDemos[selectedDemoNumber].CreateDate).c_str(), coordsStart.x, coordsEnd.y + rowHeight * 2.0f, 1.0f, T6SDK::Drawing::GRAYCOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+			T6SDK::Drawing::DrawTextAbsolute(T6SDK::InternalFunctions::FormatUnixTime(Common::LocalDemos[selectedDemoNumber].CreateDate).c_str(), coordsStart.x, coordsEnd.y + rowHeight * 3.0f, 1.0f, T6SDK::Drawing::GRAYCOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
+			
+			//Draw metadata if available
+			if (Common::LocalDemos[selectedDemoNumber].HasMetadata)
+				DrawCustomMetadata(coordsStart.x, coordsEnd.y + rowHeight * 5.0f);
+
+
 			fadingX += 0.05f;
 			if (fadingX > 8.0f)
 				fadingX = 0.0f;
@@ -552,7 +566,7 @@ namespace DemoBrowserMenu
 			UIControls::UI_DemosDirectoryButton.cyclingFading = true;
 		}
 
-		UIControls::UI_DemosDirectoryButton.ToolTip = CustomDvars::dvar_demos_directory->current.string;
+		UIControls::UI_DemosDirectoryButton.ToolTip = Settings::Settings::GetDemosDirectory().c_str();
 		UIControls::UI_DemosDirectoryButton.Draw();
 		UIControls::UI_CloseDemoSelectMenu.Draw();
 		if (Common::LocalDemos.size() <= 0)

@@ -9,6 +9,7 @@
 #include "Weapon.h"
 #include "Fog.h"
 #include "HoldGun.h"
+#include "Settings.h"
 
 namespace TheaterBase
 {
@@ -16,18 +17,18 @@ namespace TheaterBase
 	{
 		if(!T6SDK::Theater::IsInTheater())
 			return;
-		if (key == T6SDK::Input::Keys::M.KeyCode)
+		if (key == T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["GotoFirstMarker"])->KeyCode)
 		{
 			if (T6SDK::Input::Keys::CTRL.IsAnyPressState())
 			{
 				Camera::DollyCamera::GoToFirstMarker();
 			}
 		}
-		if (key == T6SDK::Input::Keys::F5.KeyCode)
+		if (key == T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["StreamsStartStop"])->KeyCode)
 		{
 			Streams::StreamsSwitchState();
 		}
-		if(key == T6SDK::Input::Keys::F6.KeyCode)
+		if(key == T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["StreamsAbort"])->KeyCode)
 		{
 			Streams::AbortStreams();
 		}
@@ -66,6 +67,7 @@ namespace TheaterBase
 			Camera::DollyCamera::PreventChangingRotation(false);
 			Camera::DollyCamera::PreventChangingPosition(false);
 			Common::CurrentLoadedDemo.Clear();
+			Common::CustomBookmarks.clear();
 		}
 		else
 		{

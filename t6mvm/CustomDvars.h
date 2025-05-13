@@ -33,7 +33,7 @@ namespace CustomDvars
 
 	//MISC DVARS
 	static dvar_s* dvar_greenScreen;
-	const char* gsPlayersEnum[4] = {"No", "Selected player", "Threshold", "All players"};
+	//const char* gsPlayersEnum[4] = {"No", "Selected player", "Threshold", "All players"};
 	static dvar_s* dvar_greenScreenPlayers;
 	static dvar_s* dvar_greenScreenPlayersThreshold;
 	static dvar_s* dvar_greenScreenColor;
@@ -62,7 +62,7 @@ namespace CustomDvars
 	//STREAMS DVARS
 	static dvar_s* dvar_streams;
 	static dvar_s* dvar_streams_noFlash;
-	static dvar_s* dvar_streams_directory;
+	//static dvar_s* dvar_streams_directory;
 	static dvar_s* dvar_streams_fps;
 	static dvar_s* dvar_streams_JPG;
 	static dvar_s* dvar_streams_avi;
@@ -90,7 +90,7 @@ namespace CustomDvars
 	//DEMO DVARS
 	static dvar_s* dvar_demos_directory;
 
-	void CheckDvars()
+	static void CheckDvars()
 	{
 		if ((*T6SDK::Dvars::DvarList::r_aspectRatio)->modified == true)
 		{
@@ -157,7 +157,7 @@ namespace CustomDvars
 		//Register streams dvars
 		dvar_streams = T6SDK::Dvars::RegisterBool("mvm_streams", false, "Enable/disable streams recording.");
 		dvar_streams_noFlash = T6SDK::Dvars::RegisterBool("mvm_streams_noFlash", true, "Disable displaying any other passes on streams to prevent screen flash.");
-		dvar_streams_directory = T6SDK::Dvars::RegisterString("mvm_streams_directory", "", "Directory where streams will be saved.");
+		//dvar_streams_directory = T6SDK::Dvars::RegisterString("mvm_streams_directory", "", "Directory where streams will be saved.");
 		dvar_streams_fps = T6SDK::Dvars::RegisterInt("mvm_streams_fps", 50, 50, 1000, "Streams recording frame rate.");
 		dvar_streams_avi = T6SDK::Dvars::RegisterBool("mvm_streams_avi", false, "Streams recording AVI format.");
 		dvar_streams_JPG = T6SDK::Dvars::RegisterBool("mvm_streams_JPG", false, "Record streams in JPG format.");

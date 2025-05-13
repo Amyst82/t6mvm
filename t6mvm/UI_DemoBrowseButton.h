@@ -142,6 +142,7 @@ namespace UIDemoBrowseButtonNS
 		}
 		float* GetFadingColor(tColor color)
 		{
+			return color;
 			float A = 0.5f;
 			float k = 1.6f;
 			float w = 0.8f;

@@ -1,6 +1,7 @@
 #pragma once
 #include "StdInclude.h"
 #include "UIControls.h"
+#include "Settings.h"
 #include "../../../../Downloads/json.hpp"
 using json = nlohmann::json;
 namespace Common
@@ -9,10 +10,11 @@ namespace Common
 			typedef class CustomDemoBookmark
 			{
 			public:
-				int playerNum;
+				int player_index;
+				std::string player;
 				int tick;
 				std::string description;
-				NLOHMANN_DEFINE_TYPE_INTRUSIVE(CustomDemoBookmark, playerNum, tick, description)
+				NLOHMANN_DEFINE_TYPE_INTRUSIVE(CustomDemoBookmark, player_index, player, tick, description)
 			};
 		#pragma endregion
 	#pragma region Helpers
@@ -77,7 +79,8 @@ namespace Common
 			UI_BookmarkDialog.Show([](std::string e) {
 				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "UI_Timeline", "Bookmark description: %s", e.c_str());
 				Common::CustomDemoBookmark bookMark{};
-				bookMark.playerNum = T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client);
+				bookMark.player_index = T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client);
+				bookMark.player = std::string(T6SDK::Addresses::cg->client[T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::demo_client)].szName);
 				int tick = T6SDK::Addresses::cg->Tick;
 				bookMark.tick = tick;
 				bookMark.description = std::string(e);
@@ -118,12 +121,12 @@ namespace Common
 					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "1) Empty bookmark created");
 					bkmrk.tick = std::stoi(tick);
 					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "2) Tick set");
-					bkmrk.playerNum = player_index;
+					//bkmrk.playerNum = player_index;
 					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "3) Player index set");
 					bkmrk.description = std::string(desc);
 					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "4) Desc set! Pushing back...");
 					Common::CustomBookmarks.push_back(bkmrk);
-					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Bookmark added! Bookmarks : %i; tick: %i, pNum: %i, desc: %s", Common::CustomBookmarks.size(), bkmrk.tick, bkmrk.playerNum, bkmrk.description.c_str());
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "DEMOMETADATA", "Bookmark added! Bookmarks : %i; tick: %i, pplayer %s, desc: %s", Common::CustomBookmarks.size(), bkmrk.tick, bkmrk.player.c_str(), bkmrk.description.c_str());
 				}
 			}
 			//Now check if it has metadata from T6MVM
@@ -207,7 +210,12 @@ namespace Common
 
 	static void LoadAllDemos()
 	{
-		std::string redactedPath = std::string(CustomDvars::dvar_demos_directory->current.string);
+		std::string redactedPath;
+		if (T6SDK::CrossVersion::GetGameVersion() == T6SDK::CrossVersion::GameVersion::V43)
+			redactedPath = Settings::Settings::DemosDirectoryMp;
+		else if(T6SDK::CrossVersion::GetGameVersion() == T6SDK::CrossVersion::GameVersion::V41)
+			redactedPath = Settings::Settings::DemosDirectoryZm;
+
 		auto list = T6SDK::InternalFunctions::find_files_by_extension(redactedPath, ".demo");
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "T6MVM", "Found demos: %i", list.size());
 		Common::LocalDemos.clear();

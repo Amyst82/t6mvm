@@ -299,18 +299,17 @@ namespace UI_TimelineNS
 							if (T6SDK::Input::MousePosX() > (float)bookmarkRect.left - margin && T6SDK::Input::MousePosX() < (float)bookmarkRect.right + margin && T6SDK::Input::MousePosY() > (float)bookmarkRect.top - margin && T6SDK::Input::MousePosY() < (float)bookmarkRect.bottom + margin)
 							{
 								char buffer[512];
-								sprintf(buffer, "^9Player: ^7%s\n^9Desc: ^7%s\nTime: %02i:%02i, tick: %i", T6SDK::Addresses::cg->client[Common::CustomBookmarks[i].playerNum].szName, Common::CustomBookmarks[i].description.c_str(), Common::CustomBookmarks[i].tick / 60000, Common::CustomBookmarks[i].tick % 60000 / 1000, Common::CustomBookmarks[i].tick);
+								sprintf(buffer, "^9Player: ^7%s\n^9Desc: ^7%s\nTime: %02i:%02i, tick: %i", Common::CustomBookmarks[i].player.c_str(), Common::CustomBookmarks[i].description.c_str(), Common::CustomBookmarks[i].tick / 60000, Common::CustomBookmarks[i].tick % 60000 / 1000, Common::CustomBookmarks[i].tick);
 								T6SDK::Drawing::DrawTextAbsolute(buffer, T6SDK::Input::MousePosX() + 35.0f, T6SDK::Input::MousePosY() - 40.0f, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 								if (T6SDK::Input::Keys::LMB.IsAnyPressState())
 								{
 									if (BookmarkClicked == false)
 									{
 										BookmarkClicked = true;
-										T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::demo_client, Common::CustomBookmarks[i].playerNum);
+										(*T6SDK::Dvars::DvarList::demo_client)->current.integer = Common::CustomBookmarks[i].player_index;
 										T6SDK::Theater::GoToTick(Common::CustomBookmarks[i].tick);
 										T6SDK::Addresses::IsDemoPaused.SetValueSafe(0);
-										gameUnpaused = true;
-
+										gameUnpaused = true;	
 									}
 								}
 								else

@@ -15,6 +15,7 @@
 #include "MainMenu.h"
 #include "DemoBrowserMenu.h"
 #include "CustomSlidersMenu.h"
+#include "SettingsMenu.h"
 
 namespace UIBase
 {
@@ -83,16 +84,19 @@ namespace UIBase
 			if(!T6SDK::Input::BlankMenuOpened)
 			{
 				Streams::StopStreams();
+				SettingsMenu::CloseSettingsMenu();
 				OpenMenu();
 			}
 			else
 			{
+				SettingsMenu::CloseSettingsMenu();
 				CloseMenu();
 			}
 		}
 		if(T6SDK::Input::BlankMenuOpened && keyCode == T6SDK::Input::Keys::ESCAPE.KeyCode)
 		{
-			CloseMenu();
+			if(!SettingsMenu::IsSettingsMenuOpen)
+				CloseMenu();
 		}
 		Common::UI_BookmarkDialog.OnInputKey(keyCode);
 		CustomSlidersMenu::UI_CustomSliderDvarNameDialog.OnInputKey(keyCode);
@@ -138,10 +142,11 @@ namespace UIBase
 			}
 			if (!T6SDK::Theater::IsInTheater() || T6SDK::Input::BlankMenuOpened)
 			{
-				T6SDK::Drawing::DrawTextAbsolute("^5T6^7MVM v1.0.0 build 1515 May 10th 2025", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.2f }, T6SDK::AnchorPoint::TopLeft, 0x00);
+				T6SDK::Drawing::DrawTextAbsolute("^5T6^7MVM v1.0.0 build 1642 May 13th 2025", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.2f }, T6SDK::AnchorPoint::TopLeft, 0x00);			
 			}
+
 			//Draw tabs here
-			if (T6SDK::Input::BlankMenuOpened)
+			if (T6SDK::Input::BlankMenuOpened && !SettingsMenu::IsSettingsMenuOpen)
 			{
 				//bg blur
 				(*T6SDK::Dvars::DvarList::r_blur)->current.value = CustomDvars::dvar_menuBlur->current.enabled ? 9.0f : 0.0f;
@@ -185,7 +190,7 @@ namespace UIBase
 			{
 				if (T6SDK::MAIN::ENABLED && T6SDK::Addresses::GameMode.Value() == 32)
 				{
-					if(!DemoBrowserMenu::isShown)
+					if(!DemoBrowserMenu::isShown && !SettingsMenu::IsSettingsMenuOpen)
 					{
 						UIControls::UI_DemoBrowseCheckButton.Draw();
 						UIControls::UI_OpenDemoBrowserButton.Draw();
@@ -209,6 +214,15 @@ namespace UIBase
 		Common::UI_BookmarkDialog.Draw();
 		DemoBrowserMenu::UI_DemoRenameDialog.Draw();
 		CustomSlidersMenu::UI_CustomSliderDvarNameDialog.Draw();
+		if (!T6SDK::Theater::IsInTheater() || (T6SDK::Input::BlankMenuOpened && *UIControls::MainTabButton.isChecked))
+		{
+			if (DemoBrowserMenu::isShown)
+				return;
+			if(T6SDK::MAIN::ENABLED && T6SDK::Addresses::GameMode.Value() == 32)
+				SettingsMenu::DrawSettingsButton();
+		}
+
+		SettingsMenu::DrawSettingsMenu();
 		((T6SDK::Drawing::UI_Notification*)(T6SDK::MAIN::GetNotificationControl()))->Draw();
 
 	}
@@ -246,10 +260,13 @@ namespace UIBase
 		UIControls::UI_TimelineSlider.ToolTip = "Jump to any tick you want!";
 		UIControls::UI_DemoClient = T6SDK::Drawing::UI_EnumButton("Demo client", 0, 32, &(*T6SDK::Dvars::DvarList::demo_client)->current.integer, 8, 35, T6SDK::AnchorPoint::TopCenter, 0x00);
 		UIControls::UI_DemoClient.ToolTip = "Switch between players.";
-		UIControls::UI_OpenDemoBrowserButton = T6SDK::Drawing::UI_IconClickableButton("BROWSE DEMOS", "menu_mp_lobby_icon_clip", 13, 7, T6SDK::AnchorPoint::TopLeft, false, []()
+		UIControls::UI_OpenDemoBrowserButton = T6SDK::Drawing::UI_IconClickableButton("BROWSE DEMOS", "menu_mp_lobby_icon_clip", 13, 7, T6SDK::AnchorPoint::TopLeft, true, []()
 		{
 			DemoBrowserMenu::Show();
 		});
+
+		SettingsMenu::Init();
+
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnMouseWheelDown, (uintptr_t)&DemoBrowserMenu::OnMouseWheelDown);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnMouseWheelUp, (uintptr_t)&DemoBrowserMenu::OnMouseWheelUp);
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnKeyPressed, (uintptr_t)&DemoBrowserMenu::OnKeyPressed);

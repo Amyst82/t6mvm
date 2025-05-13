@@ -73,6 +73,9 @@
     <Filter Include="Components\Theater\CustomSlidersMenu">
       <UniqueIdentifier>{c26d853a-a88f-4da5-81c2-8942b91f7497}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Components\Common\Settings">
+      <UniqueIdentifier>{14e58d08-fade-4bb9-bfb1-9276ac744557}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -225,6 +228,12 @@
     <ClInclude Include="CustomSlidersMenu.h">
       <Filter>Components\Theater\CustomSlidersMenu</Filter>
     </ClInclude>
+    <ClInclude Include="Settings.h">
+      <Filter>Components\Common\Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsMenu.h">
+      <Filter>Components\Common\Settings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -238,6 +247,9 @@
     </ClCompile>
     <ClCompile Include="Shake.cpp">
       <Filter>Components\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <Filter>Components\Common\Settings</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

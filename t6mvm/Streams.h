@@ -2,7 +2,6 @@
 #define _CRT_SECURE_NO_WARNINGS 
 #define WIN32_LEAN_AND_MEAN
 #include <d3d11.h>
-#include "../../../../Downloads/json.hpp"
 #include "IMVMStream.h"
 #include "Default.h"
 #include "GreenScreen.h"
@@ -20,7 +19,8 @@
 #pragma comment(lib, "libMinHook.x86.lib")
 #include <sstream>
 #include <libgmavi.h>
-using json = nlohmann::json;
+#include "Settings.h"
+
 
 #pragma comment(lib, "d3d11.lib")
 
@@ -399,48 +399,34 @@ namespace Streams
 	{
 		if (abortingStreams == false)
 		{
-			std::string settingsPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\t6mvm.json";
-			if (!std::filesystem::exists(settingsPath))
+			if (Settings::Settings::PostStreamsActions["Notification"] == true && !Settings::Settings::AlertzyKey.empty())
 			{
-				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "STREAMS", "Settings JSON not found.");
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Sending notification via Alertzy.");
+				try
+				{
+					// Get the current time
+					auto now = std::chrono::system_clock::now();
+					auto in_time_t = std::chrono::system_clock::to_time_t(now);
+
+					// Format the time as a string (e.g., "2023-10-05_14-30-45")
+					std::stringstream ss{};
+					ss << std::put_time(std::localtime(&in_time_t), "%B %d %Y at %I:%M %p");
+					std::string message = "Streams recording finished on " + ss.str();
+					std::string script = "curl -s -X POST https://alertzy.app/send \\ -d \"accountKey=" + Settings::Settings::AlertzyKey + "\" \\ -d \"title=T6MVM\" \\ -d \"message=" + message + "\"";
+					std::system(script.c_str());
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "Notification sent.");
+				}
+				catch (const char* error)
+				{
+					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Notification was not sent dut to an error.");
+				}
 			}
-			else
+			if (Settings::Settings::PostStreamsActions["OpenStreamsFolder"] == true)
 			{
-				std::ifstream file(settingsPath);
-				json data = json::parse(file);
-
-				std::string accountKey = data.value("AlertzyKey", "");
-				bool notification = data["PostStreamsActions"].value("Notification", false);
-				bool openStreamsFolder = data["PostStreamsActions"].value("OpenStreamsFolder", false);
-				if (notification && lstrcmp(accountKey.c_str(), "") > 0)
-				{
-					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Sending notification via Alertzy.");
-					try
-					{
-						// Get the current time
-						auto now = std::chrono::system_clock::now();
-						auto in_time_t = std::chrono::system_clock::to_time_t(now);
-
-						// Format the time as a string (e.g., "2023-10-05_14-30-45")
-						std::stringstream ss{};
-						ss << std::put_time(std::localtime(&in_time_t), "%B %d %Y at %I:%M %p");
-						std::string message = "Streams recording finished on " + ss.str();
-						std::string script = "curl -s -X POST https://alertzy.app/send \\ -d \"accountKey=" + accountKey + "\" \\ -d \"title=T6MVM\" \\ -d \"message=" + message + "\"";
-						std::system(script.c_str());
-						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "Notification sent.");
-					}
-					catch (const char* error)
-					{
-						T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Notification was not sent dut to an error.");
-					}
-				}
-				if (openStreamsFolder)
-				{
-					//Open folder when streams are done
-					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Attempting to open the streams folder...");
-					std::string cmd = "explorer " + folderToDeleteWhenAborted;
-					std::system(cmd.c_str());
-				}
+				//Open folder when streams are done
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Attempting to open the streams folder...");
+				std::string cmd = "explorer " + folderToDeleteWhenAborted;
+				std::system(cmd.c_str());
 			}
 		}
 	}
@@ -587,13 +573,13 @@ namespace Streams
 		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
 			return;
 		//Creating a new directory for streams
-		if (std::string(T6SDK::Dvars::GetString(CustomDvars::dvar_streams_directory)).empty())
+		if (Settings::Settings::StreamsDirectory.empty())
 		{
 			T6SDK::Theater::Demo_Error("Streams directory is not set!", "Use ^5mvm_streams_directory ^7dvar or use ^5TAB ^7menu to set a directory for streams.");
 			return;
 		}
 		char streamsDirectory[256];
-		sprintf(streamsDirectory, "%s\\Streams_%s", T6SDK::Dvars::GetString(CustomDvars::dvar_streams_directory), T6SDK::InternalFunctions::getCurrentDateTimeString().c_str());
+		sprintf(streamsDirectory, "%s\\Streams_%s", Settings::Settings::StreamsDirectory.c_str(), T6SDK::InternalFunctions::getCurrentDateTimeString().c_str());
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", "Creating directory for streams at: %s", streamsDirectory);
 		if (!T6SDK::InternalFunctions::CreateNewDirectory(streamsDirectory))
 		{
@@ -650,6 +636,8 @@ namespace Streams
 
 	inline static void AbortStreams()
 	{
+		if(!IsStreamsStarted)
+			return;
 		abortingStreams = true;
 		StopStreams();
 		abortingStreams = false;

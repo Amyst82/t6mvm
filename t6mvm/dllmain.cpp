@@ -4,43 +4,24 @@
 #include "UIBase.h"
 #include "TheaterBase.h"
 #include "WeaponAnimations.h"
+#include "Settings.h"
 
 void SetDemoDirectoryDvar()
 {
+    if (!Settings::Settings::GetDemosDirectory().empty())
+        return;
     if (T6SDK::CrossVersion::GetGameVersion() == T6SDK::CrossVersion::GameVersion::V43)
     {
         std::string redactedPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\OpenNetStorage\\Cloud\\FILM_MP\\";
-        T6SDK::Dvars::SetString(CustomDvars::dvar_demos_directory, redactedPath.c_str());
+        Settings::Settings::SetDemosDirectory(redactedPath);
         T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "T6MVM", "Demos directory was restored from redacted mp game path.");
     }
     else if (T6SDK::CrossVersion::GetGameVersion() == T6SDK::CrossVersion::GameVersion::V41)
     {
         std::string redactedPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\OpenNetStorage\\Cloud\\FILM_ZM\\";
-        T6SDK::Dvars::SetString(CustomDvars::dvar_demos_directory, redactedPath.c_str());
+        Settings::Settings::SetDemosDirectory(redactedPath);
         T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "T6MVM", "Demos directory was restored from redacted zm game path.");
     }
-    std::string settingsPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\t6mvm.json";
-    // 1. Read JSON file
-    std::ifstream input_file(settingsPath);
-    if (!input_file.is_open())
-    {
-        T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "T6MVM", "Could not open settings file.");
-        return;
-    }
-    json data;
-    input_file >> data;
-    input_file.close();
-    // 2. Modify JSON data
-    data["DemosDirectory"] = CustomDvars::dvar_demos_directory->current.string;
-    // 3. Write modified JSON back to file
-    std::ofstream output_file(settingsPath);
-    if (!output_file.is_open())
-    {
-        T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "T6MVM", "Could not write to settings file.");
-    }
-    // Write with pretty printing (indentation = 4)
-    output_file << data.dump(4);
-    output_file.close();
 }
 
 void OnGameLoaded()
@@ -54,54 +35,8 @@ void OnGameLoaded()
     T6SDK::MAIN::InitializeDevConsole();
     WeaponAnimations::Init();
     //Read settings
-
-    std::string settingsPath = std::string(T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath)) + "\\Plugins\\t6mvm.json";
-    if (!std::filesystem::exists(settingsPath))
-    {
-        T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "T6MVM", "Settings JSON not found.");
-    }
-    else
-    {
-        std::ifstream file(settingsPath);
-        json data = json::parse(file);
-        //Getting streams output folder
-        std::string StreamsDir = data.value("StreamsDirectory", "");
-        if (StreamsDir.empty())
-            T6SDK::Dvars::SetString(CustomDvars::dvar_streams_directory, "");
-        else
-        {
-            if (std::filesystem::exists(StreamsDir) && std::filesystem::is_directory(StreamsDir))
-            {
-                T6SDK::Dvars::SetString(CustomDvars::dvar_streams_directory, StreamsDir.c_str());
-                T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "T6MVM", "Streams output directory was restored from t6mvm.json.");
-            }
-            else
-            {
-                T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "T6MVM", "Could not get streams output directory. Setting it to an empty string.");
-                T6SDK::Dvars::SetString(CustomDvars::dvar_streams_directory, "");
-            }
-        }
-   
-        //Getting demos folder
-        std::string DemosDir = data.value("DemosDirectory", "");
-        if (DemosDir.empty())
-        {
-            SetDemoDirectoryDvar();
-        }
-        else
-        {
-            if (std::filesystem::exists(DemosDir) && std::filesystem::is_directory(DemosDir))
-            {
-                T6SDK::Dvars::SetString(CustomDvars::dvar_demos_directory, DemosDir.c_str());
-                T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "T6MVM", "Demos directory was restored from t6mvm.json.");
-            }
-            else
-            {
-                T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "T6MVM", "Could not get demos directory. Setting it to an empty string.");
-                T6SDK::Dvars::SetString(CustomDvars::dvar_demos_directory, "");
-            }
-        }
-    }
+    Settings::Settings::Load();
+    SetDemoDirectoryDvar();
     Common::LoadAllDemos();
 }
 
