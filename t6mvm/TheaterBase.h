@@ -45,7 +45,9 @@ namespace TheaterBase
 		}
 		if(strcmp(*string, "PLATFORM_DEMO_TAKE_SCREENSHOT_KEYBOARD") == 0)
 		{
-			*string = "^7Ctrl + ^3M";
+			char buffer[32];
+			sprintf(buffer, "^7Ctrl + ^3%s", T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["GotoFirstMarker"])->KeyCode);
+			*string = buffer;
 		}
 		if(strcmp(*string, "PLATFORM_DEMO_RECORD_KEYBOARD") == 0)
 		{
