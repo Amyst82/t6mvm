@@ -213,7 +213,10 @@ namespace Streams
 			T6SDK::Drawing::DrawTextAbsolute(formatBuffer1, coords2.x, coords2.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 
 			vec2_t coords3 = T6SDK::Drawing::GetGridCellCoords(8, 22);
-			T6SDK::Drawing::DrawTextAbsolute("Press ^3F5 ^7to stop. Press ^1F6 ^7to abort recording and remove recorded files.", coords3.x, coords3.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+
+			char buffer2[256];
+			sprintf(buffer2, "Press ^3%s ^7to stop. Press ^1%s ^7to abort recording and remove recorded files.", T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["StreamsStartStop"])->KeyName.c_str(), T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["StreamsAbort"])->KeyName.c_str());
+			T6SDK::Drawing::DrawTextAbsolute(buffer2, coords3.x, coords3.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 		}
 		else
 		{
@@ -223,7 +226,9 @@ namespace Streams
 			T6SDK::Drawing::DrawTextAbsolute(buffer1, coords.x, coords.y, 1.5f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 
 			vec2_t coords2 = T6SDK::Drawing::GetGridCellCoords(8, 21);
-			T6SDK::Drawing::DrawTextAbsolute("Press ^3F5 ^7to stop. Press ^1F6 ^7to abort recording and remove recorded files.", coords2.x, coords2.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
+			char buffer3[256];
+			sprintf(buffer3, "Press ^3%s ^7to stop. Press ^1%s ^7to abort recording and remove recorded files.", T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["StreamsStartStop"])->KeyName.c_str(), T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["StreamsAbort"])->KeyName.c_str());
+			T6SDK::Drawing::DrawTextAbsolute(buffer3, coords2.x, coords2.y, 1.0f, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::Center, 0x00);
 		}
 	}
 
