@@ -17,7 +17,7 @@ namespace Settings
 			j["KeyBinds"] = Settings::KeyBinds;
 			j["PostStreamsAction"] = Settings::PostStreamsActions;
 			j["StreamsDirectory"] = Settings::StreamsDirectory;
-			file << j.dump(4); // Pretty print with 4 spaces
+			file << j.dump(4, 32, false, nlohmann::json::error_handler_t::replace); // Pretty print with 4 spaces
 			file.close();
 			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "T6MVM SETTINGS", "Settings saved!");
 		}

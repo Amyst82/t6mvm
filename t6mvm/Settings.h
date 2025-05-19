@@ -46,7 +46,7 @@ namespace Settings
 			try
 			{
 				auto json = nlohmann::json::parse(badJson); // Throws if invalid
-				return json.dump(2); // Reconvert to well-formatted string
+				return json.dump(2, 32, false, nlohmann::json::error_handler_t::replace); // Reconvert to well-formatted string
 			}
 			catch (const nlohmann::json::parse_error& e)
 			{

@@ -37,7 +37,7 @@ namespace TheaterBase
 	{
 		if (strcmp(*string, "MENU_DEMO_DVR_RECORD") == 0)
 		{
-			*string = "T6MVM";
+			*string = "^5T6^7MVM";
 		}
 		if(strcmp(*string, "MENU_DEMO_DVR_SCREENSHOT") == 0)
 		{
@@ -45,9 +45,9 @@ namespace TheaterBase
 		}
 		if(strcmp(*string, "PLATFORM_DEMO_TAKE_SCREENSHOT_KEYBOARD") == 0)
 		{
-			char buffer[32];
-			sprintf(buffer, "^7Ctrl + ^3%s", T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["GotoFirstMarker"])->KeyCode);
-			*string = buffer;
+			static std::string result; // Static storage persists
+			result = "^7Ctrl + ^3" + T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["GotoFirstMarker"])->KeyName;
+			*string = result.c_str();
 		}
 		if(strcmp(*string, "PLATFORM_DEMO_RECORD_KEYBOARD") == 0)
 		{

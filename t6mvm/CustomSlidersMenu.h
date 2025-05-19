@@ -54,7 +54,7 @@ namespace CustomSlidersMenu
 				data["fMax"] = foundDvar->domain.value.max;
 				data["intdefaultValue"] = foundDvar->latched.integer;
 				data["fDefaultValue"] = foundDvar->latched.value;
-				file << data.dump(2);
+				file << data.dump(2, 32, false, nlohmann::json::error_handler_t::replace);
 			}
 			file.close();
 		}
@@ -86,9 +86,9 @@ namespace CustomSlidersMenu
 			if (file)
 			{
 				json data1 = json::parse(file);
-				json data = json::parse(data1.dump(2));
+				json data = json::parse(data1.dump(2, 32, false, nlohmann::json::error_handler_t::replace));
 				file.close();
-				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "SLIDERS", "Found json file: %s; contents: %s", list[i].string().c_str(), data.dump(4).c_str());
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, true, "SLIDERS", "Found json file: %s; contents: %s", list[i].string().c_str(), data.dump(4, 32, false, nlohmann::json::error_handler_t::replace).c_str());
 				if(data.contains("type") && data.contains("name") && data.contains("friendlyName") && data.contains("offset") && data.contains("intMin") && data.contains("intMax") && data.contains("fMin") && data.contains("fMax") && data.contains("intdefaultValue") && data.contains("fDefaultValue"))
 				{
 					if (data.at("type").get<int>() != Dvar_Float)

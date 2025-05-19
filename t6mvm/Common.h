@@ -33,7 +33,7 @@ namespace Common
 		try 
 		{
 			auto json = nlohmann::json::parse(badJson); // Throws if invalid
-			return json.dump(2); // Reconvert to well-formatted string
+			return json.dump(2, 32, false, nlohmann::json::error_handler_t::replace); // Reconvert to well-formatted string
 		}
 		catch (const nlohmann::json::parse_error& e) 
 		{
@@ -156,7 +156,7 @@ namespace Common
 			//Writing custom bookmarks
 			json j;
 			j["Bookmarks"] = CustomBookmarks;
-			std::string json_str = j.dump(4); // Pretty print with 4-space indentation
+			std::string json_str = j.dump(4, 32, false, nlohmann::json::error_handler_t::replace); // Pretty print with 4-space indentation
 			if (T6SDK::DemoHandler::WriteTagsMetadata(Common::CurrentLoadedDemo.DemoPath.c_str(), json_str, 0x19D314BB2FD8D972))
 			{
 				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, true, "DEMOMETADATA", "Bookmarks written to tags file -> %s -> %s", Common::CurrentLoadedDemo.DemoPath.c_str(), json_str.c_str());
@@ -193,7 +193,7 @@ namespace Common
 				//Write to tags in local storage
 				json j;
 				j["Bookmarks"] = CustomBookmarks;
-				std::string json_str = j.dump(4); // Pretty print with 4-space indentation
+				std::string json_str = j.dump(4, 32, false, nlohmann::json::error_handler_t::replace); // Pretty print with 4-space indentation
 				if (T6SDK::DemoHandler::WriteTagsMetadata(std::string(redactedPath + demoFullName + ".tags").c_str(), json_str, 0x19D314BB2FD8D972))
 				{
 					T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, true, "DEMOMETADATA", "Bookmarks written to tags file!");
@@ -222,10 +222,19 @@ namespace Common
 		for (auto& file : list)
 		{
 			T6SDK::DemoBriefData data = T6SDK::DemoHandler::GetDemoBriefData(file.string().c_str());
+			if (data.DemoPath.empty())
+				continue;
 			Common::LocalDemos.push_back(data);
 		}
 		if(Common::LocalDemos.size() > 0)
+		{
+			if(Common::LocalDemos.size() != list.size())
+			{
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "T6MVM", "Not all demos were cached! %i / %i", Common::LocalDemos.size(), list.size());
+				return;
+			}
 			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "T6MVM", "Cached demos: %i / %i", Common::LocalDemos.size(), list.size());
+		}
 		else
 			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "T6MVM", "No demos were cached!");
 	}

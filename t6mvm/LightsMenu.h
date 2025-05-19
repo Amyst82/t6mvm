@@ -24,6 +24,7 @@ namespace LightsMenu
 		UIControls::UI_LightBrightness = T6SDK::Drawing::UI_Slider("Brightness", &Lights::LightsList[Lights::SelectedLight].a, 1.0f, 0.0f, 10.0f, 12, 16, T6SDK::Drawing::WHITECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_LightRadius = T6SDK::Drawing::UI_Slider("Radius", &Lights::LightsList[Lights::SelectedLight].radius, 255.0f, 0.0f, CustomDvars::dvar_lightRadiusLimit->current.value, 12, 19, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		UIControls::UI_LightFlicker = T6SDK::Drawing::UI_CheckBoxButton("FLICKER OFF", "FLICKER ON", 12, 22,  T6SDK::AnchorPoint::TopLeft, &Lights::LightsList[Lights::SelectedLight].flicker, 0x00);
+		UIControls::UI_LightFlickerFreq = T6SDK::Drawing::UI_Slider("Flicker frequency", &Lights::LightsList[Lights::SelectedLight].flickerFrequency, 1.0f, 0.0f, 5.0f, 12, 24, T6SDK::Drawing::ORANGECOLOR, T6SDK::AnchorPoint::TopLeft, 0x00);
 		inited = true;
 	}
 
@@ -66,6 +67,7 @@ namespace LightsMenu
 			UIControls::UI_LightBrightness.Draw();
 			UIControls::UI_LightRadius.Draw();
 			UIControls::UI_LightFlicker.Draw();
+			UIControls::UI_LightFlickerFreq.Draw(*UIControls::UI_LightFlicker.isChecked);
 			UIControls::UI_RepositionLightButton.Draw();
 			UIControls::UI_DeleteLightButton.Draw();
 		}

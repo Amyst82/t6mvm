@@ -136,6 +136,7 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_Slider UI_LightBrightness{};
 	inline static T6SDK::Drawing::UI_Slider UI_LightRadius{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_LightFlicker{};
+	inline static T6SDK::Drawing::UI_Slider UI_LightFlickerFreq{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_DeleteLightButton{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_DeleteAllLightsButton{};
 	inline static T6SDK::Drawing::UI_ClickableButton UI_RepositionLightButton{};
