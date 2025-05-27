@@ -283,20 +283,21 @@ namespace Lights
 				{
 					char exportStringline[256];
 					vec3_t dir{};
-					T6SDK::InternalFunctions::AxisToAngles(&LightsList[i].dir, &dir);
+					T6SDK::InternalFunctions::AxisToAnglesCustom(&LightsList[i].dir, &dir);
 					//TYPE;X;Y;Z;DIRX;DIRY;DIRZ;RADIUS;R;G;B;A
 					sprintf(exportStringline, "%i;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%f;%i;%f",
 						LightsList[i].spotLight, LightsList[i].org.x, LightsList[i].org.y, LightsList[i].org.z,
 						dir.x, dir.y, dir.z,
 						LightsList[i].radius, LightsList[i].r, LightsList[i].g, LightsList[i].b, LightsList[i].a, LightsList[i].flicker, LightsList[i].flickerFrequency);
-
+				
 					ExportFile << exportStringline << endl;
 				}
-				ExportFile.close();
+				
 				char buffer[256];
-				sprintf(buffer, "%i light(s) exported to %s.", (int)LightsList.size(), str);
+				sprintf(buffer, "%i light(s) exported!", (int)LightsList.size());
 				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "LIGHTS", buffer);
 			}
+			ExportFile.close();
 		}
 		else
 			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_WARNING, false, "LIGHTS", "User cancelled light export operation");
@@ -356,7 +357,10 @@ namespace Lights
 								if (list.size() == 13)
 									tmpLight.flicker = atoi(list[12].c_str()) == 1 ? true : false;
 								if(list.size() == 14)
+								{
+									tmpLight.flicker = atoi(list[12].c_str()) == 1 ? true : false;
 									tmpLight.flickerFrequency = stof(list[13].c_str());
+								}
 								tempLightsList.push_back(tmpLight);
 							}
 							else
