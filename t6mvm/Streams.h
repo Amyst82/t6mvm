@@ -593,6 +593,7 @@ namespace Streams
 			StopStreams();
 			return;
 		}
+		StreamsCommon::CapturePreviousDof();
 		newStreamFolder = streamsDirectory;
 		folderToDeleteWhenAborted = string(streamsDirectory);
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "newStreamFolder: %s", newStreamFolder);
@@ -679,12 +680,18 @@ namespace Streams
 			StartStreams();
 	}
 
+
 	inline static void InitStreams()
 	{
 		//Default
 		Default.Init();
 		Streams.push_back(&Default);
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Default stream registered!");
+
+		//NoGun
+		NoGun.Init();
+		Streams.push_back(&NoGun);
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "No gun stream registered!");
 
 		//GreenScreen
 		GreenScreen.Init();
@@ -696,25 +703,20 @@ namespace Streams
 		Streams.push_back(&NoPlayers);
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "No players stream registered!");
 
-		//NoGun
-		NoGun.Init();
-		Streams.push_back(&NoGun);
-		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "No gun stream registered!");
-
 		//Depth
 		Depth.Init();
 		Streams.push_back(&Depth);
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Depth stream registered!");
 
-		//FxOnly
-		FxOnly.Init();
-		Streams.push_back(&FxOnly);
-		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "FxOnly stream registered!");
-
 		//DepthWithGun
 		DepthWithGun.Init();
 		Streams.push_back(&DepthWithGun);
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Depth with gun stream registered!");
+
+		//FxOnly
+		FxOnly.Init();
+		Streams.push_back(&FxOnly);
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "FxOnly stream registered!");
 
 		//Green sky
 		GreenSky.Init();
@@ -732,6 +734,7 @@ namespace Streams
 		}
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "DX11 initialized.");
 
+
 		//Init UI for passes
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", "Initializing streams passes UI...");
 		UIControls::UI_StreamsPass1CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEFAULT", "DEFAULT", 12, 6, T6SDK::AnchorPoint::TopLeft, &Streams::Default.toggle->current.enabled, 0x00);
@@ -742,6 +745,9 @@ namespace Streams
 		UIControls::UI_StreamsPass6CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEPTH WITH GUN", "DEPTH WITH GUN", 12, 16, T6SDK::AnchorPoint::TopLeft, &Streams::DepthWithGun.toggle->current.enabled, 0x00);
 		UIControls::UI_StreamsPass7CheckBox = T6SDK::Drawing::UI_CheckBoxButton("FX ONLY", "FX ONLY", 12, 18, T6SDK::AnchorPoint::TopLeft, &Streams::FxOnly.toggle->current.enabled, 0x00);
 		UIControls::UI_StreamsPass8CheckBox = T6SDK::Drawing::UI_CheckBoxButton("GREEN SKY", "GREEN SKY", 12, 20, T6SDK::AnchorPoint::TopLeft, &Streams::GreenSky.toggle->current.enabled, 0x00);
+				
+
+
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "Streams passes UI initialized.");
 
 

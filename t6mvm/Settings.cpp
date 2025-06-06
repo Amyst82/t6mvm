@@ -15,6 +15,8 @@ namespace Settings
 			j["DemosDirectoryMp"] = Settings::DemosDirectoryMp;
 			j["DemosDirectoryZm"] = Settings::DemosDirectoryZm;
 			j["KeyBinds"] = Settings::KeyBinds;
+			Settings::PostStreamsActions["OpenStreamsFolder"] = Settings::OpenStreamsFolder_proxy;
+			Settings::PostStreamsActions["Notification"] = Settings::Notification_proxy;
 			j["PostStreamsAction"] = Settings::PostStreamsActions;
 			j["StreamsDirectory"] = Settings::StreamsDirectory;
 			file << j.dump(4, 32, false, nlohmann::json::error_handler_t::replace); // Pretty print with 4 spaces
@@ -61,6 +63,10 @@ namespace Settings
 				{std::string("Notification"), false},
 				{std::string("OpenStreamsFolder"), true}
 			});
+			Settings::Notification_proxy = Settings::PostStreamsActions["Notification"];
+			Settings::OpenStreamsFolder_proxy = Settings::PostStreamsActions["OpenStreamsFolder"];
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "T6MVM SETTINGS", "Notification: %s", Settings::PostStreamsActions["Notification"] ? "Enabled" : "Disabled");
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "T6MVM SETTINGS", "OpenStreamsFolder: %s", Settings::PostStreamsActions["OpenStreamsFolder"] ? "Enabled" : "Disabled");
 			Settings::StreamsDirectory = data.value("StreamsDirectory", "");
 			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "T6MVM SETTINGS", "Settings loaded!");
 		}
@@ -68,7 +74,7 @@ namespace Settings
 
 	void Settings::SetDemosDirectory(std::string& path)
 	{
-		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "T6MVM SETTINGS", "Setting MP demos directory...");
+		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "T6MVM SETTINGS", "Setting demos directories...");
 		if (T6SDK::CrossVersion::GetGameVersion() == T6SDK::CrossVersion::GameVersion::V43)
 			Settings::DemosDirectoryMp = path;
 		else if (T6SDK::CrossVersion::GetGameVersion() == T6SDK::CrossVersion::GameVersion::V41)

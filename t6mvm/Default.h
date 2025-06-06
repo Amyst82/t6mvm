@@ -5,11 +5,11 @@ class Stream_Default : public IMVMStream
 public:
 	void Enable()
 	{
-
+		StreamsCommon::SetPreviousDof();
 	}
 	void Disable()
 	{
-
+		StreamsCommon::SetPreviousDof();
 	}
 	void Init()
 	{

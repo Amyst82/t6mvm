@@ -232,13 +232,17 @@ namespace SettingsMenu
 		UI_StreamsStartStopCheckbox = T6SDK::Drawing::UI_CheckBoxButton("^3F5", "^9...", keybindsColumn2, keybindsRow+9, T6SDK::AnchorPoint::TopLeft, &StreamsStartStopAwaitingKey, 0x00);
 		UI_StreamsAbortCheckbox = T6SDK::Drawing::UI_CheckBoxButton("^3F6", "^9...", keybindsColumn2, keybindsRow+12, T6SDK::AnchorPoint::TopLeft, &StreamsAbortAwaitingKey, 0x00);
 
-		UI_NotificationEnabled = T6SDK::Drawing::UI_CheckBoxButton("ALERTZY NOTIFICATION OFF", "ALERTZY NOTIFICATION ON", keybindsColumn1-3, 22, T6SDK::AnchorPoint::TopLeft, &Settings::Settings::PostStreamsActions["Notification"], [](bool e)
+		UI_NotificationEnabled = T6SDK::Drawing::UI_CheckBoxButton("ALERTZY NOTIFICATION OFF", "ALERTZY NOTIFICATION ON", keybindsColumn1-3, 22, T6SDK::AnchorPoint::TopLeft, &Settings::Settings::Notification_proxy, [](bool e)
 		{ 
-			Settings::Settings::Save();
+				std::string s("Notification");
+				Settings::Settings::SetPostStreamsAction(s, e);
+				//Settings::Settings::Save();
 		});
-		UI_OpenStreamsFolder = T6SDK::Drawing::UI_CheckBoxButton("OPEN FOLDER OFF", "OPEN FOLDER ON", keybindsColumn2 - 3, 22, T6SDK::AnchorPoint::TopLeft, &Settings::Settings::PostStreamsActions["OpenStreamsFolder"], [](bool e)
+		UI_OpenStreamsFolder = T6SDK::Drawing::UI_CheckBoxButton("OPEN FOLDER OFF", "OPEN FOLDER ON", keybindsColumn2 - 3, 22, T6SDK::AnchorPoint::TopLeft, &Settings::Settings::OpenStreamsFolder_proxy, [](bool e)
 		{
-			Settings::Settings::Save();
+				std::string s("OpenStreamsFolder");
+				Settings::Settings::SetPostStreamsAction(s, e);
+				//Settings::Settings::Save();
 		});
 
 		UI_OpenDemosDirectoryDialog = T6SDK::Drawing::UI_ClickableButton("DEMOS: No directory selected.",keybindsColumn1-3, 28, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&ChangeDemoDirectory);

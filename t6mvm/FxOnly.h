@@ -5,22 +5,12 @@ class Stream_FxOnly : public IMVMStream
 private:
 	BYTE prevBaseTechType = 0x04;
 	BYTE prevEmissiveTechType = 0x03;
-	bool prevBloomTweaks = false;
-	int prevClearColor = 0;
-	int prevClearColor2 = 0;
-	bool prevDOFTweak = false;
-	bool prevDOFEnable = false;
 	int prevModelLimit = 1024;
 public:
 	void Enable()
 	{
 		prevBaseTechType = T6SDK::Addresses::GfxDrawMethod.Value().baseTechType;
 		prevEmissiveTechType = T6SDK::Addresses::GfxDrawMethod.Value().emissiveTechType;
-		prevBloomTweaks = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks);
-		prevClearColor = T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::r_clearColor);
-		prevClearColor2 = T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::r_clearColor2);
-		prevDOFTweak = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_dof_tweak);
-		prevDOFEnable = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_dof_enable);
 		prevModelLimit = T6SDK::Dvars::GetInt(*T6SDK::Dvars::DvarList::r_modelLimit);
 
 		T6SDK::Addresses::GfxDrawMethod.Value().baseTechType = 0x00;
@@ -37,12 +27,8 @@ public:
 	{
 		T6SDK::Addresses::GfxDrawMethod.Value().baseTechType = prevBaseTechType;
 		T6SDK::Addresses::GfxDrawMethod.Value().emissiveTechType = prevEmissiveTechType;
-		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks, prevBloomTweaks);
-		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor, prevClearColor);
-		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor2, prevClearColor2);
-		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_dof_tweak, prevDOFTweak);
-		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_dof_enable, prevDOFEnable);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_modelLimit, prevModelLimit);
+		StreamsCommon::SetPreviousDof();
 		Enabled = false;
 	}
 	void Init()

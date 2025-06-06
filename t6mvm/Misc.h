@@ -10,7 +10,7 @@ namespace Misc
 
 		if (entity->pose.eType == (BYTE)T6SDK::EntityType::PLAYERENTITY || entity->pose.eType == (BYTE)T6SDK::EntityType::TEMPENTITY || entity->pose.eType == (BYTE)T6SDK::EntityType::ACTOR || entity->pose.eType == (BYTE)T6SDK::EntityType::ACTOR_CORPSE || entity->pose.eType == (BYTE)T6SDK::EntityType::PLAYERCORPSEENTITY || entity->pose.eType == (BYTE)T6SDK::EntityType::ITEMENTITY)
 		{
-			if (T6SDK::Dvars::GetBool(CustomDvars::dvar_greenScreen) || (Streams::GreenScreen.toggle->current.enabled && Streams::GreenScreen.Enabled))
+			if (T6SDK::Dvars::GetBool(CustomDvars::dvar_greenScreen) || (Streams::GreenScreen.toggle->current.enabled || Streams::GreenScreen.Enabled))
 			{
 				if (CustomDvars::dvar_greenScreenPlayers->current.integer == 0) //No players
 				{

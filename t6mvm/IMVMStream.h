@@ -1,5 +1,6 @@
 #pragma once
 #include <StdInclude.h>
+#include "StreamsCommon.h"
 class IMVMStream
 {
 public:

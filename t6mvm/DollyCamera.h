@@ -160,10 +160,29 @@ namespace Camera
 		static void Update()
 		{
 			if (!T6SDK::Theater::IsInTheater())
-				return;
-
-			if (T6SDK::Addresses::DemoPlayback.Value()->CameraMode != T6SDK::DemoCameraMode::FREECAM || T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode != T6SDK::DemoFreeCameraMode::DOLLY || InterpoldatedValues.size() == 0 || T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount == 0)
 			{
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DOLLYCAMERA", "Not in theater");
+				return;
+			}
+
+			if (T6SDK::Addresses::DemoPlayback.Value()->CameraMode != T6SDK::DemoCameraMode::FREECAM)
+			{
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DOLLYCAMERA", "Not in free camera mode");
+				return;
+			}
+			if (T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode != T6SDK::DemoFreeCameraMode::DOLLY)
+			{
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DOLLYCAMERA", "Not in dollycam mode");
+				return;
+			}
+			if (T6SDK::Addresses::DemoPlayback.Value()->DollyCamMarkerCount == 0)
+			{
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DOLLYCAMERA", "Zero markers found");
+				return;
+			}
+			if(InterpoldatedValues.size() == 0)
+			{
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "DOLLYCAMERA", "InterpoldatedValues is empty");
 				return;
 			}
 
@@ -307,6 +326,7 @@ namespace Camera
 			CheckDollyCamDvars();
 			if (T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == T6SDK::DemoFreeCameraMode::DOLLY) //If camera mode is DollyCam
 			{
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, true, "DOLLYCAMERA", "Updating camera");
 				Update();
 			}
 			else if (T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == T6SDK::DemoFreeCameraMode::FREEROAM || T6SDK::Addresses::DemoPlayback.Value()->FreeCameraMode == T6SDK::DemoFreeCameraMode::EDIT)

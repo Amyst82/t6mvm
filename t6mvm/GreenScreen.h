@@ -3,7 +3,6 @@
 class Stream_GreenScreen : public IMVMStream
 {
 private:
-	bool prevBloomTweaks = false;
 	bool prevFxMarksDraw = true;
 	float prevZNear = 4.0f;
 	float prevZFar = 0.0f;
@@ -17,7 +16,6 @@ public:
 	{
 		prevBaseTechType = T6SDK::Addresses::GfxDrawMethod.Value().baseTechType;
 		prevEmissiveTechType = T6SDK::Addresses::GfxDrawMethod.Value().emissiveTechType;
-		prevBloomTweaks = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks);
 		prevFxMarksDraw = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::fx_marks_draw);
 		prevZNear = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::r_znear);
 		prevFlareEffects = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::flareDisableEffects);
@@ -60,7 +58,6 @@ public:
 		T6SDK::Addresses::GfxDrawMethod.Value().emissiveTechType = prevEmissiveTechType;
 
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_skipPvs, false);
-		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks, prevBloomTweaks);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor, 0x00);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor2, 0x00);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::fx_marks_draw, prevFxMarksDraw);
@@ -69,6 +66,7 @@ public:
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, prevFlareEffects);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, prevSunFlares);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::cg_drawGun, prevDrawGun);
+		StreamsCommon::SetPreviousDof();
 		Enabled = false;
 	}
 	void Init()

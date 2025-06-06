@@ -32,6 +32,9 @@ namespace Settings
 		};
 		inline static std::string StreamsDirectory{};
 
+		inline static bool Notification_proxy = false;
+		inline static bool OpenStreamsFolder_proxy = false;
+
 		//methods
 		static void Load();
 		static void Save();

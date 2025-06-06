@@ -165,6 +165,17 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass9CheckBox{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass10CheckBox{};
 
+	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass1Preview{};
+	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass2Preview{};
+	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass3Preview{};
+	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass4Preview{};
+	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass5Preview{};
+	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass6Preview{};
+	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass7Preview{};
+	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass8Preview{};
+	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass9Preview{};
+	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass10Preview{};
+
 	//WEAPON controls
 	inline static T6SDK::Drawing::UI_Slider UI_GunXOffset{};
 	inline static T6SDK::Drawing::UI_Slider UI_GunYOffset{};

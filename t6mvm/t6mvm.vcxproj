@@ -304,6 +304,7 @@
     <ClInclude Include="Shake.h" />
     <ClInclude Include="SsaoMenu.h" />
     <ClInclude Include="Streams.h" />
+    <ClInclude Include="StreamsCommon.h" />
     <ClInclude Include="StreamsMenu.h" />
     <ClInclude Include="SunMenu.h" />
     <ClInclude Include="TheaterBase.h" />

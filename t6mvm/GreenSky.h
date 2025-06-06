@@ -3,14 +3,12 @@
 class Stream_GreenSky : public IMVMStream
 {
 private:
-	bool prevBloomTweaks = false;
 	bool prevFlareEffects = true;
 	bool prevSunFlares = true;
 public:
 	void Enable()
 	{
 		T6SDK::Addresses::Patches::RemoveSkyBoxPatch.Patch();
-		prevBloomTweaks = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks);
 		prevFlareEffects = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::flareDisableEffects);
 		prevSunFlares = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw);
 		//T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor, 0x0000FF00);
@@ -39,10 +37,9 @@ public:
 		T6SDK::Addresses::Patches::RemoveSkyBoxPatch.UnPatch();
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor,  0x00000000);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor2, 0x00000000);
-
+		StreamsCommon::SetPreviousDof();
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, prevFlareEffects);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, prevSunFlares);
-		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks, prevBloomTweaks);
 		Enabled = false;
 	}
 	void Init()

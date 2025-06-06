@@ -234,6 +234,9 @@
     <ClInclude Include="SettingsMenu.h">
       <Filter>Components\Common\Settings</Filter>
     </ClInclude>
+    <ClInclude Include="StreamsCommon.h">
+      <Filter>Components\Streams</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

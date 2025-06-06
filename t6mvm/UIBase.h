@@ -142,7 +142,7 @@ namespace UIBase
 			}
 			if (!T6SDK::Theater::IsInTheater() || T6SDK::Input::BlankMenuOpened)
 			{
-				T6SDK::Drawing::DrawTextAbsolute("T6MVM v1.0.0 build 1730", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.2f }, T6SDK::AnchorPoint::TopLeft, 0x00);			
+				T6SDK::Drawing::DrawTextAbsolute("T6MVM v1.0.1 build 1780", 20.0f, 10.0f, 1.0f, tColor{ 1.0f, 1.0f, 1.0f, 0.2f }, T6SDK::AnchorPoint::TopLeft, 0x00);			
 			}
 
 			//Draw tabs here

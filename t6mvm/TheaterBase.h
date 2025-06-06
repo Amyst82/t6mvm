@@ -17,6 +17,8 @@ namespace TheaterBase
 	{
 		if(!T6SDK::Theater::IsInTheater())
 			return;
+		if (T6SDK::Addresses::CurrentKeyCatcher.Value() != 0)
+			return;
 		if (key == T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["GotoFirstMarker"])->KeyCode)
 		{
 			if (T6SDK::Input::Keys::CTRL.IsAnyPressState())

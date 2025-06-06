@@ -6,10 +6,12 @@ public:
 	void Enable() 
 	{
 		Enabled = true;
+		StreamsCommon::SetPreviousDof();
 	}
 	void Disable() 
 	{
 		Enabled = false;
+		StreamsCommon::SetPreviousDof();
 	}
 	void Init() 
 	{

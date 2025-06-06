@@ -9,11 +9,13 @@ public:
 	{
 		prevDrawGun = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::cg_drawGun);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::cg_drawGun, false);
+		StreamsCommon::SetPreviousDof();
 		Enabled = true;
 	}
 	void Disable() 
 	{
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::cg_drawGun, prevDrawGun);
+		StreamsCommon::SetPreviousDof();
 		Enabled = false;
 	}
 	void Init()
