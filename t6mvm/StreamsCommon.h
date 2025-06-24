@@ -18,6 +18,14 @@ namespace StreamsCommon
 	inline static float prevDOFViewModelStart = 0.5f;
 	inline static float prevDOFViewModelEnd = 0.5f;
 
+	inline static bool prevSsaoEnabled = false;
+	inline static float prevSsaoScale = 0.0f;
+	inline static float prevSsaoRadius = 0.0f;
+	inline static float prevSsaoBias = 0.0f;
+	inline static float prevSsaoIntensity = 0.0f;
+
+
+
 	static void CapturePreviousDof()
 	{
 		prevBloomTweaks = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_bloomTweaks);
@@ -55,5 +63,23 @@ namespace StreamsCommon
 		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_viewModelStart, prevDOFViewModelStart);
 		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_viewModelEnd, prevDOFViewModelEnd);
 		//T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", "Previous DOF settings restored.");
+	}
+
+	static void CapturePreviousSsao()
+	{
+		prevSsaoEnabled = T6SDK::Dvars::GetBool(*T6SDK::Dvars::DvarList::r_ssao);
+		prevSsaoScale = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::r_ssaoScale);
+		prevSsaoRadius = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::r_ssaoRadius);
+		prevSsaoBias = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::r_ssaoBias);
+		prevSsaoIntensity = T6SDK::Dvars::GetFloat(*T6SDK::Dvars::DvarList::r_ssaoIntensity);
+	}
+
+	static void SetPreviousSsao()
+	{
+		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_ssao, prevSsaoEnabled);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_ssaoScale, prevSsaoScale);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_ssaoRadius, prevSsaoRadius);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_ssaoBias, prevSsaoBias);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_ssaoIntensity, prevSsaoIntensity);
 	}
 }

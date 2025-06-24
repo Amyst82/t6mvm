@@ -187,23 +187,6 @@ namespace StreamsMenu
 		//UIControls::UI_StreamsPass9CheckBox.Draw(streamsEnabled);
 		//UIControls::UI_StreamsPass10CheckBox.Draw(streamsEnabled);
 
-		//UIControls::UI_StreamsPass1Preview.Draw(streamsEnabled);
-		UIControls::UI_StreamsPass2Preview.Draw(streamsEnabled);
-		UIControls::UI_StreamsPass3Preview.Draw(streamsEnabled);
-		UIControls::UI_StreamsPass4Preview.Draw(streamsEnabled);
-		UIControls::UI_StreamsPass5Preview.Draw(streamsEnabled);
-		UIControls::UI_StreamsPass6Preview.Draw(streamsEnabled);
-		UIControls::UI_StreamsPass7Preview.Draw(streamsEnabled);
-		UIControls::UI_StreamsPass8Preview.Draw(streamsEnabled);
-		UIControls::UI_StreamsPass2Preview.sizeX = UIControls::UI_StreamsPass2Preview.sizeY =(float)UIControls::UI_StreamsPass2CheckBox.btnRect.bottom - (float)UIControls::UI_StreamsPass2CheckBox.btnRect.top;
-		UIControls::UI_StreamsPass3Preview.sizeX = UIControls::UI_StreamsPass3Preview.sizeY =(float)UIControls::UI_StreamsPass3CheckBox.btnRect.bottom - (float)UIControls::UI_StreamsPass3CheckBox.btnRect.top;
-		UIControls::UI_StreamsPass4Preview.sizeX = UIControls::UI_StreamsPass4Preview.sizeY =(float)UIControls::UI_StreamsPass4CheckBox.btnRect.bottom - (float)UIControls::UI_StreamsPass4CheckBox.btnRect.top;
-		UIControls::UI_StreamsPass5Preview.sizeX = UIControls::UI_StreamsPass5Preview.sizeY =(float)UIControls::UI_StreamsPass5CheckBox.btnRect.bottom - (float)UIControls::UI_StreamsPass5CheckBox.btnRect.top;
-		UIControls::UI_StreamsPass6Preview.sizeX = UIControls::UI_StreamsPass6Preview.sizeY =(float)UIControls::UI_StreamsPass6CheckBox.btnRect.bottom - (float)UIControls::UI_StreamsPass6CheckBox.btnRect.top;
-		UIControls::UI_StreamsPass7Preview.sizeX = UIControls::UI_StreamsPass7Preview.sizeY =(float)UIControls::UI_StreamsPass7CheckBox.btnRect.bottom - (float)UIControls::UI_StreamsPass7CheckBox.btnRect.top;
-		UIControls::UI_StreamsPass8Preview.sizeX = UIControls::UI_StreamsPass8Preview.sizeY =(float)UIControls::UI_StreamsPass8CheckBox.btnRect.bottom - (float)UIControls::UI_StreamsPass8CheckBox.btnRect.top;
-		//UIControls::UI_StreamsPass9CheckBox.Draw(streamsEnabled);
-		//UIControls::UI_StreamsPass10CheckBox.Draw(streamsEnabled);
 
 	}
 	void OnTheaterControlsDrawn()
@@ -226,43 +209,6 @@ namespace StreamsMenu
 		}
 	}
 
-	bool pass1PreviewState = false;
-	bool pass2PreviewState = false;
-	bool pass3PreviewState = false;
-	bool pass4PreviewState = false;
-	bool pass5PreviewState = false;
-	bool pass6PreviewState = false;
-	bool pass7PreviewState = false;
-	bool pass8PreviewState = false;
-	bool pass9PreviewState = false;
-	bool pass10PreviewState = false;
-
-	static void DisableStreamsPreviews(int pass = -1, bool* state = 0x00)
-	{
-		for(auto& stream : Streams::Streams)
-		{
-			stream->Disable();
-		}
-		if(pass > -1)
-		{
-			Streams::Streams[pass]->Enable();
-			pass1PreviewState = false;
-			pass2PreviewState = false;
-			pass3PreviewState = false;
-			pass4PreviewState = false;
-			pass5PreviewState = false;
-			pass6PreviewState = false;
-			pass7PreviewState = false;
-			pass8PreviewState = false;
-			pass9PreviewState = false;
-			pass10PreviewState = false;
-		}
-		if(state)
-		{
-			*state = true;
-		}
-	}
-
 	static void Init()
 	{
 		UIControls::UI_ToggleStreamsCheckBox = T6SDK::Drawing::UI_CheckBoxButton("STREAMS OFF","STREAMS ON",4,5, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_streams->current.enabled, 0x00);
@@ -281,13 +227,13 @@ namespace StreamsMenu
 		UIControls::UI_StreamsJPGCheckBox.ToolTip = "^7Switch between ^5PNG ^7and ^5JPG ^7formats. PNG provides better quality. JPG takes less space.";
 
 		UIControls::UI_StreamsAVICheckBox = T6SDK::Drawing::UI_CheckBoxButton("TYPE: IMAGE SEQUENCE", "TYPE: AVI", 4, 18, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_streams_avi->current.enabled, 0x00);
-		UIControls::UI_StreamsAVICheckBox.ToolTip = "^2NOT IMPLEMENTED YET";
+		UIControls::UI_StreamsAVICheckBox.ToolTip = "^7Record as ^5IMAGE SEQUENCE ^7or ^5AVI ^7file.";
 
-		UIControls::UI_StreamsNoFlashCheckBox = T6SDK::Drawing::UI_CheckBoxButton("NO FLASH OFF", "NO FLASH ON", 4, 20, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_streams_noFlash->current.enabled, 0x00);
+		UIControls::UI_StreamsNoFlashCheckBox = T6SDK::Drawing::UI_CheckBoxButton("NO FLASH OFF", "NO FLASH ON (DOESN'T CAPTURE RESHADE)", 4, 20, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_streams_noFlash->current.enabled, 0x00);
 		UIControls::UI_StreamsNoFlashCheckBox.ToolTip = "Don't want to see you screen flashing during recording each pass? Turn this on!";
 
 		UIControls::UI_RecordCamCheckBox = T6SDK::Drawing::UI_CheckBoxButton("RECORD CAMERA DATA\tOFF", "RECORD CAMERA DATA\tON", 4, 22, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_streams_recordCam->current.enabled, 0x00);
-		UIControls::UI_RecordCamCheckBox.ToolTip = "^2NOT IMPLEMENTED YET";//"Get camera orientation and position data exported for each recorded frame.";
+		UIControls::UI_RecordCamCheckBox.ToolTip = "^7Get camera orientation and position data exported for each recorded frame.";
 
 		UIControls::UI_StreamsDirectoryButton = T6SDK::Drawing::UI_ClickableButton("Directory is not set", 4, 30, T6SDK::AnchorPoint::TopLeft, (uintptr_t)&SetStreamsDirectory);
 		UIControls::UI_StreamsDirectoryButton.ToolTip = "Select the directory where the streams will be saved.";
@@ -298,27 +244,7 @@ namespace StreamsMenu
 		float sizeX = 33.0f * scale;
 		float sizeY = 33.0f * scale;
 
-		UIControls::UI_StreamsPass2Preview = T6SDK::Drawing::UI_IconCheckBoxButton(uncheckedMaterial, checkedMaterial, sizeX, sizeY, 11, 8, T6SDK::AnchorPoint::TopLeft, &pass2PreviewState, [](bool e) { e ? DisableStreamsPreviews(1,  &pass2PreviewState) : DisableStreamsPreviews(-1); });
-		UIControls::UI_StreamsPass3Preview = T6SDK::Drawing::UI_IconCheckBoxButton(uncheckedMaterial, checkedMaterial, sizeX, sizeY, 11, 10, T6SDK::AnchorPoint::TopLeft, &pass3PreviewState, [](bool e) { e ? DisableStreamsPreviews(2, &pass3PreviewState) : DisableStreamsPreviews(-1); });
-		UIControls::UI_StreamsPass4Preview = T6SDK::Drawing::UI_IconCheckBoxButton(uncheckedMaterial, checkedMaterial, sizeX, sizeY, 11, 12, T6SDK::AnchorPoint::TopLeft, &pass4PreviewState, [](bool e) { e ? DisableStreamsPreviews(3, &pass4PreviewState) : DisableStreamsPreviews(-1); });
-		UIControls::UI_StreamsPass5Preview = T6SDK::Drawing::UI_IconCheckBoxButton(uncheckedMaterial, checkedMaterial, sizeX, sizeY, 11, 14, T6SDK::AnchorPoint::TopLeft, &pass5PreviewState, [](bool e) { e ? DisableStreamsPreviews(4, &pass5PreviewState) : DisableStreamsPreviews(-1); });
-		UIControls::UI_StreamsPass6Preview = T6SDK::Drawing::UI_IconCheckBoxButton(uncheckedMaterial, checkedMaterial, sizeX, sizeY, 11, 16, T6SDK::AnchorPoint::TopLeft, &pass6PreviewState, [](bool e) { e ? DisableStreamsPreviews(5, &pass6PreviewState) : DisableStreamsPreviews(-1); });
-		UIControls::UI_StreamsPass7Preview = T6SDK::Drawing::UI_IconCheckBoxButton(uncheckedMaterial, checkedMaterial, sizeX, sizeY, 11, 18, T6SDK::AnchorPoint::TopLeft, &pass7PreviewState, [](bool e) { e ? DisableStreamsPreviews(6, &pass7PreviewState) : DisableStreamsPreviews(-1); });
-		UIControls::UI_StreamsPass8Preview = T6SDK::Drawing::UI_IconCheckBoxButton(uncheckedMaterial, checkedMaterial, sizeX, sizeY, 11, 20, T6SDK::AnchorPoint::TopLeft, &pass8PreviewState, [](bool e) { e ? DisableStreamsPreviews(7, &pass8PreviewState) : DisableStreamsPreviews(-1); });
-
-
-		UIControls::UI_StreamsPass1Preview.ToolTip = "Click to preview!";
-		UIControls::UI_StreamsPass2Preview.ToolTip = "Click to preview!";
-		UIControls::UI_StreamsPass3Preview.ToolTip = "Click to preview!";
-		UIControls::UI_StreamsPass4Preview.ToolTip = "Click to preview!";
-		UIControls::UI_StreamsPass5Preview.ToolTip = "Click to preview!";
-		UIControls::UI_StreamsPass6Preview.ToolTip = "Click to preview!";
-		UIControls::UI_StreamsPass7Preview.ToolTip = "Click to preview!";
-		UIControls::UI_StreamsPass8Preview.ToolTip = "Click to preview!";
-
-
 		T6SDK::Events::RegisterListener(T6SDK::EventType::OnTheaterControlsDrawn, (uintptr_t)&OnTheaterControlsDrawn);
-		//UIControls::UI_StreamsPass9CheckBox{};
-		//UIControls::UI_StreamsPass10CheckBox{};
+
 	}
 }

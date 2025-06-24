@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -312,7 +312,6 @@
     <ClInclude Include="UIBase.h" />
     <ClInclude Include="UIControls.h" />
     <ClInclude Include="UI_DemoBrowseButton.h" />
-    <ClInclude Include="UI_StreamPass.h" />
     <ClInclude Include="UI_Timeline.h" />
     <ClInclude Include="WeapAnimListBoxControl.h" />
     <ClInclude Include="Weapon.h" />

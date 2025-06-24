@@ -67,11 +67,14 @@ public:
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, prevSunFlares);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::cg_drawGun, prevDrawGun);
 		StreamsCommon::SetPreviousDof();
+		StreamsCommon::SetPreviousSsao();
 		Enabled = false;
 	}
 	void Init()
 	{
 		IMVMStream::Name = "GreenScreen";
 		IMVMStream::toggle = T6SDK::Dvars::RegisterBool("mvm_streams_greenScreen", false, "Green screen stream.");
+		IMVMStream::IgnoreReshade = T6SDK::Dvars::RegisterBool("mvm_streams_greenScreen_ignoreReshade", false, "Should green screen pass ignore reshade.");
+		IMVMStream::preview = T6SDK::Dvars::RegisterBool("mvm_streams_greenScreen_preview", false, "Toggle preview for green screen stream.");
 	}
 };

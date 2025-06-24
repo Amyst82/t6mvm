@@ -20,6 +20,9 @@
 #include <sstream>
 #include <libgmavi.h>
 #include "Settings.h"
+#include "kiero.h"
+#include "WinToastHelper.h"
+#include <codecvt>
 
 
 #pragma comment(lib, "d3d11.lib")
@@ -103,6 +106,7 @@ namespace Streams
 	inline static bool IsStreamsStarted = false;
 	inline static bool ScreenshotRequested = false;
 	inline static bool IsAnyOtherStream = false;
+	inline static bool StreamShouldIgnoreReshade = false;
 	bool FreeBufferRequested = false;
 	string filename = "";
 	inline static bool IsStreamsRunning = false;
@@ -128,6 +132,7 @@ namespace Streams
 	typedef long(__stdcall* present)(IDXGISwapChain*, UINT, UINT);
 	present p_present;
 	present p_present_target;
+
 	
 	typedef long(__stdcall* resizeBuffers)(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);
 	resizeBuffers p_ResizeBuffers;
@@ -247,7 +252,17 @@ namespace Streams
 			else
 				HRES = p_present(p_swap_chain, sync_interval, flags);
 		}
-		p_context->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
+		if (StreamShouldIgnoreReshade == false)
+		{
+			if (T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_noFlash))
+			{
+				if (!IsAnyOtherStream)
+					HRES = p_present(p_swap_chain, sync_interval, flags);
+			}
+			else
+				HRES = p_present(p_swap_chain, sync_interval, flags);
+		}
+
 
 		if (ScreenshotRequested)
 		{
@@ -286,8 +301,16 @@ namespace Streams
 			}
 		}
 
-		if (!IsAnyOtherStream)
-			HRES = p_present(p_swap_chain, sync_interval, flags);
+		if (StreamShouldIgnoreReshade == true)
+		{
+			if (T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_noFlash))
+			{
+				if (!IsAnyOtherStream)
+					HRES = p_present(p_swap_chain, sync_interval, flags);
+			}
+			else
+				HRES = p_present(p_swap_chain, sync_interval, flags);
+		}
 
 		return HRES;
 	}
@@ -320,17 +343,35 @@ namespace Streams
 			return false;
 		}
 		
+		//MinHook (used to be used in v1.0.0)
 		if (MH_CreateHook(reinterpret_cast<void**>(p_present_target), &detour_present, reinterpret_cast<void**>(&p_present)) != MH_OK) 
 		{
 			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to hook present");
 			return false;
 		}
-		
+		else
+		{
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Hooked present => 0x%X", (reinterpret_cast<void**>(p_present_target)));
+		}
+
 		if (MH_EnableHook(p_present_target) != MH_OK) 
 		{
 			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to enable present");
 			return false;
 		}
+
+
+		//if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success)
+		//{
+		//	kiero::bind((uint16_t)8, (void**)&p_present, detour_present);
+		//	T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Hooked present => 0x%X", (reinterpret_cast<void**>(p_present_target)));
+		//}
+		//else
+		//{
+		//	T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_ERROR, false, "STREAMS", "Failed to init kiero");
+		//	return false;
+		//}
+
 
 		if (MH_CreateHook(reinterpret_cast<void**>(p_ResizeBuffers_target), &detour_ResizeBuffers, reinterpret_cast<void**>(&p_ResizeBuffers)) != MH_OK) 
 		{
@@ -404,6 +445,7 @@ namespace Streams
 	{
 		if (abortingStreams == false)
 		{
+			WinToastHelper::send_toast_notification(L"T6MVM STREAMS FINISHED", L"Recording Complete!");
 			if (Settings::Settings::PostStreamsActions["Notification"] == true && !Settings::Settings::AlertzyKey.empty())
 			{
 				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Streams finished. Sending notification via Alertzy.");
@@ -474,6 +516,11 @@ namespace Streams
 	}
 
 	int StreamsPassesEnabled = 0;
+	static int FrameTimeMeasured = 0;
+	static vector<std::chrono::nanoseconds> FrameTimes{};
+	static std::chrono::steady_clock::time_point start_time;
+	static std::chrono::steady_clock::time_point end_time;
+
 	inline static void Update()
 	{
 		if (!T6SDK::Dvars::GetBool(CustomDvars::dvar_streams))
@@ -488,8 +535,11 @@ namespace Streams
 				return;
 			}
 		}
+		if(FrameTimeMeasured < 3)
+			start_time = std::chrono::high_resolution_clock::now();
 		IsStreamsRunning = true;
 		IsAnyOtherStream = false;
+		StreamShouldIgnoreReshade = false;
 		T6SDK::InternalFunctions::SCR_UpdateScreen(2);
 		StreamsPassesEnabled = 0;
 		if(T6SDK::Theater::IsInTheater())
@@ -499,8 +549,8 @@ namespace Streams
 				if (stream->toggle->current.enabled)
 				{
 					StreamsPassesEnabled++;
-					if(T6SDK::Dvars::GetBool(CustomDvars::dvar_streams_noFlash))
-						IsAnyOtherStream = true; //NOFLASH
+					IsAnyOtherStream = true; //NOFLASH
+					StreamShouldIgnoreReshade = stream->IgnoreReshade->current.enabled;
 					stream->Enable();
 					gmav = stream->gmav;
 					CaptureScreenshot(stream);
@@ -516,6 +566,34 @@ namespace Streams
 		{
 			RecordCamera();
 		}
+
+		if (FrameTimeMeasured < 3)
+		{
+			end_time = std::chrono::high_resolution_clock::now();
+			auto duration = end_time - start_time;
+			FrameTimes.push_back(duration);
+			FrameTimeMeasured++;
+		}
+		else if(FrameTimeMeasured == 3)
+		{
+			//Calculate average frame time
+			auto total_duration = std::chrono::nanoseconds(0);
+			for (const auto& frame_time : FrameTimes)
+			{
+				total_duration += frame_time;
+			}
+			auto average_duration = total_duration / FrameTimes.size();
+			int average_frame_time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(average_duration).count();
+			T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Average frame time: %d ms", average_frame_time_ms);
+			if (T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart) > -1 && T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) > -1)
+			{
+				int totalFrames = (T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickEnd) - T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_tickStart)) / (1000 / T6SDK::Dvars::GetInt(CustomDvars::dvar_streams_fps));
+				int estimatedDuration = totalFrames * average_frame_time_ms;
+				T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "Approximate estimated duration: %i hour(s) %i minute(s) %i second(s)	", estimatedDuration / 3600000, (estimatedDuration / 60000) % 60, estimatedDuration / 1000);
+			}
+			FrameTimeMeasured++;
+		}
+
 		//T6SDK::ConsoleLog::LogFormatted(CONSOLETEXTGREEN, "Successfully captured %i", frameCount);
 	}
 
@@ -594,6 +672,7 @@ namespace Streams
 			return;
 		}
 		StreamsCommon::CapturePreviousDof();
+		StreamsCommon::CapturePreviousSsao();
 		newStreamFolder = streamsDirectory;
 		folderToDeleteWhenAborted = string(streamsDirectory);
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_INFO, false, "STREAMS", "newStreamFolder: %s", newStreamFolder);
@@ -638,6 +717,18 @@ namespace Streams
 		LocalAddresses::h_TickIncreasing.Hook(OnTickIncreasing);
 		T6SDK::Addresses::IsDemoPaused.Value() = false;
 		IsStreamsStarted = true;
+
+		char buffer2[256];
+		sprintf(buffer2, "Press %s to stop. Press %s to abort recording and remove recorded files.", 
+			T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["StreamsStartStop"])->KeyName.c_str(), 
+			T6SDK::Input::GetKeyByCode(Settings::Settings::KeyBinds["StreamsAbort"])->KeyName.c_str());
+		// Create converter
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
+		// Convert to wstring
+		std::wstring result = converter.from_bytes(buffer2);
+		WinToastHelper::send_toast_notification(L"T6MVM STREAMS STARTED", result);
+		FrameTimeMeasured = 0;
 	}
 
 	inline static void AbortStreams()
@@ -737,19 +828,17 @@ namespace Streams
 
 		//Init UI for passes
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_DEBUG, false, "STREAMS", "Initializing streams passes UI...");
-		UIControls::UI_StreamsPass1CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEFAULT", "DEFAULT", 12, 6, T6SDK::AnchorPoint::TopLeft, &Streams::Default.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass2CheckBox = T6SDK::Drawing::UI_CheckBoxButton("NO GUN", "NO GUN", 12, 8, T6SDK::AnchorPoint::TopLeft, &Streams::NoGun.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass3CheckBox = T6SDK::Drawing::UI_CheckBoxButton("GREEN SCREEN", "GREEN SCREEN", 12, 10, T6SDK::AnchorPoint::TopLeft, &Streams::GreenScreen.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass4CheckBox = T6SDK::Drawing::UI_CheckBoxButton("NO PLAYERS", "NO PLAYERS", 12, 12, T6SDK::AnchorPoint::TopLeft, &Streams::NoPlayers.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass5CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEPTH", "DEPTH", 12, 14, T6SDK::AnchorPoint::TopLeft, &Streams::Depth.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass6CheckBox = T6SDK::Drawing::UI_CheckBoxButton("DEPTH WITH GUN", "DEPTH WITH GUN", 12, 16, T6SDK::AnchorPoint::TopLeft, &Streams::DepthWithGun.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass7CheckBox = T6SDK::Drawing::UI_CheckBoxButton("FX ONLY", "FX ONLY", 12, 18, T6SDK::AnchorPoint::TopLeft, &Streams::FxOnly.toggle->current.enabled, 0x00);
-		UIControls::UI_StreamsPass8CheckBox = T6SDK::Drawing::UI_CheckBoxButton("GREEN SKY", "GREEN SKY", 12, 20, T6SDK::AnchorPoint::TopLeft, &Streams::GreenSky.toggle->current.enabled, 0x00);
-				
 
+		UIControls::UI_StreamsPass1CheckBox = UI_StreamPassNS::UI_StreamPass(&Streams, Streams[0], std::string("DEFAULT"), 12, 7, T6SDK::AnchorPoint::TopLeft);
+		UIControls::UI_StreamsPass2CheckBox = UI_StreamPassNS::UI_StreamPass(&Streams, Streams[1], std::string("NO GUN"), 12, 11, T6SDK::AnchorPoint::TopLeft);
+		UIControls::UI_StreamsPass3CheckBox = UI_StreamPassNS::UI_StreamPass(&Streams, Streams[2], std::string("GREEN SCREEN"), 12, 15, T6SDK::AnchorPoint::TopLeft);
+		UIControls::UI_StreamsPass4CheckBox = UI_StreamPassNS::UI_StreamPass(&Streams, Streams[3], std::string("NO PLAYERS"), 12, 19, T6SDK::AnchorPoint::TopLeft);
+		UIControls::UI_StreamsPass5CheckBox = UI_StreamPassNS::UI_StreamPass(&Streams, Streams[4], std::string("DEPTH"), 12, 23, T6SDK::AnchorPoint::TopLeft);
+		UIControls::UI_StreamsPass6CheckBox = UI_StreamPassNS::UI_StreamPass(&Streams, Streams[5], std::string("DEPTH WITH GUN"), 12, 27, T6SDK::AnchorPoint::TopLeft);
+		UIControls::UI_StreamsPass7CheckBox = UI_StreamPassNS::UI_StreamPass(&Streams, Streams[6], std::string("FX ONLY"), 12, 31, T6SDK::AnchorPoint::TopLeft);
+		UIControls::UI_StreamsPass8CheckBox = UI_StreamPassNS::UI_StreamPass(&Streams, Streams[7], std::string("GREEN SKY"), 12, 35, T6SDK::AnchorPoint::TopLeft);
 
 		T6SDK::ConsoleLog::LogTagged(T6SDK::ConsoleLog::C_SUCCESS, false, "STREAMS", "Streams passes UI initialized.");
-
 
 		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_start", StartStreams, &cmd_streams_start_VAR);
 		T6SDK::Dvars::Cmd_AddCommandInternal("mvm_streams_stop", StopStreams, &cmd_streams_stop_VAR);

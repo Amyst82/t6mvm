@@ -76,6 +76,12 @@
     <Filter Include="Components\Common\Settings">
       <UniqueIdentifier>{14e58d08-fade-4bb9-bfb1-9276ac744557}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Components\Streams\kiero">
+      <UniqueIdentifier>{e721ef2e-d120-4136-929a-872370ca90e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Streams\wintoastlib">
+      <UniqueIdentifier>{4e157e8c-c643-45c7-8dc6-05cc01dc99d9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -237,6 +243,18 @@
     <ClInclude Include="StreamsCommon.h">
       <Filter>Components\Streams</Filter>
     </ClInclude>
+    <ClInclude Include="kiero.h">
+      <Filter>Components\Streams\kiero</Filter>
+    </ClInclude>
+    <ClInclude Include="wintoastlib.h">
+      <Filter>Components\Streams\wintoastlib</Filter>
+    </ClInclude>
+    <ClInclude Include="WinToastHelper.h">
+      <Filter>Components\Streams\wintoastlib</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_StreamPass.h">
+      <Filter>Components\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -253,6 +271,12 @@
     </ClCompile>
     <ClCompile Include="Settings.cpp">
       <Filter>Components\Common\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="kiero.cpp">
+      <Filter>Components\Streams\kiero</Filter>
+    </ClCompile>
+    <ClCompile Include="wintoastlib.cpp">
+      <Filter>Components\Streams\wintoastlib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

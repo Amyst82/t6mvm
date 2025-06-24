@@ -4,6 +4,7 @@
 #include "UI_DemoBrowseButton.h"
 #include "WeapsListBoxControl.h"
 #include "WeapAnimListBoxControl.h"
+#include "UI_StreamPass.h"
 namespace UIControls
 {
 
@@ -154,7 +155,7 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsNoFlashCheckBox{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_RecordCamCheckBox{};
 	//streams passes
-	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass1CheckBox{};
+	/*inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass1CheckBox{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass2CheckBox{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass3CheckBox{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass4CheckBox{};
@@ -163,18 +164,19 @@ namespace UIControls
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass7CheckBox{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass8CheckBox{};
 	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass9CheckBox{};
-	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass10CheckBox{};
+	inline static T6SDK::Drawing::UI_CheckBoxButton UI_StreamsPass10CheckBox{};*/
 
-	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass1Preview{};
-	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass2Preview{};
-	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass3Preview{};
-	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass4Preview{};
-	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass5Preview{};
-	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass6Preview{};
-	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass7Preview{};
-	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass8Preview{};
-	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass9Preview{};
-	inline static T6SDK::Drawing::UI_IconCheckBoxButton UI_StreamsPass10Preview{};
+	inline static UI_StreamPassNS::UI_StreamPass UI_StreamsPass1CheckBox{};
+	inline static UI_StreamPassNS::UI_StreamPass UI_StreamsPass2CheckBox{};
+	inline static UI_StreamPassNS::UI_StreamPass UI_StreamsPass3CheckBox{};
+	inline static UI_StreamPassNS::UI_StreamPass UI_StreamsPass4CheckBox{};
+	inline static UI_StreamPassNS::UI_StreamPass UI_StreamsPass5CheckBox{};
+	inline static UI_StreamPassNS::UI_StreamPass UI_StreamsPass6CheckBox{};
+	inline static UI_StreamPassNS::UI_StreamPass UI_StreamsPass7CheckBox{};
+	inline static UI_StreamPassNS::UI_StreamPass UI_StreamsPass8CheckBox{};
+	inline static UI_StreamPassNS::UI_StreamPass UI_StreamsPass9CheckBox{};
+	inline static UI_StreamPassNS::UI_StreamPass UI_StreamsPass10CheckBox{};
+
 
 	//WEAPON controls
 	inline static T6SDK::Drawing::UI_Slider UI_GunXOffset{};
@@ -244,7 +246,7 @@ namespace UIControls
 		LightsTabButton.ToolTip = "Create and manage your custom lights on map!";
 		StreamsTabButton.ToolTip = "Record multiple passes simultaneously as screensots to get perfect sync!";
 		WeaponTabButton.ToolTip = "Change weapon camo and viewmodel offsets!";
-		MenuBlurCheckBox = T6SDK::Drawing::UI_CheckBoxButton("^7BLUR ^9OFF", "^7BLUR ON", 12, 35, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_menuBlur->current.enabled, 0x00);
+		MenuBlurCheckBox = T6SDK::Drawing::UI_CheckBoxButton("^7BLUR ^9OFF", "^7BLUR ON", 10, 35, T6SDK::AnchorPoint::TopLeft, &CustomDvars::dvar_menuBlur->current.enabled, 0x00);
 		MenuBlurCheckBox.ToolTip = "Turn on/off menu background blur.";
 		UI_DemoBrowseCheckButton = UIDemoBrowseButtonNS::UI_DemoBrowseButton(13, 4, T6SDK::AnchorPoint::TopLeft);
 		UI_DemoBrowseCheckButton.ToolTip = "Load a demo from file.";

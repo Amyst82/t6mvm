@@ -35,6 +35,11 @@ public:
 		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_viewModelStart, 0.0f);
 		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_dof_viewModelEnd, 0.0f);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::cg_drawGun, false);
+		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_ssao, false);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_ssaoScale, 0.0f);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_ssaoRadius, 0.0f);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_ssaoBias, 0.0f);
+		T6SDK::Dvars::SetFloat(*T6SDK::Dvars::DvarList::r_ssaoIntensity, 0.0f);
 		Enabled = true;
 	}
 	void Disable()
@@ -42,6 +47,7 @@ public:
 		T6SDK::Addresses::GfxDrawMethod.Value().baseTechType = prevBaseTechType;
 		T6SDK::Addresses::GfxDrawMethod.Value().emissiveTechType = prevEmissiveTechType;
 		StreamsCommon::SetPreviousDof();
+		StreamsCommon::SetPreviousSsao();
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::cg_drawGun, prevDrawGun);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::cg_draw2D, prevDraw2D);
 		Enabled = false;
@@ -51,5 +57,7 @@ public:
 
 		IMVMStream::Name = "Depth";
 		IMVMStream::toggle = T6SDK::Dvars::RegisterBool("mvm_streams_depth", false, "Depth buffer stream.");
+		IMVMStream::IgnoreReshade = T6SDK::Dvars::RegisterBool("mvm_streams_depth_ignoreReshade", false, "Should depth pass ignore reshade.");
+		IMVMStream::preview = T6SDK::Dvars::RegisterBool("mvm_streams_depth_preview", false, "Toggle preview for depth stream.");
 	}
 };

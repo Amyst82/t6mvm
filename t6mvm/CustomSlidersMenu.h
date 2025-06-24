@@ -169,7 +169,7 @@ namespace CustomSlidersMenu
 		Path = T6SDK::Dvars::GetString(*T6SDK::Dvars::DvarList::fs_homepath) + std::string("\\Plugins\\Sliders\\");
 		UIControls::UI_SlidersAddSliderButton = T6SDK::Drawing::UI_ClickableButton("ADD CUSTOM SLIDER", 8, 36, T6SDK::AnchorPoint::Center, (uintptr_t)&AddSlider);
 		UIControls::UI_SlidersAddSliderButton.ToolTip = "Add a custom slider just like in BO2 Console V4 :)";
-		UIControls::UI_SlidersRefreshButton = T6SDK::Drawing::UI_ClickableButton("REFRESH", 10, 36, T6SDK::AnchorPoint::CenterLeft, (uintptr_t)&Refresh, true);
+		UIControls::UI_SlidersRefreshButton = T6SDK::Drawing::UI_ClickableButton("REFRESH", 8, 34, T6SDK::AnchorPoint::Center, (uintptr_t)&Refresh, true);
 		UIControls::UI_SlidersRefreshButton.ToolTip = "Refresh the list of sliders from the sliders folder.";
 		CustomSlidersMenu::UI_CustomSliderDvarNameDialog = T6SDK::Drawing::UI_TextBoxDialog("Search for a ^3float ^7type dvar");
 		Refresh();

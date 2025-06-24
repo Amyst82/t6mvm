@@ -11,5 +11,7 @@ public:
 	std::string Dir{};
 	const char* Name;
 	dvar_s* toggle;
+	dvar_s* IgnoreReshade;
+	dvar_s* preview;
 	void* gmav = 0;
 };

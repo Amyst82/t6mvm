@@ -29,11 +29,14 @@ public:
 		T6SDK::Addresses::GfxDrawMethod.Value().emissiveTechType = prevEmissiveTechType;
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_modelLimit, prevModelLimit);
 		StreamsCommon::SetPreviousDof();
+		StreamsCommon::SetPreviousSsao();
 		Enabled = false;
 	}
 	void Init()
 	{
 		IMVMStream::Name = "FxOnly";
 		IMVMStream::toggle = T6SDK::Dvars::RegisterBool("mvm_streams_fxOnly", false, "FX only stream.");
+		IMVMStream::IgnoreReshade = T6SDK::Dvars::RegisterBool("mvm_streams_fxOnly_ignoreReshade", false, "Should FxOnly pass ignore reshade.");
+		IMVMStream::preview = T6SDK::Dvars::RegisterBool("mvm_streams_fxOnly_preview", false, "Toggle preview for FxOnly stream.");
 	}
 };

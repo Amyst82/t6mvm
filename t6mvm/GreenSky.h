@@ -38,6 +38,7 @@ public:
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor,  0x00000000);
 		T6SDK::Dvars::SetInt(*T6SDK::Dvars::DvarList::r_clearColor2, 0x00000000);
 		StreamsCommon::SetPreviousDof();
+		StreamsCommon::SetPreviousSsao();
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::flareDisableEffects, prevFlareEffects);
 		T6SDK::Dvars::SetBool(*T6SDK::Dvars::DvarList::r_superFlareDraw, prevSunFlares);
 		Enabled = false;
@@ -46,5 +47,7 @@ public:
 	{
 		IMVMStream::Name = "GreenSky";
 		IMVMStream::toggle = T6SDK::Dvars::RegisterBool("mvm_streams_greenSky", false, "Green sky pass.");
+		IMVMStream::IgnoreReshade = T6SDK::Dvars::RegisterBool("mvm_streams_greenSky_ignoreReshade", false, "Should green sky pass ignore reshade.");
+		IMVMStream::preview = T6SDK::Dvars::RegisterBool("mvm_streams_greenSky_preview", false, "Toggle preview for green sky pass.");
 	}
 };
